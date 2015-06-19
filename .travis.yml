@@ -4,6 +4,9 @@ node_js:
   - "0.11"
   - "0.10"
 
-install: lein redis
+install:
+  - sudo apt-add-repository ppa:gautambt/leiningen2
+  - sudo apt-get update
+  - sudo apt-get install redis leinigen
 
 script: lein cljsbuild test
