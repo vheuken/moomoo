@@ -8,7 +8,7 @@ install:
   - mkdir ~/bin
   - wget -O ~/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
   - chmod 755 ~/bin/lein
-  - source ~/.bash_profile
+  - PATH=$PATH:~/bin
   - sudo apt-get install redis
 
 script: lein cljsbuild test
