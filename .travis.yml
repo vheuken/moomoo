@@ -5,7 +5,7 @@ node_js:
   - "0.10"
 
 install:
-  - sudo apt-add-repository ppa:gautambt/leiningen2
+  - sudo apt-add-repository ppa:gautambt/leiningen2 -y
   - sudo apt-get update
   - sudo apt-get install redis leinigen
 
