@@ -5,6 +5,7 @@ node_js:
   - "0.10"
 
 install:
+  - mkdir ~/bin
   - wget -O ~/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
   - chmod 755 ~/bin/lein
   - source ~/.bash_profile
