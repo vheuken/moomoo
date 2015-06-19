@@ -8,18 +8,22 @@
 (def http (nodejs/require "http"))
 (def socketio (nodejs/require "socket.io"))
 
-(defn disconnect []
+(defn disconnect [socket]
   (.log js/console "A user has disconnected!"))
 
 (defn connection [socket]
   (.log js/console "A user has connected!")
-  (.on socket "disconnect" disconnect))
+  (.on socket "disconnect"
+    (fn []
+      (disconnect socket))))
 
 (defn -main []
   (println "Hello world!")
   (let [app (.createServer http)
         io (.listen socketio app)]
-    (.on io "connection" connection)
+    (.on io "connection"
+      (fn [socket]
+        (connection socket)))
     (.listen app port)))
 
 (set! *main-cli-fn* -main)
