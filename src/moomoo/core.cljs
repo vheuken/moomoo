@@ -14,16 +14,17 @@
 (defn connection [socket]
   (.log js/console "A user has connected!")
   (.on socket "disconnect"
-    (fn []
-      (disconnect socket))))
+    (complement disconnect))
+  (.on socket "set_username"
+    (fn [room username]
+      (.log js/console username))))
 
 (defn -main []
   (println "Hello world!")
   (let [app (.createServer http)
         io (.listen socketio app)]
     (.on io "connection"
-      (fn [socket]
-        (connection socket)))
+      (complement connection))
     (.listen app port)))
 
 (set! *main-cli-fn* -main)
