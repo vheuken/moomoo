@@ -3,7 +3,8 @@
   :url "http://example.com/FIXME"
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2755"]]
+                 [org.clojure/clojurescript "0.0-2755"]
+                 [com.cemerick/clojurescript.test "0.3.3"]]
 
   :node-dependencies [[source-map-support "0.2.8"]
                       [socket.io "1.3.5"]
