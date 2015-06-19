@@ -8,13 +8,10 @@
 (def http (nodejs/require "http"))
 (def socketio (nodejs/require "socket.io"))
 
-(defn disconnect [socket]
-  (.log js/console "A user has disconnected!"))
-
 (defn connection [socket]
   (.log js/console "A user has connected!")
   (.on socket "disconnect"
-    (complement disconnect))
+    #(.log js/console "A user has disconnected!"))
   (.on socket "set_username"
     (fn [room username]
       (.log js/console username))))
