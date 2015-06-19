@@ -9,6 +9,7 @@ install:
   - wget -O ~/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
   - chmod 755 ~/bin/lein
   - PATH=$PATH:~/bin
-  - sudo apt-get install redis
+  - lein
+  - sudo apt-get install redis-server
 
 script: lein cljsbuild test
