@@ -3,6 +3,8 @@
 
 (nodejs/enable-util-print!)
 
+(def port 3001)
+
 (def http (nodejs/require "http"))
 (def socketio (nodejs/require "socket.io"))
 
@@ -18,6 +20,6 @@
   (let [app (.createServer http)
         io (.listen socketio app)]
     (.on io "connection" connection)
-    (.listen app 3001)))
+    (.listen app port)))
 
 (set! *main-cli-fn* -main)
