@@ -33,5 +33,5 @@
                 :target :nodejs
                 :optimizations :simple
                 :hashbang false}}]
-    :test-commands {"moomoo" ["nodejs" :node-runner
+    :test-commands {"moomoo" ["node" :node-runner
                               "out-test/test.js"]}})
