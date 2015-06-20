@@ -23,4 +23,13 @@
                 :output-dir "out"
                 :target :nodejs
                 :optimizations :none
-                :source-map true}}]})
+                :source-map true}}
+             {:id "moomoo-test"
+              :source-paths ["test"]
+              :compiler {
+                :output-to "out-test/test.js"
+                :output-dir "out-test"
+                :target :nodejs
+                :optimizations :simple}}]
+    :test-commands {"moomoo" ["nodejs" :node-runner
+                              "out-test/test.js"]}})
