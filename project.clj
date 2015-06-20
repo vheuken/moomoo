@@ -11,7 +11,8 @@
                       [redis "0.12.1"]]
 
   :plugins [[lein-cljsbuild "1.0.4"]
-            [lein-npm "0.4.0"]]
+            [lein-npm "0.4.0"]
+            [com.cemerick/clojurescript.test "0.3.3"]]
 
   :source-paths ["src"]
 
@@ -25,11 +26,12 @@
                 :optimizations :none
                 :source-map true}}
              {:id "moomoo-test"
-              :source-paths ["test"]
+              :source-paths ["test/moomoo"]
               :compiler {
                 :output-to "out-test/test.js"
                 :output-dir "out-test"
                 :target :nodejs
-                :optimizations :simple}}]
+                :optimizations :simple
+                :hashbang false}}]
     :test-commands {"moomoo" ["nodejs" :node-runner
                               "out-test/test.js"]}})
