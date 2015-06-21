@@ -26,7 +26,7 @@
                 :optimizations :none
                 :source-map true}}
              {:id "moomoo-test"
-              :source-paths ["test/moomoo"]
+              :source-paths ["src" "test"]
               :compiler {
                 :output-to "out-test/test.js"
                 :output-dir "out-test"
