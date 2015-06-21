@@ -11,5 +11,6 @@ install:
   - PATH=$PATH:~/bin
   - lein
   - sudo apt-get install redis-server
+  - lein npm install
 
 script: NODE_PATH=./node_modules lein cljsbuild test
