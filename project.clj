@@ -28,10 +28,10 @@
              {:id "moomoo-test"
               :source-paths ["src" "test"]
               :compiler {
-                :output-to "out-test/test.js"
-                :output-dir "out-test"
+                :output-to "out/moomoo-test.js"
+                :output-dir "out/test"
                 :target :nodejs
                 :optimizations :simple
                 :hashbang false}}]
     :test-commands {"moomoo" ["node" :node-runner
-                              "out-test/test.js"]}})
+                              "out/moomoo-test.js"]}})
