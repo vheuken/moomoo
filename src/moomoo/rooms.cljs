@@ -17,5 +17,5 @@
           (c [err reply]
             (callback err (users-to-list err reply)))]
   (.hgetall redis-client (string/join [room ":users"])
-    (fn [err reply callback]
+    (fn [err reply]
       (c err reply)))))
