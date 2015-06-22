@@ -27,6 +27,8 @@
                 :source-map true}}
              {:id "moomoo-test"
               :source-paths ["src" "test"]
+              :notify-command ["node" :cljs.test/node-runner
+                               "out/moomoo-test.js"]
               :compiler {
                 :output-to "out/moomoo-test.js"
                 :output-dir "out/test"
