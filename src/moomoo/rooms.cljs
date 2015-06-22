@@ -13,9 +13,7 @@
 (defn get-all-users [room callback]
   (letfn [(users-to-list [err reply]
             (let [user-hash (js->clj reply)]
-              (vec (map #(val %) user-hash))))
-          (c [err reply]
-            (callback err (users-to-list err reply)))]
+              (vec (map #(val %) user-hash))))]
   (.hgetall redis-client (string/join [room ":users"])
     (fn [err reply]
-      (c err reply)))))
+      (callback err (users-to-list err reply))))))
