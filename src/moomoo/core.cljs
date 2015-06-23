@@ -28,6 +28,7 @@
                 id   (.-id socket)]
             (.hdel rooms/redis-client (string/join [room ":users"]) id
               #(emit-userslist-to-room room))))))
+    (.del rooms/redis-client (string/join ["users:" (.-id socket)]))
     (println "A user has disconnected!")))
   (.on socket "set_username"
     (fn [room username]
