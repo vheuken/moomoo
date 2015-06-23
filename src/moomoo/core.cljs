@@ -7,15 +7,16 @@
 
 (def port 3001)
 
-(def http (nodejs/require "http"))
+(def express (nodejs/require "express"))
+(def app (express))
+(def server (.Server (nodejs/require "http") app))
 (def socketio (nodejs/require "socket.io"))
 (def socketio-stream (nodejs/require "socket.io-stream"))
 (def file-upload-directory "/tmp/moomoo-uploads")
 (def uuid (nodejs/require "uuid"))
 (def fs (nodejs/require "fs"))
 
-(def app (.createServer http))
-(def io (.listen socketio app))
+(def io (.listen socketio server))
 
 (defn emit-userslist-to-room [room]
   (rooms/get-all-users room
@@ -57,7 +58,8 @@
 (defn -main []
   (.on io "connection"
     (complement connection))
+  (.get app "/" #(.send %2 "MooMoo!"))
   (println (string/join ["Listening on port " port]))
-  (.listen app port))
+  (.listen server port))
 
 (set! *main-cli-fn* -main)

@@ -11,7 +11,8 @@
                       [redis "0.12.1"]
                       [socket.io-stream "0.8.0"]
                       [uuid "2.0.1"]
-                      [id3js "1.1.3"]]
+                      [id3js "1.1.3"]
+                      [express "4.13"]]
 
   :plugins [[lein-cljsbuild "1.0.4"]
             [lein-npm "0.4.0"]
