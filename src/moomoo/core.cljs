@@ -24,7 +24,7 @@
           (let [room (.toString reply)]
             (rooms/get-all-users room
               (fn [err reply]
-                (.emit (.to io room) "userslist" reply)))))))
+                (.emit (.to io room) "userslist" (clj->js reply))))))))
     (println "A user has disconnected!")))
   (.on socket "set_username"
     (fn [room username]
