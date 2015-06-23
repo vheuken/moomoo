@@ -13,7 +13,7 @@
 (def app (.createServer http))
 (def io (.listen socketio app))
 
-(defn emit-userslistto-room [room]
+(defn emit-userslist-to-room [room]
   (rooms/get-all-users room
     (fn [err reply]
       (.emit (.to io room) "userslist" (clj->js reply)))))
@@ -27,12 +27,12 @@
           (let [room (.toString reply)
                 id   (.-id socket)]
             (.hdel rooms/redis-client (string/join [room ":users"] id))
-            (emit-userslistto-room room)))))
+            (emit-userslist-to-room room)))))
     (println "A user has disconnected!")))
   (.on socket "set_username"
     (fn [room username]
       (rooms/set-username room (.-id socket) username)
-      (emit-userslistto-room room)
+      (emit-userslist-to-room room)
       (println (string/join [username " has joined " room]))))
   (.on socket "join_room"
     (fn [room]
