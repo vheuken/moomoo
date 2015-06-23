@@ -23,20 +23,20 @@
     :builds [{:id "moomoo"
               :source-paths ["src"]
               :compiler {
-                :output-to "out/moomoo.js"
-                :output-dir "out"
+                :output-to "target/moomoo.js"
+                :output-dir "target"
                 :target :nodejs
                 :optimizations :none
                 :source-map true}}
              {:id "moomoo-test"
               :source-paths ["src" "test"]
               :notify-command ["node" :cljs.test/node-runner
-                               "out/moomoo-test.js"]
+                               "target/moomoo-test.js"]
               :compiler {
-                :output-to "out/moomoo-test.js"
-                :output-dir "out/test"
+                :output-to "target/moomoo-test.js"
+                :output-dir "target/test"
                 :target :nodejs
                 :optimizations :simple
                 :hashbang false}}]
     :test-commands {"moomoo" ["node" :node-runner
-                              "out/moomoo-test.js"]}})
+                              "target/moomoo-test.js"]}})
