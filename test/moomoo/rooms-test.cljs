@@ -3,13 +3,12 @@
                     :refer (is deftest with-test run-tests testing test-var
                             done use-fixtures)])
   (:require [cemerick.cljs.test :as t]
+            [clojure.string :as string]
             [cljs.nodejs :as nodejs]
             [moomoo.rooms :as rooms]))
 
-(def redis-client (.createClient (nodejs/require "redis")))
-
 (defn clear-redis-fixture []
-  (.flushall redis-client))
+  (.flushall rooms/redis-client))
 
 (use-fixtures :once clear-redis-fixture)
 
@@ -18,6 +17,9 @@
         id   "test"
         user "Ricky"]
     (rooms/set-username room id user)
+    (.get rooms/redis-client (string/join ["users:" id])
+      (fn [err reply]
+        (is (= room (.toString reply)))))
     (rooms/get-username room id
       (fn [err reply]
         (is (= user (.toString reply)))

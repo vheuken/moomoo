@@ -13,10 +13,19 @@
 (def app (.createServer http))
 (def io (.listen socketio app))
 
+
+
 (defn connection [socket]
   (println "A user has connected!")
-  (.on socket "disconnect"
-    #(println "A user has disconnected!"))
+  (.on socket "disconnect" (fn []
+    (.get rooms/redis-client (string/join ["users:" (.-id socket)])
+      (fn [err reply]
+        (if (not (nil? reply))
+          (let [room (.toString reply)]
+            (rooms/get-all-users room
+              (fn [err reply]
+                (.emit (.to io room) "userslist" reply)))))))
+    (println "A user has disconnected!")))
   (.on socket "set_username"
     (fn [room username]
       (rooms/set-username room (.-id socket) username)
@@ -32,7 +41,8 @@
             (.emit (.to io room) "chat message" msg-to-send)))))))
 
 (defn -main []
-  (.on io "connection" connection)
+  (.on io "connection"
+    (complement connection))
   (println (string/join ["Listening on port " port]))
   (.listen app port))
 
