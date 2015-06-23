@@ -32,8 +32,7 @@
             (.emit (.to io room) "chat message" msg-to-send)))))))
 
 (defn -main []
-  (.on io "connection"
-    (complement connection))
+  (.on io "connection" connection)
   (println (string/join ["Listening on port " port]))
   (.listen app port))
 
