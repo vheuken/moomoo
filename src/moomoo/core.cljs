@@ -55,10 +55,11 @@
         (println (string/join ["Saving file as: " absolute-file-path]))
         (.pipe stream (.createWriteStream fs absolute-file-path))))))
 
+(.on io "connection" connection)
+(.use app (.static express "public"))
+(.get app "/" #(. %2 (sendFile "public/index.html")))
+
 (defn -main []
-  (.on io "connection" connection)
-  (.use app (.static express "public"))
-  (.get app "/" #(. %2 (sendFile "public/index.html")))
   (println (string/join ["Listening on port " port]))
   (.listen server port))
 
