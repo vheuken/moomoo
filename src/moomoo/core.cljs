@@ -56,8 +56,7 @@
         (.pipe stream (.createWriteStream fs absolute-file-path))))))
 
 (defn -main []
-  (.on io "connection"
-    (complement connection))
+  (.on io "connection" connection)
   (.get app "/" #(.send %2 "MooMoo!"))
   (println (string/join ["Listening on port " port]))
   (.listen server port))
