@@ -21,16 +21,16 @@
   :source-paths ["src"]
 
   :cljsbuild {
-    :builds [{:id "moomoo"
-              :source-paths ["src"]
+    :builds [{:id "moomoo-server"
+              :source-paths ["src/server"]
               :compiler {
                 :output-to "target/moomoo.js"
                 :output-dir "target"
                 :target :nodejs
                 :optimizations :none
                 :source-map true}}
-             {:id "moomoo-test"
-              :source-paths ["src" "test"]
+             {:id "moomoo-server-test"
+              :source-paths ["src/server" "test/server"]
               :notify-command ["node" :cljs.test/node-runner
                                "target/moomoo-test.js"]
               :compiler {
