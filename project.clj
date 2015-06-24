@@ -2,8 +2,8 @@
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
 
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-3196"]
+  :dependencies [[org.clojure/clojure "1.7.0-RC1"]
+                 [org.clojure/clojurescript "0.0-3308"]
                  [com.cemerick/clojurescript.test "0.3.3"]]
 
   :node-dependencies [[source-map-support "0.2.8"]

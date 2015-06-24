@@ -13,7 +13,7 @@
 (def socketio (nodejs/require "socket.io"))
 (def socketio-stream (nodejs/require "socket.io-stream"))
 (def file-upload-directory "/tmp/moomoo-uploads")
-(def uuid (nodejs/require "uuid"))
+(def js-uuid (nodejs/require "uuid"))
 (def fs (nodejs/require "fs"))
 
 (def io (.listen socketio server))
@@ -51,7 +51,7 @@
             (.emit (.to io room) "chat message" msg-to-send))))))
   (.on (new socketio-stream socket) "file"
     (fn [stream data]
-      (let [absolute-file-path (string/join [(string/join [file-upload-directory "/"]) (.v4 uuid)])]
+      (let [absolute-file-path (string/join [(string/join [file-upload-directory "/"]) (.v4 js-uuid)])]
         (println (string/join ["Saving file as: " absolute-file-path]))
         (.pipe stream (.createWriteStream fs absolute-file-path))))))
 
