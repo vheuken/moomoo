@@ -57,7 +57,8 @@
 
 (defn -main []
   (.on io "connection" connection)
-  (.get app "/" #(.send %2 "MooMoo!"))
+  (.use app (.static express "public"))
+  (.get app "/" #(. %2 (sendFile "public/index.html")))
   (println (string/join ["Listening on port " port]))
   (.listen server port))
 
