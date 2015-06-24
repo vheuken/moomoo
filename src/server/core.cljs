@@ -59,6 +59,11 @@
 (.use app (.static express "public"))
 (.get app "/" #(. %2 (sendFile "public/index.html")))
 
+(.get app "/rooms/:id"
+  (fn [req res]
+    (.send res (.-id (.-params req)))))
+
+
 (defn -main []
   (println (string/join ["Listening on port " port]))
   (.listen server port))
