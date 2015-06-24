@@ -38,6 +38,11 @@
                 :output-dir "target/test"
                 :target :nodejs
                 :optimizations :simple
-                :hashbang false}}]
+                :hashbang false}}
+             {:id "moomoo-frontend"
+              :source-paths ["src/frontend"]
+              :compiler {
+                :output-to "public/js/moomoo-frontend.js"
+                :optimizations :simple}}]
     :test-commands {"moomoo" ["node" :node-runner
                               "target/moomoo-test.js"]}})
