@@ -6,9 +6,13 @@ head
 
 html
   body
+    #messages(style="width: 500px; height: 500px; overflow: scroll")
+    form#message_form(action="")
+      input#m(autocomplete="off")
+      button Send
     form#username_form(action="")
       input#username(type="text", autocomplete="off", value="Enter Name")
-      button join
+      button Join
     #userslist
 
     script(src="/js/moomoo-frontend.js")

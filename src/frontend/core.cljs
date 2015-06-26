@@ -5,7 +5,8 @@
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce room (str "room:" room-id))
 (defonce socket (js/io "http://localhost:3001"))
-(defonce app-state (atom {:users []}))
+(defonce app-state (atom {:users []
+                          :messages ["H" "A" "B"]}))
 
 (defn user-view [user owner]
   (reify
@@ -22,14 +23,42 @@
         (apply dom/div nil
           (om/build-all user-view (:users data)))))))
 
+(defn message-view [message owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/li nil message))))
+
+(defn messages-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (apply dom/div nil
+        (om/build-all message-view (:messages data))))))
+
 (om/root users-list-view app-state {:target (. js/document (getElementById "userslist"))})
+(om/root messages-view app-state {:target (. js/document (getElementById "messages"))})
 
 (.on socket "connect" #(.emit socket "join_room" room))
+
+(.hide (js/$ "#message_form"))
+
+(.submit (js/$ "#message_form")
+  (fn []
+    (.emit socket "chat message" room (.val (js/$ "#m")))
+    (.val (js/$ "#m") "")
+    false))
 
 (.submit (js/$ "#username_form")
   (fn []
     (.emit socket "set_username" room (.val (js/$ "#username")))
+    (.hide (js/$ "#username_form"))
+    (.show (js/$ "#message_form"))
     false))
+
+(.on socket "chat message"
+  (fn [message]
+    (swap! app-state assoc :messages (conj (:messages @app-state) message))))
 
 (.on socket "userslist"
   (fn [users]
