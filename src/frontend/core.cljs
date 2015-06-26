@@ -18,8 +18,8 @@
     om/IRender
     (render [this]
       (dom/div nil
-        (dom/h1 nil "Users")
-        (apply dom/h2 nil
+        (dom/h3 nil "Users")
+        (apply dom/div nil
           (om/build-all user-view (:users data)))))))
 
 (om/root users-list-view app-state {:target (. js/document (getElementById "userslist"))})
