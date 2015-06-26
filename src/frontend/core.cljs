@@ -34,8 +34,12 @@
   (reify
     om/IRender
     (render [this]
-      (apply dom/div nil
-        (om/build-all message-view (:messages data))))))
+      (apply dom/span nil
+        (om/build-all message-view (:messages data))))
+    om/IDidUpdate
+      (did-update [_ _ _]
+        (let [div (js/$ "#messages")]
+          (.scrollTop div (.prop div "scrollHeight"))))))
 
 (om/root users-list-view app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view app-state {:target (. js/document (getElementById "messages"))})
