@@ -4,7 +4,8 @@
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce room (str "room:" room-id))
-(defonce socket (js/io "http://localhost:3001"))
+;(defonce socket (js/io (str "[" (.getAttribute (. js/document (getElementById "address")) "data") "]" ":3001")))
+(defonce socket (js/io))
 (defonce app-state (atom {:users []
                           :messages []}))
 
