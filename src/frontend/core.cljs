@@ -6,7 +6,7 @@
 (defonce room (str "room:" room-id))
 (defonce socket (js/io "http://localhost:3001"))
 (defonce app-state (atom {:users []
-                          :messages ["H" "A" "B"]}))
+                          :messages []}))
 
 (defn user-view [user owner]
   (reify
