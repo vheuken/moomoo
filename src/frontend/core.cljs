@@ -100,7 +100,8 @@
       (.on blob-stream "end"
         (fn []
           (println "Upload successful!")
-          (swap! app-state assoc :upload-progress nil)))
+          (swap! app-state assoc :upload-progress nil)
+          (swap! app-state assoc :data-uploaded 0)))
 
       (.emit (js/ss socket) "file" stream)
       (.pipe blob-stream stream))))
