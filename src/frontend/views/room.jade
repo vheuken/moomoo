@@ -3,7 +3,7 @@ head
   #roomid(data!= roomid)
   script(src="https://cdn.socket.io/socket.io-1.3.5.js")
   script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js")
-
+  script(src="/vendor/socket.io-stream.js")
 html
   body
     #messages(style="width: 500px; height: 500px; overflow: scroll")
@@ -13,6 +13,8 @@ html
     form#username_form(action="")
       input#username(type="text", autocomplete="off", value="Enter Name")
       button Join
+    input#file_upload_input(type="file")
+    #progress
     #userslist
 
     script(src="/js/moomoo-frontend.js")

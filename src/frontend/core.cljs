@@ -4,10 +4,11 @@
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce room (str "room:" room-id))
-;(defonce socket (js/io (str "[" (.getAttribute (. js/document (getElementById "address")) "data") "]" ":3001")))
 (defonce socket (js/io))
 (defonce app-state (atom {:users []
                           :messages []}))
+
+(enable-console-print!)
 
 (defn user-view [user owner]
   (reify
@@ -68,3 +69,14 @@
 (.on socket "userslist"
   (fn [users]
     (swap! app-state assoc :users users)))
+
+(.change (js/$ "#file_upload_input")
+  (fn [e]
+    (let [file (aget (.-files (.-target e)) 0)
+          stream (.createStream js/ss)
+          blob-stream (.createBlobReadStream js/ss file)]
+      (println "File uploading!")
+
+      (.emit (js/ss socket) "file" stream)
+      (.pipe blob-stream stream))))
+

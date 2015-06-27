@@ -44,6 +44,6 @@
               :source-paths ["src/frontend"]
               :compiler {
                 :output-to "public/js/moomoo-frontend.js"
-                :optimizations :simple}}]
+                :optimizations :none}}]
     :test-commands {"moomoo" ["node" :node-runner
                               "target/moomoo-test.js"]}})
