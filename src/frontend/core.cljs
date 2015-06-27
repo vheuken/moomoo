@@ -6,7 +6,9 @@
 (defonce room (str "room:" room-id))
 (defonce socket (js/io))
 (defonce app-state (atom {:users []
-                          :messages []}))
+                          :messages []
+                          :upload-progress nil
+                          :data-uploaded 0}))
 
 (enable-console-print!)
 
@@ -42,8 +44,17 @@
         (let [div (js/$ "#messages")]
           (.scrollTop div (.prop div "scrollHeight"))))))
 
+(defn file-upload-progress-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (if (nil? (:upload-progress @app-state))
+        (dom/span nil "")
+        (dom/span nil (str (:upload-progress data) "%"))))))
+
 (om/root users-list-view app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view app-state {:target (. js/document (getElementById "messages"))})
+(om/root file-upload-progress-view app-state {:target (. js/document (getElementById "progress"))})
 
 (.on socket "connect" #(.emit socket "join_room" room))
 
@@ -76,6 +87,20 @@
           stream (.createStream js/ss)
           blob-stream (.createBlobReadStream js/ss file)]
       (println "File uploading!")
+
+      (swap! app-state assoc :upload-progress 0)
+      (swap! app-state assoc :data-uploaded 0)
+
+      (.on blob-stream "data"
+        (fn [data-chunk]
+          (let [size (+ (.-length data-chunk) (:data-uploaded @app-state))]
+            (swap! app-state assoc :upload-progress (Math/floor (* 100 (/ size (.-size file)))))
+            (swap! app-state assoc :data-uploaded size))))
+
+      (.on blob-stream "end"
+        (fn []
+          (println "Upload successful!")
+          (swap! app-state assoc :upload-progress nil)))
 
       (.emit (js/ss socket) "file" stream)
       (.pipe blob-stream stream))))
