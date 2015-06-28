@@ -53,7 +53,10 @@
     (fn [stream data]
       (let [absolute-file-path (string/join [(string/join [file-upload-directory "/"]) (.v4 js-uuid)])]
         (println (string/join ["Saving file as: " absolute-file-path]))
-        (.pipe stream (.createWriteStream fs absolute-file-path))))))
+        (.pipe stream (.createWriteStream fs absolute-file-path))
+        (.on stream "end"
+          (fn []
+            (println (str "Successfully uploaded " absolute-file-path)))))))A)
 
 (.on io "connection" connection)
 
