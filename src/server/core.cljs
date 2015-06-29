@@ -1,6 +1,7 @@
 (ns moomoo.core
   (:require [cljs.nodejs :as nodejs]
             [clojure.string :as string]
+            [cognitect.transit :as transit]
             [moomoo.rooms :as rooms]))
 
 (nodejs/enable-util-print!)
@@ -56,7 +57,11 @@
         (.pipe stream (.createWriteStream fs absolute-file-path))
         (.on stream "end"
           (fn []
-            (println (str "Successfully uploaded " absolute-file-path)))))))A)
+            (println (str "Successfully uploaded " absolute-file-path))
+            (let [writer (transit/writer :json)
+                  data {:socket-id (.-id socket)
+                        :file absolute-file-path}]
+              (.publish rooms/redis-client "file-upload" (transit/write writer data)))))))))
 
 (.on io "connection" connection)
 

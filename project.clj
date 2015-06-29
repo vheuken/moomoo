@@ -5,7 +5,8 @@
   :dependencies [[org.clojure/clojure "1.7.0-RC1"]
                  [org.clojure/clojurescript "0.0-3308"]
                  [com.cemerick/clojurescript.test "0.3.3"]
-                 [org.omcljs/om "0.8.8"]]
+                 [org.omcljs/om "0.8.8"]
+                 [com.cognitect/transit-cljs "0.8.220"]]
 
   :node-dependencies [[source-map-support "0.2.8"]
                       [socket.io "1.3.5"]
