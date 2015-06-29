@@ -19,6 +19,9 @@
 
 (def io (.listen socketio server))
 
+(def redis-subscribe-client (.createClient (nodejs/require "redis")))
+(def redis-publish-client (.createClient (nodejs/require "redis")))
+
 (defn emit-userslist-to-room [room]
   (rooms/get-all-users room
     (fn [err reply]
@@ -61,7 +64,23 @@
             (let [writer (transit/writer :json)
                   data {:socket-id (.-id socket)
                         :file absolute-file-path}]
-              (.publish rooms/redis-client "file-upload" (transit/write writer data)))))))))
+              (.publish redis-publish-client "file-upload" (transit/write writer data)))))))))
+
+; TODO: Move to rooms namespace (or something)
+(.subscribe redis-subscribe-client "file-upload")
+(.on redis-subscribe-client "message"
+  (fn [channel message]
+    (if (= channel "file-upload")
+      (let [reader (transit/reader :json)
+            data (transit/read reader message)
+            absolute-file-path (:file data)
+            socket-id (:socket-id data)]
+        (println (str "users:" socket-id))
+        (.get rooms/redis-client (string/join ["users:" socket-id])
+          (fn [err reply]
+            (let [room (.toString reply)
+                  clients (js->clj (aget (.-rooms (.-adapter (aget (.-nsps io) "/"))) room))]
+              (println clients))))))))
 
 (.on io "connection" connection)
 

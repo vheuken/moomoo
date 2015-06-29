@@ -5,7 +5,7 @@
 (def redis-client (.createClient (nodejs/require "redis")))
 
 (defn set-username [room id username]
-  (.hset redis-client (string/join [room ":users"])  id username)
+  (.hset redis-client (string/join [room ":users"]) id username)
   (.set redis-client (string/join ["users:" id]) room))
 
 (defn get-username [room id callback]
