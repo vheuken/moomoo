@@ -75,12 +75,19 @@
             data (transit/read reader message)
             absolute-file-path (:file data)
             socket-id (:socket-id data)]
-        (println (str "users:" socket-id))
         (.get rooms/redis-client (string/join ["users:" socket-id])
           (fn [err reply]
             (let [room (.toString reply)
                   clients (js->clj (aget (.-rooms (.-adapter (aget (.-nsps io) "/"))) room))]
-              (println clients))))))))
+              (doseq [client clients]
+                (let [client-socket-id (first client)
+                      client-socket (aget (.-connected (.-sockets io)) client-socket-id)
+                      stream (.createStream socketio-stream)
+                      read-stream (.createReadStream fs absolute-file-path)]
+                  (println (str "Sending file to " client-socket-id))
+
+                  (.emit client-socket "file-to-client" stream)
+                  (.pipe read-stream stream))))))))))
 
 (.on io "connection" connection)
 
