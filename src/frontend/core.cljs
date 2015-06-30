@@ -84,7 +84,8 @@
 (.on (new js/ss socket) "file-to-client"
   (fn [stream]
     (println "WOO")
-    (.on stream "data" (fn [] (println "H")))))
+    (.on stream "data" #(println "H"))
+    (.on stream "end" #(println "DONE!"))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
