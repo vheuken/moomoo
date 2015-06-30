@@ -86,7 +86,7 @@
                       read-stream (.createReadStream fs absolute-file-path)]
                   (println (str "Sending file to " client-socket-id))
 
-                  (.emit client-socket "file-to-client" stream)
+                  (.emit (socketio-stream client-socket) "file-to-client" stream)
                   (.pipe read-stream stream))))))))))
 
 (.on io "connection" connection)

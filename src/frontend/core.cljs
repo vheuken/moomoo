@@ -81,6 +81,11 @@
   (fn [users]
     (swap! app-state assoc :users users)))
 
+(.on (new js/ss socket) "file-to-client"
+  (fn [stream]
+    (println "WOO")
+    (.on stream "data" (fn [] (println "H")))))
+
 (.change (js/$ "#file_upload_input")
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)
