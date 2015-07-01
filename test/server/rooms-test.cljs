@@ -37,3 +37,8 @@
       (fn [err reply]
         (is (= [user1 user2] reply))
         (done)))))
+
+(deftest ^:async delete-user
+  (let [room "room:testfoo"
+        id   "tester"]
+    ))
