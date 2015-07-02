@@ -19,6 +19,9 @@
     (fn [err reply]
       (callback err (users-to-list err reply))))))
 
+(defn get-room-from-id [id callback]
+  (.get redis-client (str "users:" id) callback))
+
 (defn delete-user [id callback]
   (.get redis-client (str "users:" id)
     (fn [err reply]

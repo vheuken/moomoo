@@ -38,6 +38,16 @@
         (is (= [user1 user2] reply))
         (done)))))
 
+(deftest ^:async get-room-from-id
+  (let [id "1"
+        n "name"
+        room "justatest"]
+    (rooms/set-username room id n)
+    (rooms/get-room-from-id id
+      (fn [err reply]
+        (is (= room (.toString reply)))
+        (done)))))
+
 (deftest ^:async delete-user
   (let [room "room:testfoo"
         id   "test"
