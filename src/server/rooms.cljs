@@ -18,3 +18,9 @@
   (.hgetall redis-client (string/join [room ":users"])
     (fn [err reply]
       (callback err (users-to-list err reply))))))
+
+(defn delete-user [id callback]
+  (.get redis-client (str "users:" id)
+    (fn [err reply]
+      (let [room (.toString reply)]
+        (.hdel redis-client (str room ":users") id callback)))))

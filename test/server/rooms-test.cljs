@@ -40,5 +40,12 @@
 
 (deftest ^:async delete-user
   (let [room "room:testfoo"
-        id   "tester"]
-    ))
+        id   "test"
+        n    "foo"]
+    (rooms/set-username room id n)
+    (rooms/delete-user id
+      (fn []
+        (rooms/get-username room id
+          (fn [err reply]
+            (is (nil? reply))
+            (done)))))))
