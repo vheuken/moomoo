@@ -8,7 +8,8 @@
 (defonce app-state (atom {:users []
                           :messages []
                           :upload-progress nil
-                          :data-uploaded 0}))
+                          :data-uploaded 0
+                          :current-file-download ""}))
 
 (enable-console-print!)
 
@@ -83,9 +84,11 @@
 
 (.on (new js/ss socket) "file-to-client"
   (fn [stream]
-    (println "WOO")
-    (.on stream "data" #(println "H"))
-    (.on stream "end" #(println "DONE!"))))
+    (.on stream "data"
+      (fn [chunk]
+        (println "H")
+        (swap! app-state assoc :current-file-download (+ chunk (:current-file-download @app-state)))))
+    (.on stream "end" #(println (:current-file-download @app-state)))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
