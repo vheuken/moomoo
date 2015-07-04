@@ -9,7 +9,7 @@
                           :messages []
                           :upload-progress nil
                           :data-uploaded 0
-                          :current-file-download ""}))
+                          :current-file-download nil}))
 
 (enable-console-print!)
 
@@ -84,11 +84,14 @@
 
 (.on (new js/ss socket) "file-to-client"
   (fn [stream]
+    (swap! app-state assoc :current-file-download (new js/Blob))
     (.on stream "data"
-      (fn [chunk]
+      (fn [blob-chunk]
         (println "H")
-        (swap! app-state assoc :current-file-download (+ chunk (:current-file-download @app-state)))))
-    (.on stream "end" #(println (:current-file-download @app-state)))))
+        (swap! app-state assoc :current-file-download
+          (new js/Blob #js [(:current-file-download @app-state) blob-chunk]))))
+    (.on stream "end"
+      #(println (:current-file-download @app-state)))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
