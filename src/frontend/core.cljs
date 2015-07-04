@@ -91,7 +91,14 @@
         (swap! app-state assoc :current-file-download
           (new js/Blob #js [(:current-file-download @app-state) blob-chunk]))))
     (.on stream "end"
-      #(println (:current-file-download @app-state)))))
+      (fn []
+        (println (.-size (:current-file-download @app-state)))
+        (let [reader (new js/FileReader)
+              blob   (:current-file-download @app-state)]
+          (.readAsDataURL reader blob)
+          (set! (.-onloadend reader)
+            (fn []
+              (println (.-result reader)))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
