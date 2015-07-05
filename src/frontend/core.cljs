@@ -60,6 +60,7 @@
 (.on socket "connect" #(.emit socket "join_room" room))
 
 (.hide (js/$ "#message_form"))
+(.hide (js/$ "#file_upload_input"))
 
 (.submit (js/$ "#message_form")
   (fn []
@@ -72,6 +73,7 @@
     (.emit socket "set_username" room (.val (js/$ "#username")))
     (.hide (js/$ "#username_form"))
     (.show (js/$ "#message_form"))
+    (.show (js/$ "#file_upload_input"))
     false))
 
 (.on socket "chat message"
