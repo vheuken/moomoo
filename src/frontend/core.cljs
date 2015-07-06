@@ -10,7 +10,7 @@
                           :upload-progress nil
                           :data-uploaded 0
                           :current-file-download nil
-                          :current-download-stream-id nil}))
+                          :current-download-stream-id (new js/Blob)}))
 
 (enable-console-print!)
 
@@ -87,31 +87,31 @@
 
 (.on (new js/ss socket) "file-to-client"
   (fn [stream]
-    (if (nil? (:current-download-stream-id @app-state)) (fn []
-      (swap! app-state assoc :current-download-stream-id (.-id stream))
-      (swap! app-state assoc :current-file-download (new js/Blob))))
+    (if (= 0 (:current-file-download @app-state))
+      (swap! app-state assoc :current-download-stream-id (.-id stream)))
     (.on stream "data"
       (fn [blob-chunk]
         (if (= (.-id stream) (:current-download-stream-id @app-state))
-          (println "H")
+          (println (.-id stream))
           (swap! app-state assoc :current-file-download
             (new js/Blob #js [(:current-file-download @app-state) blob-chunk])))))
     (.on stream "end"
       (fn []
         (if (= (.-id stream) (:current-download-stream-id @app-state))
-        (println (.-size (:current-file-download @app-state)))
-        (let [reader (new js/FileReader)
-              blob   (:current-file-download @app-state)]
-          (.readAsDataURL reader blob)
-          (set! (.-onloadend reader)
-            (fn []
-              (println (.-result reader))
-              (println (.attr (js/$ "#current-track") "src"))
-              (.attr (js/$ "#current-track") "src" (.-result reader))
-              (println (.attr (js/$ "#current-track") "src"))
-              (.load (.getElementById js/document "audio-tag"))
-              (.play (.getElementById js/document "audio-tag"))
-              (swap! app-state assoc :current-download-stream-id nil)))))))))
+          (println (.-size (:current-file-download @app-state)))
+          (let [reader (new js/FileReader)
+                blob   (:current-file-download @app-state)]
+            (.readAsDataURL reader blob)
+            (set! (.-onloadend reader)
+              (fn []
+                (println (.-result reader))
+                (println (.attr (js/$ "#current-track") "src"))
+                (.attr (js/$ "#current-track") "src" (.-result reader))
+                (println (.attr (js/$ "#current-track") "src"))
+                (.load (.getElementById js/document "audio-tag"))
+                (.play (.getElementById js/document "audio-tag"))
+                (swap! app-state assoc :current-download-stream-id nil)
+                (swap! app-state assoc :current-file-download (new js/Blob))))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
