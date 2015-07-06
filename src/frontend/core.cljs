@@ -9,7 +9,8 @@
                           :messages []
                           :upload-progress nil
                           :data-uploaded 0
-                          :current-file-download nil}))
+                          :current-file-download nil
+                          :current-download-stream-id nil}))
 
 (enable-console-print!)
 
@@ -86,14 +87,18 @@
 
 (.on (new js/ss socket) "file-to-client"
   (fn [stream]
-    (swap! app-state assoc :current-file-download (new js/Blob))
+    (if (nil? (:current-download-stream-id @app-state)) (fn []
+      (swap! app-state assoc :current-download-stream-id (.-id stream))
+      (swap! app-state assoc :current-file-download (new js/Blob))))
     (.on stream "data"
       (fn [blob-chunk]
-        (println "H")
-        (swap! app-state assoc :current-file-download
-          (new js/Blob #js [(:current-file-download @app-state) blob-chunk]))))
+        (if (= (.-id stream) (:current-download-stream-id @app-state))
+          (println "H")
+          (swap! app-state assoc :current-file-download
+            (new js/Blob #js [(:current-file-download @app-state) blob-chunk])))))
     (.on stream "end"
       (fn []
+        (if (= (.-id stream) (:current-download-stream-id @app-state))
         (println (.-size (:current-file-download @app-state)))
         (let [reader (new js/FileReader)
               blob   (:current-file-download @app-state)]
@@ -105,7 +110,8 @@
               (.attr (js/$ "#current-track") "src" (.-result reader))
               (println (.attr (js/$ "#current-track") "src"))
               (.load (.getElementById js/document "audio-tag"))
-              (.play (.getElementById js/document "audio-tag")))))))))
+              (.play (.getElementById js/document "audio-tag"))
+              (swap! app-state assoc :current-download-stream-id nil)))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
