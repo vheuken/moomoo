@@ -10,7 +10,8 @@
                           :upload-progress nil
                           :data-uploaded 0
                           :current-file-download nil
-                          :current-download-stream-id (new js/Blob)}))
+                          :current-download-stream-id (new js/Blob)
+                          :message-received false}))
 
 (enable-console-print!)
 
@@ -43,8 +44,10 @@
         (om/build-all message-view (:messages data))))
     om/IDidUpdate
       (did-update [_ _ _]
-        (let [div (js/$ "#messages")]
-          (.scrollTop div (.prop div "scrollHeight"))))))
+        (if (:message-received @app-state)
+          (let [div (js/$ "#messages")]
+            (.scrollTop div (.prop div "scrollHeight"))
+            (swap! app-state assoc :message-received false))))))
 
 (defn file-upload-progress-view [data owner]
   (reify
@@ -79,7 +82,8 @@
 
 (.on socket "chat message"
   (fn [message]
-    (swap! app-state assoc :messages (conj (:messages @app-state) message))))
+    (swap! app-state assoc :messages (conj (:messages @app-state) message))
+    (swap! app-state assoc :message-received true)))
 
 (.on socket "userslist"
   (fn [users]
