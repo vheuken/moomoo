@@ -54,16 +54,12 @@
     (.on stream "end"
       (fn []
         (if (= (.-id stream) (:current-download-stream-id @app-state))
-          (println (.-size (:current-file-download @app-state)))
           (let [reader (new js/FileReader)
                 blob   (:current-file-download @app-state)]
             (.readAsDataURL reader blob)
             (set! (.-onloadend reader)
               (fn []
-                (println (.-result reader))
-                (println (.attr (js/$ "#current-track") "src"))
                 (.attr (js/$ "#current-track") "src" (.-result reader))
-                (println (.attr (js/$ "#current-track") "src"))
                 (.load (.getElementById js/document "audio-tag"))
                 (.play (.getElementById js/document "audio-tag"))
                 (swap! app-state assoc :current-download-stream-id nil)
