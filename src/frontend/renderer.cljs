@@ -28,7 +28,7 @@
   (reify
     om/IRender
     (render [this]
-      (apply dom/span nil
+      (apply dom/div #js {:id "messages"}
         (om/build-all message-view (:messages data))))
     om/IDidUpdate
       (did-update [_ _ _]
@@ -46,6 +46,6 @@
         (dom/span nil (str (:upload-progress data) "%"))))))
 
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
-(om/root messages-view core/app-state {:target (. js/document (getElementById "messages"))})
+(om/root messages-view core/app-state {:target (. js/document (getElementById "app"))})
 (om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
 
