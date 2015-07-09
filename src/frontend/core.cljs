@@ -62,7 +62,9 @@
             (fn []
               (.attr (js/$ "#current-track") "src" (.-result reader))
               (.load (.getElementById js/document "audio-tag"))
-              (.play (.getElementById js/document "audio-tag")))))))))
+              (.play (.getElementById js/document "audio-tag"))
+              (println (str "Number of music files downloaded/downloading: "
+                            (count (:music-files @app-state)))))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
