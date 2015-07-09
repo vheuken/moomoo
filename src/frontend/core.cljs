@@ -8,6 +8,7 @@
                           :upload-progress nil
                           :data-uploaded 0
                           :current-file-download nil
+                          :music-files {}
                           :message-received false}))
 
 (enable-console-print!)
@@ -44,21 +45,24 @@
   (fn [stream]
     (.on stream "data"
       (fn [blob-chunk]
-        (println "H")
-        (swap! app-state assoc :current-file-download
-          (new js/Blob #js [(:current-file-download @app-state) blob-chunk]))))
+        (let [stream-id (.-id stream)]
+          (println stream-id)
+          (if (nil? (get (:music-files @app-state) stream-id))
+            (swap! app-state assoc :music-files
+              (merge (:music-files @app-state) {stream-id (new js/Blob)})))
+          (swap! app-state assoc :music-files
+            (merge (:music-files @app-state) {stream-id
+              (new js/Blob #js [(get (:music-files @app-state) stream-id) blob-chunk])})))))
     (.on stream "end"
       (fn []
         (let [reader (new js/FileReader)
-              blob   (:current-file-download @app-state)]
+              blob   (get (:music-files @app-state) (.-id stream))]
           (.readAsDataURL reader blob)
           (set! (.-onloadend reader)
             (fn []
               (.attr (js/$ "#current-track") "src" (.-result reader))
               (.load (.getElementById js/document "audio-tag"))
-              (.play (.getElementById js/document "audio-tag"))
-              (swap! app-state assoc :current-download-stream-id nil)
-              (swap! app-state assoc :current-file-download (new js/Blob)))))))))
+              (.play (.getElementById js/document "audio-tag")))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
