@@ -35,10 +35,8 @@
         (if (not (nil? reply))
           (let [room (.toString reply)
                 id   (.-id socket)]
-            (.hdel rooms/redis-client (string/join [room ":users"]) id
-              #(emit-userslist-to-room room))))))
-    (.del rooms/redis-client (string/join ["users:" (.-id socket)]))
-    (println "A user has disconnected!")))
+            (rooms/delete-user id #(emit-userslist-to-room room))))))
+        (println "A user has disconnected!")))
   (.on socket "set_username"
     (fn [room username]
       (rooms/set-username room (.-id socket) username)

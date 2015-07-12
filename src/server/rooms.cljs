@@ -26,4 +26,5 @@
   (.get redis-client (str "users:" id)
     (fn [err reply]
       (let [room (.toString reply)]
-        (.hdel redis-client (str room ":users") id callback)))))
+        (.hdel redis-client (str room ":users") id callback))
+      (.del redis-client (str "users:" id)))))
