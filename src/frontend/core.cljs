@@ -11,7 +11,8 @@
                           :music-files {}
                           :message-received false
                           :file-downloading? false
-                          :num-of-queued-requests 0}))
+                          :num-of-queued-requests 0
+                          :current-track 0}))
 
 (enable-console-print!)
 
@@ -54,6 +55,9 @@
       (+ 1 (:num-of-queued-requests @app-state))
       :else (request-new-file))))
 
+(defn is-music-playing? []
+  (not (.-paused (.getElementById js/document "audio-tag"))))
+
 (.on (new js/ss socket) "file-to-client"
   (fn [stream]
     (swap! app-state assoc :file-downloading? true)
@@ -72,15 +76,16 @@
         (let [reader (new js/FileReader)
               blob   (get (:music-files @app-state) (.-id stream))]
           (.readAsDataURL reader blob)
+          (if-not (is-music-playing?)
           (set! (.-onloadend reader)
             (fn []
-              (request-new-file)
-              (swap! app-state assoc :file-downloading? false)
-              (.attr (js/$ "#current-track") "src" (.-result reader))
-              (.load (.getElementById js/document "audio-tag"))
-              (.play (.getElementById js/document "audio-tag"))
-              (println (str "Number of music files downloaded "
-                            (count (:music-files @app-state)))))))))))
+                (request-new-file)
+                (swap! app-state assoc :file-downloading? false)
+                (.attr (js/$ "#current-track") "src" (.-result reader))
+                (.load (.getElementById js/document "audio-tag"))
+                (.play (.getElementById js/document "audio-tag"))
+                (println (str "Number of music files downloaded "
+                              (count (:music-files @app-state))))))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
@@ -107,3 +112,6 @@
       (.emit (js/ss socket) "file" stream)
       (.pipe blob-stream stream))))
 
+(.bind (js/$ "#audio-tag") "ended"
+  (fn []
+    (println "Track ended!")))
