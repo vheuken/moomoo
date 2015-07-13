@@ -85,7 +85,13 @@
             (fn [err r]
               (.lindex rooms/redis-client (str (.toString reply) ":music") (- 1 (.toString r))
                 (fn [err reply]
-                  (println (.toString reply)))))))))))
+                  (let [client-id message
+                        client-socket (aget (.-connected (.-sockets io)) client-id)
+                        stream (.createStream socketio-stream)
+                        absolute-file-path (.toString reply)
+                        read-stream (.createReadStream fs absolute-file-path)]
+                    (.emit (socketio-stream client-socket) "file-to-client" stream)
+                    (.pipe read-stream stream)))))))))))
 
 ; TODO: Move to rooms namespace (or something)
 ; TODO: probably dont even need this subscription anymore...
