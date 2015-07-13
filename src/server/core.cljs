@@ -19,6 +19,7 @@
 
 (def io (.listen socketio server))
 
+(def redis-subscribe-download-request-client (.createClient (nodejs/require "redis")))
 (def redis-subscribe-client (.createClient (nodejs/require "redis")))
 (def redis-publish-client (.createClient (nodejs/require "redis")))
 
@@ -31,7 +32,10 @@
   (println "A user has connected!")
   (.on socket "new-file-request"
     (fn []
-      (println "New file request!")))
+      (println "New file request!")
+      (.incr rooms/redis-client (str "file-request:" (.-id socket))
+        (fn [err reply]
+          (.publish redis-publish-client "file-download-request" (.-id socket))))))
   (.on socket "disconnect" (fn []
     (.get rooms/redis-client (string/join ["users:" (.-id socket)])
       (fn [err reply]
@@ -70,6 +74,18 @@
                   data {:socket-id (.-id socket)
                         :file absolute-file-path}]
               (.publish redis-publish-client "file-upload" (transit/write writer data)))))))))
+
+(.subscribe redis-subscribe-download-request-client "file-download-request")
+(.on redis-subscribe-download-request-client "message"
+  (fn [channel message]
+    (if (= channel "file-download-request")
+      (rooms/get-room-from-id message
+        (fn [err reply]
+          (.get rooms/redis-client (str "file-request:" message)
+            (fn [err r]
+              (.lindex rooms/redis-client (str (.toString reply) ":music") (- 1 (.toString r))
+                (fn [err reply]
+                  (println (.toString reply)))))))))))
 
 ; TODO: Move to rooms namespace (or something)
 ; TODO: probably dont even need this subscription anymore...
