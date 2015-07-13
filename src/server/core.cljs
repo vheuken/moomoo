@@ -35,6 +35,7 @@
       (println "New file request!")
       (.incr rooms/redis-client (str "file-request:" (.-id socket))
         (fn [err reply]
+          (println (.toString reply))
           (.publish redis-publish-client "file-download-request" (.-id socket))))))
   (.on socket "disconnect" (fn []
     (.get rooms/redis-client (string/join ["users:" (.-id socket)])
@@ -84,15 +85,16 @@
         (fn [err reply]
           (.get rooms/redis-client (str "file-request:" message)
             (fn [err r]
-              (.lindex rooms/redis-client (str (.toString reply) ":music") (- 1 (.toString r))
+              (.lindex rooms/redis-client (str (.toString reply) ":music") (- (.toString r) 1)
                 (fn [err reply]
-                  (let [client-id message
-                        client-socket (aget (.-connected (.-sockets io)) client-id)
-                        stream (.createStream socketio-stream)
-                        absolute-file-path (.toString reply)
-                        read-stream (.createReadStream fs absolute-file-path)]
-                    (.emit (socketio-stream client-socket) "file-to-client" stream)
-                    (.pipe read-stream stream)))))))))))
+                  (if-not (nil? reply)
+                    (let [client-id message
+                          client-socket (aget (.-connected (.-sockets io)) client-id)
+                          stream (.createStream socketio-stream)
+                          absolute-file-path (.toString reply)
+                          read-stream (.createReadStream fs absolute-file-path)]
+                      (.emit (socketio-stream client-socket) "file-to-client" stream)
+                      (.pipe read-stream stream))))))))))))
 
 ; TODO: probably dont even need this subscription anymore...
 (.subscribe redis-subscribe-client "file-upload")
