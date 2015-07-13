@@ -41,9 +41,13 @@
   (fn [users]
     (swap! app-state assoc :users users)))
 
+(defn request-new-file []
+  (.emit socket "new-file-request"))
+
 (.on socket "file-upload-notification"
   (fn []
-    (println "FILE HAS BEEN UPED!")))
+    (println "Received file upload notification!")
+    (request-new-file)))
 
 (.on (new js/ss socket) "file-to-client"
   (fn [stream]

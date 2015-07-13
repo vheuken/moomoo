@@ -29,6 +29,9 @@
 
 (defn connection [socket]
   (println "A user has connected!")
+  (.on socket "new-file-request"
+    (fn []
+      (println "New file request!")))
   (.on socket "disconnect" (fn []
     (.get rooms/redis-client (string/join ["users:" (.-id socket)])
       (fn [err reply]
@@ -60,7 +63,7 @@
           (fn []
             (rooms/get-room-from-id (.-id socket)
               (fn [err reply]
-                (.lpush rooms/redis-client (str (.toString reply) ":music")
+                (.rpush rooms/redis-client (str (.toString reply) ":music")
                                            absolute-file-path)))
             (println (str "Successfully uploaded " absolute-file-path))
             (let [writer (transit/writer :json)
