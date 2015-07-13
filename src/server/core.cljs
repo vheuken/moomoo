@@ -69,6 +69,7 @@
               (.publish redis-publish-client "file-upload" (transit/write writer data)))))))))
 
 ; TODO: Move to rooms namespace (or something)
+; TODO: probably dont even need this subscription anymore...
 (.subscribe redis-subscribe-client "file-upload")
 (.on redis-subscribe-client "message"
   (fn [channel message]
