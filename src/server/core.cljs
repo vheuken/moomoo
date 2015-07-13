@@ -58,6 +58,10 @@
         (.pipe stream (.createWriteStream fs absolute-file-path))
         (.on stream "end"
           (fn []
+            (rooms/get-room-from-id (.-id socket)
+              (fn [err reply]
+                (.lpush rooms/redis-client (str (.toString reply) ":music")
+                                           absolute-file-path)))
             (println (str "Successfully uploaded " absolute-file-path))
             (let [writer (transit/writer :json)
                   data {:socket-id (.-id socket)
