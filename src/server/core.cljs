@@ -79,17 +79,9 @@
             socket-id (:socket-id data)]
         (.get rooms/redis-client (string/join ["users:" socket-id])
           (fn [err reply]
-            (let [room (.toString reply)
-                  clients (js->clj (aget (.-rooms (.-adapter (aget (.-nsps io) "/"))) room))]
-              (doseq [client clients]
-                (let [client-socket-id (first client)
-                      client-socket (aget (.-connected (.-sockets io)) client-socket-id)
-                      stream (.createStream socketio-stream)
-                      read-stream (.createReadStream fs absolute-file-path)]
-                  (println (str "Sending file to " client-socket-id))
-
-                  (.emit (socketio-stream client-socket) "file-to-client" stream)
-                  (.pipe read-stream stream))))))))))
+            (let [room (.toString reply)]
+              (println (str "Sending file notification to " room))
+                (.emit (.to io room) "file-upload-notification"))))))))
 
 (.on io "connection" connection)
 
