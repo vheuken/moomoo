@@ -94,7 +94,8 @@
                           absolute-file-path (.toString reply)
                           read-stream (.createReadStream fs absolute-file-path)]
                       (.emit (socketio-stream client-socket) "file-to-client" stream)
-                      (.pipe read-stream stream))
+                      (.pipe read-stream stream)))
+                  (if (nil? reply)
                     (.decr rooms/redis-client (str "file-request:" message))))))))))))
 
 ; TODO: probably dont even need this subscription anymore...

@@ -76,16 +76,18 @@
         (let [reader (new js/FileReader)
               blob   (get (:music-files @app-state) (.-id stream))]
           (.readAsDataURL reader blob)
+          (swap! app-state assoc :file-downloading? false)
+          (request-new-file)
+          (println (str "Number of music files downloaded "
+                        (count (:music-files @app-state))))
           (if-not (is-music-playing?)
           (set! (.-onloadend reader)
             (fn []
-                (request-new-file)
-                (swap! app-state assoc :file-downloading? false)
                 (.attr (js/$ "#current-track") "src" (.-result reader))
                 (.load (.getElementById js/document "audio-tag"))
                 (.play (.getElementById js/document "audio-tag"))
-                (println (str "Number of music files downloaded "
-                              (count (:music-files @app-state))))))))))))
+                (swap! app-state assoc :current-track (+ 1 (:current-track @app-state)))
+               ))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
@@ -114,4 +116,13 @@
 
 (.bind (js/$ "#audio-tag") "ended"
   (fn []
-    (println "Track ended!")))
+    (println "Track ended!")
+    (let [reader (new js/FileReader)
+          blob (nth (vals (:music-files @app-state)) (:current-track @app-state))]
+      (.readAsDataURL reader blob)
+      (set! (.-onloadend reader)
+        (fn []
+          (.attr (js/$ "#current-track") "src" (.-result reader))
+          (.load (.getElementById js/document "audio-tag"))
+          (.play (.getElementById js/document "audio-tag"))
+          (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))))))
