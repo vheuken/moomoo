@@ -44,6 +44,7 @@
     (swap! app-state assoc :users users)))
 
 (defn request-new-file []
+  (println "Requesting new file...")
   (.emit socket "new-file-request"))
 
 (.on socket "file-upload-notification"
@@ -51,7 +52,6 @@
     (println "Received file upload notification!")
     (cond (:file-downloading? @app-state)
       (+ 1 (:num-of-queued-requests @app-state))
-
       :else (request-new-file))))
 
 (.on (new js/ss socket) "file-to-client"
@@ -74,11 +74,12 @@
           (.readAsDataURL reader blob)
           (set! (.-onloadend reader)
             (fn []
+              (request-new-file)
               (swap! app-state assoc :file-downloading? false)
               (.attr (js/$ "#current-track") "src" (.-result reader))
               (.load (.getElementById js/document "audio-tag"))
               (.play (.getElementById js/document "audio-tag"))
-              (println (str "Number of music files downloaded/downloading: "
+              (println (str "Number of music files downloaded "
                             (count (:music-files @app-state)))))))))))
 
 (.change (js/$ "#file_upload_input")
