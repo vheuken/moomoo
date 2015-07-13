@@ -75,6 +75,7 @@
                         :file absolute-file-path}]
               (.publish redis-publish-client "file-upload" (transit/write writer data)))))))))
 
+; TODO: Move to rooms namespace (or something)
 (.subscribe redis-subscribe-download-request-client "file-download-request")
 (.on redis-subscribe-download-request-client "message"
   (fn [channel message]
@@ -93,7 +94,6 @@
                     (.emit (socketio-stream client-socket) "file-to-client" stream)
                     (.pipe read-stream stream)))))))))))
 
-; TODO: Move to rooms namespace (or something)
 ; TODO: probably dont even need this subscription anymore...
 (.subscribe redis-subscribe-client "file-upload")
 (.on redis-subscribe-client "message"

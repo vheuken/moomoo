@@ -9,7 +9,9 @@
                           :data-uploaded 0
                           :current-file-download nil
                           :music-files {}
-                          :message-received false}))
+                          :message-received false
+                          :file-downloading? false
+                          :num-of-queued-requests 0}))
 
 (enable-console-print!)
 
@@ -47,10 +49,14 @@
 (.on socket "file-upload-notification"
   (fn []
     (println "Received file upload notification!")
-    (request-new-file)))
+    (cond (:file-downloading? @app-state)
+      (+ 1 (:num-of-queued-requests @app-state))
+
+      :else (request-new-file))))
 
 (.on (new js/ss socket) "file-to-client"
   (fn [stream]
+    (swap! app-state assoc :file-downloading? true)
     (.on stream "data"
       (fn [blob-chunk]
         (let [stream-id (.-id stream)]
@@ -68,6 +74,7 @@
           (.readAsDataURL reader blob)
           (set! (.-onloadend reader)
             (fn []
+              (swap! app-state assoc :file-downloading? false)
               (.attr (js/$ "#current-track") "src" (.-result reader))
               (.load (.getElementById js/document "audio-tag"))
               (.play (.getElementById js/document "audio-tag"))
