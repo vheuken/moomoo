@@ -5,6 +5,8 @@ head
   script(src="https://cdn.socket.io/socket.io-1.3.5.js")
   script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js")
   script(src="/vendor/socket.io-stream.js")
+  script(src="/vendor/soundmanager2-jsmin.js")
+  script(src="/vendor/bar-ui.js")
 html
   body(style="width=100%; height=100%;")
     #messages-window
@@ -18,3 +20,40 @@ html
     audio#audio-tag(controls autoplay)
       source#current-track(type="audio/mp3" src="f")
     script(src="/js/moomoo-frontend.js")
+
+// soundmanager2
+.sm2-bar-ui.
+
+ <div class="bd sm2-main-controls">
+
+  <div class="sm2-inline-texture"></div>
+  <div class="sm2-inline-gradient"></div>
+
+  <div class="sm2-inline-element sm2-button-element">
+   <div class="sm2-button-bd">
+    <a href="#play" class="sm2-inline-button play-pause">Play / pause</a>
+   </div>
+  </div>
+
+  <div class="sm2-inline-element sm2-inline-status">
+
+   <div class="sm2-playlist">
+    <div class="sm2-playlist-target">
+     <!-- playlist <ul> + <li> markup will be injected here -->
+     <!-- if you want default / non-JS content, you can put that here. -->
+     <noscript><p>JavaScript is required.</p></noscript>
+    </div>
+   </div>
+
+   <div class="sm2-progress">
+    <div class="sm2-row">
+    <div class="sm2-inline-time">0:00</div>
+     <div class="sm2-progress-bd">
+      <div class="sm2-progress-track">
+       <div class="sm2-progress-bar"></div>
+       <div class="sm2-progress-ball"><div class="icon-overlay"></div></div>
+      </div>
+     </div>
+     <div class="sm2-inline-duration">0:00</div>
+    </div>
+   </div>
