@@ -51,10 +51,20 @@
     (render [this]
       (if-not (:logged-in? data)
         (dom/form #js {:action ""} "Enter Name: "
-          (dom/input #js {:id "username" :type "text" :ref "username"})
+          (dom/input #js {:id "username" :type "text" :ref "username" :autocomplete "off"})
           (dom/button nil "Join"))))))
+
+(defn message-form [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (if (:logged-in? data)
+        (dom/form #js {:action "" :ref "message"}
+          (dom/input #js {:id "m" :autocomplete "off" :type "text"})
+          (dom/button nil "Send"))))))
 
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
 (om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
+(om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})

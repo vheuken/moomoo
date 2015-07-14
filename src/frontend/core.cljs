@@ -19,10 +19,9 @@
 
 (.on socket "connect" #(.emit socket "join_room" room))
 
-(.hide (js/$ "#message_form"))
 (.hide (js/$ "#file_upload_input"))
 
-(.submit (js/$ "#message_form")
+(.submit (js/$ "#message-form")
   (fn []
     (.emit socket "chat message" room (.val (js/$ "#m")))
     (.val (js/$ "#m") "")
@@ -34,7 +33,6 @@
   (fn []
     (swap! app-state assoc :logged-in? true)
     (.emit socket "set_username" room (.val (js/$ "#username")))
-    (.show (js/$ "#message_form"))
     (.show (js/$ "#file_upload_input"))
     false))
 
