@@ -3,7 +3,8 @@
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce room (str "room:" room-id))
 (defonce socket (js/io))
-(defonce app-state (atom {:users []
+(defonce app-state (atom {:logged-in? false
+                          :users []
                           :messages []
                           :upload-progress nil
                           :data-uploaded 0
@@ -31,8 +32,8 @@
 ;       and handle things more like the om tutorial handles things
 (.submit (js/$ "#username-form")
   (fn []
+    (swap! app-state assoc :logged-in? true)
     (.emit socket "set_username" room (.val (js/$ "#username")))
-    (.hide (js/$ "#username-form"))
     (.show (js/$ "#message_form"))
     (.show (js/$ "#file_upload_input"))
     false))
