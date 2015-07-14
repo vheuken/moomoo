@@ -7,14 +7,11 @@ head
   script(src="/vendor/socket.io-stream.js")
 html
   body(style="width=100%; height=100%;")
-    #app
-    //#messages(style="width: 50%; height: 75%; overflow: scroll")
+    #messages-window
     form#message_form(action="")
       input#m(autocomplete="off")
       button Send
-    form#username_form(action="")
-      input#username(type="text", autocomplete="off", value="Enter Name")
-      button Join
+    #username-form
     input#file_upload_input(type="file")
     #progress
     #userslist

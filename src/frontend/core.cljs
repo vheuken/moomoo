@@ -27,10 +27,12 @@
     (.val (js/$ "#m") "")
     false))
 
-(.submit (js/$ "#username_form")
+; TODO: We want to get rid of this at some point
+;       and handle things more like the om tutorial handles things
+(.submit (js/$ "#username-form")
   (fn []
     (.emit socket "set_username" room (.val (js/$ "#username")))
-    (.hide (js/$ "#username_form"))
+    (.hide (js/$ "#username-form"))
     (.show (js/$ "#message_form"))
     (.show (js/$ "#file_upload_input"))
     false))

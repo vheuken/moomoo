@@ -45,7 +45,17 @@
         (dom/span nil "")
         (dom/span nil (str (:upload-progress data) "%"))))))
 
+; TODO: make this figure out how to hide by itself
+;       instead of using jquery, just make it stop rendering
+(defn username-form [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/form #js {:action ""} "Enter Name: "
+        (dom/input #js {:id "username" :type "text" :ref "username"})
+        (dom/button nil "Join")))))
+
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
 (om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
-
+(om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
