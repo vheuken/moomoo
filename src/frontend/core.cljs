@@ -13,7 +13,9 @@
                           :message-received false
                           :file-downloading? false
                           :num-of-queued-requests 0
-                          :current-track 0}))
+                          :current-track 0
+                          :current-sound nil
+                          :current-sound-id "current-song"}))
 
 (enable-console-print!)
 
@@ -84,15 +86,20 @@
           (println (str "Number of music files downloaded "
                         (count (:music-files @app-state))))
           (if-not (is-music-playing?)
-          (set! (.-onloadend reader)
-            (fn []
-                (.play (.createSound js/soundManager #js {:type "audio/mpeg"
-                                                          :url  (.-result reader)}))
-                ;(.attr (js/$ "#current-track") "src" (.-result reader))
-                ;(.load (.getElementById js/document "audio-tag"))
-                ;(.play (.getElementById js/document "audio-tag"))
-                (swap! app-state assoc :current-track (+ 1 (:current-track @app-state)))
-               ))))))))
+            (set! (.-onloadend reader)
+              (fn []
+                (if-not (nil? (:current-sound @app-state))
+                  (.destroySound js/soundManager (:current-sound-id @app-state)))
+                (swap! app-state assoc :current-sound
+                  (.createSound js/soundManager #js {:id   (:current-sound-id @app-state)
+                                                     :type "audio/mpeg"
+                                                     :url  (.-result reader)}))
+                  (.play (:current-sound @app-state))
+                  ;(.attr (js/$ "#current-track") "src" (.-result reader))
+                  ;(.load (.getElementById js/document "audio-tag"))
+                  ;(.play (.getElementById js/document "audio-tag"))
+                  (swap! app-state assoc :current-track (+ 1 (:current-track @app-state)))
+                 ))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
@@ -127,7 +134,12 @@
       (.readAsDataURL reader blob)
       (set! (.-onloadend reader)
         (fn []
-          (.play (.createSound js/soundManager #js {:type "audio/mpeg"
+          (if-not (nil? (:current-sound @app-state))
+            (.destroySound js/soundManager (:current-sound-id @app-state)))
+          (swap! app-state assoc :current-sound
+                 (.createSound js/soundManager #js {:id   (:current-sound-id @app-state)
+                                                    :type "audio/mpeg"
                                                     :url  (.-result reader)}))
+          (.play (:current-sound @app-state))
           (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))))))
 
