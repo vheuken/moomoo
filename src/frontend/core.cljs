@@ -57,7 +57,8 @@
       :else (request-new-file))))
 
 (defn is-music-playing? []
-  (not (.-paused (.getElementById js/document "audio-tag"))))
+  false)
+  ;(not (.-paused (.getElementById js/document "audio-tag"))))
 
 (.on (new js/ss socket) "file-to-client"
   (fn [stream]
@@ -71,7 +72,8 @@
               (merge (:music-files @app-state) {stream-id (new js/Blob)})))
           (swap! app-state assoc :music-files
             (merge (:music-files @app-state) {stream-id
-              (new js/Blob #js [(get (:music-files @app-state) stream-id) blob-chunk])})))))
+              (new js/Blob #js [(get (:music-files @app-state) stream-id) blob-chunk]
+                           #js {:type "audio/mpeg"})})))))
     (.on stream "end"
       (fn []
         (let [reader (new js/FileReader)
@@ -84,9 +86,11 @@
           (if-not (is-music-playing?)
           (set! (.-onloadend reader)
             (fn []
-                (.attr (js/$ "#current-track") "src" (.-result reader))
-                (.load (.getElementById js/document "audio-tag"))
-                (.play (.getElementById js/document "audio-tag"))
+                (.play (.createSound js/soundManager #js {:type "audio/mpeg"
+                                                          :url  (.-result reader)}))
+                ;(.attr (js/$ "#current-track") "src" (.-result reader))
+                ;(.load (.getElementById js/document "audio-tag"))
+                ;(.play (.getElementById js/document "audio-tag"))
                 (swap! app-state assoc :current-track (+ 1 (:current-track @app-state)))
                ))))))))
 
@@ -123,7 +127,6 @@
       (.readAsDataURL reader blob)
       (set! (.-onloadend reader)
         (fn []
-          (.attr (js/$ "#current-track") "src" (.-result reader))
-          (.load (.getElementById js/document "audio-tag"))
-          (.play (.getElementById js/document "audio-tag"))
+          (.play (.createSound js/soundManager #js {:type "audio/mpeg"
+                                                    :url  (.-result reader)}))
           (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))))))
