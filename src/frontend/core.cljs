@@ -130,3 +130,4 @@
           (.play (.createSound js/soundManager #js {:type "audio/mpeg"
                                                     :url  (.-result reader)}))
           (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))))))
+

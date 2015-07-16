@@ -68,3 +68,21 @@
 (om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})
+
+; music player
+(defn play-button [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (if (:logged-in? data)
+        (dom/button #js {:onClick #(. js/soundManager resumeAll)} "Play")))))
+
+(defn pause-button [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (if (:logged-in? data)
+      (dom/button #js {:onClick #(. js/soundManager pauseAll)} "Pause")))))
+
+(om/root play-button core/app-state {:target (. js/document (getElementById "play-button"))})
+(om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
