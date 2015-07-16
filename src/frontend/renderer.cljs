@@ -84,5 +84,19 @@
       (if (:logged-in? data)
       (dom/button #js {:onClick #(. js/soundManager pauseAll)} "Pause")))))
 
+(defn track-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/li nil data))))
+
+(defn track-queue [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (apply dom/div nil
+        (om/build-all track-view (:music-tags data))))))
+
 (om/root play-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
+(om/root track-queue core/app-state {:target (. js/document (getElementById "track-queue"))})

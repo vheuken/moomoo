@@ -15,7 +15,8 @@
                           :num-of-queued-requests 0
                           :current-track 0
                           :current-sound nil
-                          :current-sound-id "current-song"}))
+                          :current-sound-id "current-song"
+                          :music-tags []}))
 
 (enable-console-print!)
 
@@ -63,7 +64,10 @@
   ;(not (.-paused (.getElementById js/document "audio-tag"))))
 
 (.on (new js/ss socket) "file-to-client"
-  (fn [stream]
+  (fn [stream tags]
+    (swap! app-state assoc :music-tags
+      (conj (:music-tags @app-state) (str (.-artist tags) " - " (.-title tags))))
+    (println (:music-tags @app-state))
     (swap! app-state assoc :file-downloading? true)
     (.on stream "data"
       (fn [blob-chunk]
@@ -94,12 +98,9 @@
                   (.createSound js/soundManager #js {:id   (:current-sound-id @app-state)
                                                      :type "audio/mpeg"
                                                      :url  (.-result reader)}))
+
                   (.play (:current-sound @app-state))
-                  ;(.attr (js/$ "#current-track") "src" (.-result reader))
-                  ;(.load (.getElementById js/document "audio-tag"))
-                  ;(.play (.getElementById js/document "audio-tag"))
-                  (swap! app-state assoc :current-track (+ 1 (:current-track @app-state)))
-                 ))))))))
+                  (swap! app-state assoc :current-track (+ 1 (:current-track @app-state)))))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]

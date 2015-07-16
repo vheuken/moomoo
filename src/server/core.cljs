@@ -16,6 +16,7 @@
 (def file-upload-directory "/tmp/moomoo-uploads")
 (def js-uuid (nodejs/require "uuid"))
 (def fs (nodejs/require "fs"))
+(def id3 (nodejs/require "id3js"))
 
 (def io (.listen socketio server))
 
@@ -93,8 +94,11 @@
                           stream (.createStream socketio-stream)
                           absolute-file-path (.toString reply)
                           read-stream (.createReadStream fs absolute-file-path)]
-                      (.emit (socketio-stream client-socket) "file-to-client" stream)
-                      (.pipe read-stream stream)))
+                      (id3 #js {:file absolute-file-path :type id3.OPEN_LOCAL }
+                        (fn [err tags]
+                          (.emit (socketio-stream client-socket) "file-to-client" stream
+                                                                 tags)
+                        (.pipe read-stream stream)))))
                   (if (nil? reply)
                     (.decr rooms/redis-client (str "file-request:" message))))))))))))
 
