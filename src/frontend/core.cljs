@@ -93,6 +93,8 @@
                                        :type "audio/mpeg"
                                        :url  sound-data
                                        :autoLoad true}))
+                                       ; AutoLoad is supposedly a bad idea
+                                       ; when using Flash, but we don't use it
 
   (.play (:current-sound @app-state)
          #js {:onfinish on-finish
