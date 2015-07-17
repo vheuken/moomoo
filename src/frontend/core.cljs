@@ -44,6 +44,11 @@
     (println "Received pause message")
     (. (:current-sound @app-state) pause)))
 
+(.on socket "resume-sync-to-client"
+  (fn []
+    (println "Received resume message")
+    (. (:current-sound @app-state) resume)))
+
 (.on socket "chat message"
   (fn [message]
     (swap! app-state assoc :messages (conj (:messages @app-state) message))
@@ -68,6 +73,10 @@
   (println "Sending pause signal to server...")
   (.emit socket "pause-sync-to-server"))
 
+(defn on-resume []
+  (println "Sending resume signal to server...")
+  (.emit socket "resume-sync-to-server"))
+
 (defn play-sound [sound-data]
   (defn on-finish []
     (println "Song has finished!")
@@ -86,7 +95,8 @@
 
   (.play (:current-sound @app-state)
          #js {:onfinish on-finish
-              :onpause on-pause})
+              :onpause on-pause
+              :onresume on-resume})
   (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))
 
 

@@ -37,6 +37,12 @@
         (fn [err reply]
           (println (str (.toString reply) " has been paused!"))
           (.emit (.to io (.toString reply)) "pause-sync-to-client")))))
+  (.on socket "resume-sync-to-server"
+    (fn []
+      (rooms/get-room-from-id (.-id socket)
+        (fn [err reply]
+          (println (str (.toString reply) " has been resumed!"))
+          (.emit (.to io (.toString reply)) "resume-sync-to-client")))))
   (.on socket "new-file-request"
     (fn []
       (println "New file request!")
