@@ -59,9 +59,21 @@
       (+ 1 (:num-of-queued-requests @app-state))
       :else (request-new-file))))
 
-(defn is-music-playing? []
-  false)
-  ;(not (.-paused (.getElementById js/document "audio-tag"))))
+(defn on-finish []
+  (println "Song has finished!"))
+
+(defn play-sound [sound-data]
+  (if-not (nil? (:current-sound @app-state))
+    (.destroySound js/soundManager (:current-sound-id @app-state)))
+  (swap! app-state assoc :current-sound
+    (.createSound js/soundManager #js {:id   (:current-sound-id @app-state)
+                                       :type "audio/mpeg"
+                                       :url  sound-data}))
+
+  (.play (:current-sound @app-state)
+         #js {:onfinish on-finish})
+  (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))
+
 
 (.on (new js/ss socket) "file-to-client"
   (fn [stream tags]
@@ -89,18 +101,7 @@
           (request-new-file)
           (println (str "Number of music files downloaded "
                         (count (:music-files @app-state))))
-          (if-not (is-music-playing?)
-            (set! (.-onloadend reader)
-              (fn []
-                (if-not (nil? (:current-sound @app-state))
-                  (.destroySound js/soundManager (:current-sound-id @app-state)))
-                (swap! app-state assoc :current-sound
-                  (.createSound js/soundManager #js {:id   (:current-sound-id @app-state)
-                                                     :type "audio/mpeg"
-                                                     :url  (.-result reader)}))
-
-                  (.play (:current-sound @app-state))
-                  (swap! app-state assoc :current-track (+ 1 (:current-track @app-state)))))))))))
+          (set! (.-onloadend reader) #(play-sound (.-result reader))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
@@ -126,21 +127,4 @@
 
       (.emit (js/ss socket) "file" stream)
       (.pipe blob-stream stream))))
-
-(.bind (js/$ "#audio-tag") "ended"
-  (fn []
-    (println "Track ended!")
-    (let [reader (new js/FileReader)
-          blob (nth (vals (:music-files @app-state)) (:current-track @app-state))]
-      (.readAsDataURL reader blob)
-      (set! (.-onloadend reader)
-        (fn []
-          (if-not (nil? (:current-sound @app-state))
-            (.destroySound js/soundManager (:current-sound-id @app-state)))
-          (swap! app-state assoc :current-sound
-                 (.createSound js/soundManager #js {:id   (:current-sound-id @app-state)
-                                                    :type "audio/mpeg"
-                                                    :url  (.-result reader)}))
-          (.play (:current-sound @app-state))
-          (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))))))
 
