@@ -91,7 +91,8 @@
   (swap! app-state assoc :current-sound
     (.createSound js/soundManager #js {:id   (:current-sound-id @app-state)
                                        :type "audio/mpeg"
-                                       :url  sound-data}))
+                                       :url  sound-data
+                                       :autoLoad true}))
 
   (.play (:current-sound @app-state)
          #js {:onfinish on-finish
