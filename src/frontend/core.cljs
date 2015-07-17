@@ -39,6 +39,11 @@
     (.show (js/$ "#file_upload_input"))
     false))
 
+(.on socket "pause-sync-to-client"
+  (fn []
+    (println "Received pause message")
+    (. (:current-sound @app-state) pause)))
+
 (.on socket "chat message"
   (fn [message]
     (swap! app-state assoc :messages (conj (:messages @app-state) message))
@@ -59,7 +64,9 @@
       (+ 1 (:num-of-queued-requests @app-state))
       :else (request-new-file))))
 
-
+(defn on-pause []
+  (println "Sending pause signal to server...")
+  (.emit socket "pause-sync-to-server"))
 
 (defn play-sound [sound-data]
   (defn on-finish []
@@ -78,7 +85,8 @@
                                        :url  sound-data}))
 
   (.play (:current-sound @app-state)
-         #js {:onfinish on-finish})
+         #js {:onfinish on-finish
+              :onpause on-pause})
   (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))
 
 

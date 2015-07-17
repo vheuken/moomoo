@@ -75,14 +75,14 @@
     om/IRender
     (render [this]
       (if (:logged-in? data)
-        (dom/button #js {:onClick #(. js/soundManager resumeAll)} "Play")))))
+        (dom/button #js {:onClick #(. (:current-sound data) resume)} "Play")))))
 
 (defn pause-button [data owner]
   (reify
     om/IRender
     (render [this]
       (if (:logged-in? data)
-      (dom/button #js {:onClick #(. js/soundManager pauseAll)} "Pause")))))
+      (dom/button #js {:onClick #(. (:current-sound data) pause)} "Pause")))))
 
 (defn track-view [data owner]
   (reify
