@@ -59,10 +59,17 @@
       (+ 1 (:num-of-queued-requests @app-state))
       :else (request-new-file))))
 
-(defn on-finish []
-  (println "Song has finished!"))
+
 
 (defn play-sound [sound-data]
+  (defn on-finish []
+    (println "Song has finished!")
+    (let [reader (new js/FileReader)
+          next-song-blob (nth (vals (:music-files @app-state))
+                              (:current-track @app-state) 1)]
+      (.readAsDataURL reader next-song-blob)
+      (set! (.-onloadend reader) #(play-sound (.-result reader)))))
+
   (if-not (nil? (:current-sound @app-state))
     (.destroySound js/soundManager (:current-sound-id @app-state)))
   (swap! app-state assoc :current-sound
