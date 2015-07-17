@@ -101,7 +101,8 @@
           (request-new-file)
           (println (str "Number of music files downloaded "
                         (count (:music-files @app-state))))
-          (set! (.-onloadend reader) #(play-sound (.-result reader))))))))
+          (if (nil? (:current-sound @app-state))
+            (set! (.-onloadend reader) #(play-sound (.-result reader)))))))))
 
 (.change (js/$ "#file_upload_input")
   (fn [e]
