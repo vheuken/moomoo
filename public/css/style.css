@@ -5,7 +5,10 @@
 }
 
 #progress-track {
-  width: 50%;
+  position: relative;
+  width: 100%;
+  height: 5%;
+  padding-top: 2%;
 }
 
 #progress-track-bar {
@@ -26,5 +29,6 @@
   background-color: #0000FF;
   position: absolute;
   left: 0px;
+
   padding: 0px;
 }
