@@ -78,8 +78,8 @@
             (remove
               (fn [d]
                 (println d)
-                  (= (nth d 0) (:username data)))
-            (seq (:users-uploading data))))))))
+                (= (nth d 0) (:username data)))
+              (seq (:users-uploading data))))))))
 
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
