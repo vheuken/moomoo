@@ -76,9 +76,7 @@
       (apply dom/div nil
           (om/build-all user-upload-progress
             (remove
-              (fn [d]
-                (println d)
-                (= (nth d 0) (:username data)))
+              #(= (nth %1 0) (:username data))
               (seq (:users-uploading data))))))))
 
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
