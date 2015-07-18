@@ -4,6 +4,7 @@
 (defonce room (str "room:" room-id))
 (defonce socket (js/io))
 (defonce app-state (atom {:logged-in? false
+                          :username nil
                           :users []
                           :messages []
                           :upload-progress nil
@@ -38,6 +39,7 @@
 (.submit (js/$ "#username-form")
   (fn []
     (swap! app-state assoc :logged-in? true)
+    (swap! app-state assoc :username (.val (js/$ "#username")))
     (.emit socket "set_username" room (.val (js/$ "#username")))
     (.show (js/$ "#file_upload_input"))
     false))

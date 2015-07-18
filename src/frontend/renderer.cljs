@@ -74,7 +74,12 @@
     om/IRender
     (render [this]
       (apply dom/div nil
-        (om/build-all user-upload-progress (seq (:users-uploading data)))))))
+          (om/build-all user-upload-progress
+            (remove
+              (fn [d]
+                (println d)
+                  (= (nth d 0) (:username data)))
+            (seq (:users-uploading data))))))))
 
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
@@ -96,7 +101,7 @@
     om/IRender
     (render [this]
       (if (:logged-in? data)
-      (dom/button #js {:onClick #(. (:current-sound data) pause)} "Pause")))))
+        (dom/button #js {:onClick #(. (:current-sound data) pause)} "Pause")))))
 
 (defn track-view [data owner]
   (reify
