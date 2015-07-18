@@ -14,3 +14,13 @@
   left: 0px;
   padding: 0px;
 }
+
+#progress-track-ball {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  background-color: #0000FF;
+  position: absolute;
+  left: 0px;
+  padding: 0px;
+}
