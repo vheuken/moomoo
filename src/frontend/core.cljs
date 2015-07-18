@@ -87,6 +87,16 @@
   (println "Sending resume signal to server...")
   (.emit socket "resume-sync-to-server"))
 
+(defn set-progress-ball-position [percent-completed]
+  (.css (js/$ "#progress-track-ball") #js {"left" (str (/ percent-completed 2) "%")}))
+
+(defn while-playing []
+  (let [sound (:current-sound @app-state)]
+    (println (.-position sound))
+    (println (.-duration sound))
+    (println (/ (.-position sound) (.-duration sound)))
+    (set-progress-ball-position (* 100 (/ (.-position sound) (.-duration sound))))))
+
 (defn play-sound [sound-data]
   (defn on-finish []
     (println "Song has finished!")
@@ -109,7 +119,8 @@
   (.play (:current-sound @app-state)
          #js {:onfinish on-finish
               :onpause on-pause
-              :onresume on-resume})
+              :onresume on-resume
+              :whileplaying while-playing})
   (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))
 
 
@@ -173,5 +184,3 @@
       (.emit (js/ss socket) "file" stream)
       (.pipe blob-stream stream))))
 
-(defn set-progress-ball-position [percent-completed]
-  (.css (js/$ "#progress-track-ball") #js {"left" (str (/ percent-completed 2) "%")}))
