@@ -95,6 +95,7 @@
     om/IRender
     (render [this]
       (dom/span nil
+        ; TODO: download progress should be somewhere else...
         (if-not (nil? (:download-progress data))
           (dom/div nil "Downloading: " (:download-progress data) "%"))
         (apply dom/div nil
