@@ -4,13 +4,13 @@
   overflow: scroll;
 }
 
-.sm2-bar-ui {
- font-size: 16px;
-}
-.sm2-bar-ui .sm2-main-controls,
-.sm2-bar-ui .sm2-playlist-drawer {
- background-color: #2288cc;
-}
-.sm2-bar-ui .sm2-inline-texture {
- background: transparent;
+#progress-track-bar {
+  display: block;
+  height: 5px;
+  width: 50%;
+  border: none;
+  background-color: #FF0000;
+  position:absolute;
+  left: 0px;
+  padding: 0px;
 }
