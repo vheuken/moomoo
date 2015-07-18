@@ -31,6 +31,16 @@
 
 (defn connection [socket]
   (println "A user has connected!")
+  (.on socket "file-upload-progress"
+    (fn [upload-progress]
+      (rooms/get-room-from-id (.-id socket)
+        (fn [err reply]
+          (let [room (.toString reply)]
+            (rooms/get-username room (.-id socket)
+              (fn [err reply]
+                (.emit (.to io room) "user-uploading"
+                                     (.toString reply)
+                                     upload-progress))))))))
   (.on socket "pause-sync-to-server"
     (fn []
       (rooms/get-room-from-id (.-id socket)

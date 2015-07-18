@@ -18,7 +18,8 @@
                           :current-track 0
                           :current-sound nil
                           :current-sound-id "current-song"
-                          :music-tags []}))
+                          :music-tags []
+                          :users-uploading {}}))
 
 (enable-console-print!)
 
@@ -59,6 +60,11 @@
 (.on socket "userslist"
   (fn [users]
     (swap! app-state assoc :users users)))
+
+(.on socket "user-uploading"
+  (fn [username upload-progress]
+    (swap! app-state assoc :users-uploading
+      (merge (:users-uploading @app-state) {username upload-progress}))))
 
 (defn request-new-file []
   (println "Requesting new file...")
@@ -147,11 +153,14 @@
       (swap! app-state assoc :upload-progress 0)
       (swap! app-state assoc :data-uploaded 0)
 
+      (.emit socket "file-upload-progress" (:upload-progress @app-state))
+
       (.on blob-stream "data"
         (fn [data-chunk]
           (let [size (+ (.-length data-chunk) (:data-uploaded @app-state))]
             (swap! app-state assoc :upload-progress (Math/floor (* 100 (/ size (.-size file)))))
-            (swap! app-state assoc :data-uploaded size))))
+            (swap! app-state assoc :data-uploaded size)
+            (.emit socket "file-upload-progress" (:upload-progress @app-state)))))
 
       (.on blob-stream "end"
         (fn []

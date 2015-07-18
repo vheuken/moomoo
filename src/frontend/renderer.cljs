@@ -63,9 +63,23 @@
           (dom/input #js {:id "m" :autoComplete "off" :type "text"})
           (dom/button nil "Send"))))))
 
+(defn user-upload-progress [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/li nil (nth data 0) " is uploading: " (nth data 1) "%"))))
+
+(defn users-upload-progress-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (apply dom/div nil
+        (om/build-all user-upload-progress (seq (:users-uploading data)))))))
+
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
 (om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
+(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})
 
