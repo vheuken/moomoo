@@ -92,9 +92,6 @@
 
 (defn while-playing []
   (let [sound (:current-sound @app-state)]
-    (println (.-position sound))
-    (println (.-duration sound))
-    (println (/ (.-position sound) (.-duration sound)))
     (set-progress-ball-position (* 100 (/ (.-position sound) (.-duration sound))))))
 
 (defn play-sound [sound-data]
