@@ -4,6 +4,10 @@
   overflow: scroll;
 }
 
+#progress-track {
+  width: 50%;
+}
+
 #progress-track-bar {
   display: block;
   height: 5px;

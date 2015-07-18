@@ -173,3 +173,5 @@
       (.emit (js/ss socket) "file" stream)
       (.pipe blob-stream stream))))
 
+(defn set-progress-ball-position [percent-completed]
+  (.css (js/$ "#progress-track-ball") #js {"left" (str (/ percent-completed 2) "%")}))
