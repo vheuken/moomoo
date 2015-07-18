@@ -108,7 +108,9 @@
                           read-stream (.createReadStream fs absolute-file-path)]
                       (id3 #js {:file absolute-file-path :type id3.OPEN_LOCAL }
                         (fn [err tags]
-                          (.emit (socketio-stream client-socket) "file-to-client" stream
+                          (.emit (socketio-stream client-socket) "file-to-client"
+                                                                 stream
+                                                                 (.-size (.statSync fs absolute-file-path))
                                                                  tags)
                         (.pipe read-stream stream)))))
                   (if (nil? reply)

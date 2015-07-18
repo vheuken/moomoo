@@ -94,8 +94,11 @@
   (reify
     om/IRender
     (render [this]
-      (apply dom/div nil
-        (om/build-all track-view (:music-tags data))))))
+      (dom/span nil
+        (if-not (nil? (:download-progress data))
+          (dom/div nil "Downloading: " (:download-progress data) "%"))
+        (apply dom/div nil
+          (om/build-all track-view (:music-tags data)))))))
 
 (om/root play-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})

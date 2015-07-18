@@ -7,7 +7,9 @@
                           :users []
                           :messages []
                           :upload-progress nil
+                          :download-progress nil
                           :data-uploaded 0
+                          :data-downloaded 0
                           :current-file-download nil
                           :music-files {}
                           :message-received false
@@ -104,15 +106,17 @@
 
 
 (.on (new js/ss socket) "file-to-client"
-  (fn [stream tags]
+  (fn [stream file-size tags]
     (swap! app-state assoc :music-tags
       (conj (:music-tags @app-state) (str (.-artist tags) " - " (.-title tags))))
     (println (:music-tags @app-state))
     (swap! app-state assoc :file-downloading? true)
     (.on stream "data"
       (fn [blob-chunk]
+        (let [size (+ (.-length blob-chunk) (:data-downloaded @app-state))]
+          (swap! app-state assoc :download-progress (Math/floor (* 100 (/ size file-size))))
+          (swap! app-state assoc :data-downloaded size))
         (let [stream-id (.-id stream)]
-          (println stream-id)
           (if (nil? (get (:music-files @app-state) stream-id))
             (swap! app-state assoc :music-files
               (merge (:music-files @app-state) {stream-id (new js/Blob)})))
@@ -125,6 +129,7 @@
         (let [reader (new js/FileReader)
               blob   (get (:music-files @app-state) (.-id stream))]
           (.readAsDataURL reader blob)
+          (swap! app-state assoc :download-progress nil)
           (swap! app-state assoc :file-downloading? false)
           (request-new-file)
           (println (str "Number of music files downloaded "
