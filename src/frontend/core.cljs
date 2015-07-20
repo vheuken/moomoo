@@ -34,6 +34,8 @@
     (.val (js/$ "#m") "")
     false))
 
+(.draggable (js/$ "#progress-track-ball") #js {:axis "x"})
+
 ; TODO: We want to get rid of this at some point
 ;       and handle things more like the om tutorial handles things
 (.submit (js/$ "#username-form")
@@ -43,20 +45,6 @@
     (.emit socket "set_username" room (.val (js/$ "#username")))
     (.show (js/$ "#file_upload_input"))
     false))
-
-(.on socket "sync-to-server"
-  (fn [message]
-    (let [message       (js->clj message)
-          message-type  (get message "type")
-          current-sound (:current-sound @app-state)]
-      (println (str "receiving message:" message))
-      (cond
-        (= "pause" message-type)
-          (. current-sound pause)
-        (= "resume" message-type)
-          (. current-sound resume)
-        :else
-          (println "Don't know how to handle that message...")))))
 
 (.on socket "chat message"
   (fn [message]
@@ -122,7 +110,6 @@
               :whileplaying while-playing})
   (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))
 
-
 (.on (new js/ss socket) "file-to-client"
   (fn [stream file-size tags]
     (swap! app-state assoc :music-tags
@@ -183,3 +170,16 @@
       (.emit (js/ss socket) "file" stream)
       (.pipe blob-stream stream))))
 
+(.on socket "sync-to-server"
+  (fn [message]
+    (let [message       (js->clj message)
+          message-type  (get message "type")
+          current-sound (:current-sound @app-state)]
+      (println (str "Message received: " message))
+      (cond
+        (= "pause" message-type)
+          (. current-sound pause)
+        (= "resume" message-type)
+          (. current-sound resume)
+        :else
+          (println "Don't know how to handle that message...")))))
