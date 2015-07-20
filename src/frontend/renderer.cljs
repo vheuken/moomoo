@@ -49,7 +49,7 @@
   (reify
     om/IRender
     (render [this]
-      (if-not (core/logged-in?)
+      (if-not (:logged-in? data)
         (dom/form #js {:action ""} "Enter Name: "
           (dom/input #js {:id "username" :type "text" :autoComplete "off"})
           (dom/button nil "Join"))))))
@@ -58,7 +58,7 @@
   (reify
     om/IRender
     (render [this]
-      (if (core/logged-in?)
+      (if (:logged-in? data)
         (dom/form #js {:action "" :ref "message"}
           (dom/input #js {:id "m" :autoComplete "off" :type "text"})
           (dom/button nil "Send"))))))
@@ -91,15 +91,15 @@
   (reify
     om/IRender
     (render [this]
-      (if (core/logged-in?)
-        (dom/button #js {:onClick #(. (:current-sound data) resume)} "Play")))))
+      (if (:logged-in? data)
+        (dom/button #js {:onClick core/resume} "Play")))))
 
 (defn pause-button [data owner]
   (reify
     om/IRender
     (render [this]
-      (if (core/logged-in?)
-        (dom/button #js {:onClick #(. (:current-sound data) pause)} "Pause")))))
+      (if (:logged-in? data)
+        (dom/button #js {:onClick core/pause} "Pause")))))
 
 (defn track-view [data owner]
   (reify

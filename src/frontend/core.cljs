@@ -3,7 +3,6 @@
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce room (str "room:" room-id))
 (defonce socket (js/io))
-(defonce current-sound-id "current-song")
 (defonce app-state (atom {:logged-in? false
                           :username nil
                           :users []
@@ -19,13 +18,11 @@
                           :num-of-queued-requests 0
                           :current-track 0
                           :current-sound nil
+                          :current-sound-id "current-song"
                           :music-tags []
                           :users-uploading {}}))
 
 (enable-console-print!)
-
-(defn logged-in? []
-  ((complement nil?) username))
 
 (.on socket "connect" #(.emit socket "join_room" room))
 
@@ -47,15 +44,19 @@
     (.show (js/$ "#file_upload_input"))
     false))
 
-(.on socket "pause-sync-to-client"
-  (fn []
-    (println "Received pause message")
-    (. (:current-sound @app-state) pause)))
-
-(.on socket "resume-sync-to-client"
-  (fn []
-    (println "Received resume message")
-    (. (:current-sound @app-state) resume)))
+(.on socket "sync-to-server"
+  (fn [message]
+    (let [message       (js->clj message)
+          message-type  (get message "type")
+          current-sound (:current-sound @app-state)]
+      (println (str "receiving message:" message))
+      (cond
+        (= "pause" message-type)
+          (. current-sound pause)
+        (= "resume" message-type)
+          (. current-sound resume)
+        :else
+          (println "Don't know how to handle that message...")))))
 
 (.on socket "chat message"
   (fn [message]
@@ -82,13 +83,13 @@
       (+ 1 (:num-of-queued-requests @app-state))
       :else (request-new-file))))
 
-(defn on-pause []
+(defn pause []
   (println "Sending pause signal to server...")
-  (.emit socket "pause-sync-to-server"))
+  (.emit socket "sync-to-server" #js {:type "pause"}))
 
-(defn on-resume []
+(defn resume []
   (println "Sending resume signal to server...")
-  (.emit socket "resume-sync-to-server"))
+  (.emit socket "sync-to-server" #js {:type "resume"}))
 
 (defn set-progress-ball-position [percent-completed]
   (.css (js/$ "#progress-track-ball") #js {"left" (str (/ percent-completed 2) "%")}))
@@ -107,9 +108,9 @@
       (set! (.-onloadend reader) #(play-sound (.-result reader)))))
 
   (if-not (nil? (:current-sound @app-state))
-    (.destroySound js/soundManager current-sound-id)
+    (.destroySound js/soundManager (:current-sound-id @app-state)))
   (swap! app-state assoc :current-sound
-    (.createSound js/soundManager #js {:id   current-sound-id
+    (.createSound js/soundManager #js {:id   (:current-sound-id @app-state)
                                        :type "audio/mpeg"
                                        :url  sound-data
                                        :autoLoad true}))
@@ -118,8 +119,6 @@
 
   (.play (:current-sound @app-state)
          #js {:onfinish on-finish
-              :onpause on-pause
-              :onresume on-resume
               :whileplaying while-playing})
   (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))
 

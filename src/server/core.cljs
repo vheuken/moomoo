@@ -41,18 +41,13 @@
                 (.emit (.to io room) "user-uploading"
                                      (.toString reply)
                                      upload-progress))))))))
-  (.on socket "pause-sync-to-server"
-    (fn []
+  (.on socket "sync-to-server"
+    (fn [message]
       (rooms/get-room-from-id (.-id socket)
         (fn [err reply]
-          (println (str (.toString reply) " has been paused!"))
-          (.emit (.to io (.toString reply)) "pause-sync-to-client")))))
-  (.on socket "resume-sync-to-server"
-    (fn []
-      (rooms/get-room-from-id (.-id socket)
-        (fn [err reply]
-          (println (str (.toString reply) " has been resumed!"))
-          (.emit (.to io (.toString reply)) "resume-sync-to-client")))))
+
+          (println (str "Message " (js->clj message) " sent to " (.toString reply)))
+          (.emit (.to io (.toString reply)) "sync-to-server" message)))))
   (.on socket "new-file-request"
     (fn []
       (println "New file request!")
