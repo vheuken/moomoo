@@ -34,8 +34,12 @@
     (.val (js/$ "#m") "")
     false))
 
+(defn on-drag-stop [event ui]
+  (println (.-position ui)))
+
 (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
-                                               :containment "#progress-track-bar"})
+                                               :containment "#progress-track"
+                                               :stop on-drag-stop})
 
 ; TODO: We want to get rid of this at some point
 ;       and handle things more like the om tutorial handles things
@@ -81,7 +85,7 @@
   (.emit socket "sync-to-server" #js {:type "resume"}))
 
 (defn set-progress-ball-position [percent-completed]
-  (.css (js/$ "#progress-track-ball") #js {"left" (str (/ percent-completed 2) "%")}))
+  (.css (js/$ "#progress-track-ball") #js {"left" (str percent-completed "%")}))
 
 (defn while-playing []
   (let [sound (:current-sound @app-state)]
