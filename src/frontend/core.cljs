@@ -3,7 +3,9 @@
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce room (str "room:" room-id))
 (defonce socket (js/io))
-(defonce app-state (atom {:username nil
+(defonce current-sound-id "current-song")
+(defonce app-state (atom {:logged-in? false
+                          :username nil
                           :users []
                           :messages []
                           :upload-progress nil
@@ -17,7 +19,6 @@
                           :num-of-queued-requests 0
                           :current-track 0
                           :current-sound nil
-                          :current-sound-id "current-song"
                           :music-tags []
                           :users-uploading {}}))
 
@@ -106,9 +107,9 @@
       (set! (.-onloadend reader) #(play-sound (.-result reader)))))
 
   (if-not (nil? (:current-sound @app-state))
-    (.destroySound js/soundManager (:current-sound-id @app-state)))
+    (.destroySound js/soundManager current-sound-id)
   (swap! app-state assoc :current-sound
-    (.createSound js/soundManager #js {:id   (:current-sound-id @app-state)
+    (.createSound js/soundManager #js {:id   current-sound-id
                                        :type "audio/mpeg"
                                        :url  sound-data
                                        :autoLoad true}))
