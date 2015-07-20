@@ -34,7 +34,8 @@
     (.val (js/$ "#m") "")
     false))
 
-(.draggable (js/$ "#progress-track-ball") #js {:axis "x"})
+(.draggable (js/$ "#progress-track-ball") #js {:axis "x"
+                                               :containment "#progress-track-bar"})
 
 ; TODO: We want to get rid of this at some point
 ;       and handle things more like the om tutorial handles things
