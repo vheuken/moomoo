@@ -3,8 +3,7 @@
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce room (str "room:" room-id))
 (defonce socket (js/io))
-(defonce app-state (atom {:logged-in? false
-                          :username nil
+(defonce app-state (atom {:username nil
                           :users []
                           :messages []
                           :upload-progress nil
@@ -23,6 +22,9 @@
                           :users-uploading {}}))
 
 (enable-console-print!)
+
+(defn logged-in? []
+  ((complement nil?) username))
 
 (.on socket "connect" #(.emit socket "join_room" room))
 
