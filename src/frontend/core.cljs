@@ -109,11 +109,13 @@
 
 (defn on-finish []
   (println "Song has finished!")
-    (let [reader (new js/FileReader)
-          next-song-blob (nth (vals (:music-files @app-state))
-                              (:current-track @app-state) 1)]
-      (.readAsDataURL reader next-song-blob)
-      (set! (.-onloadend reader) #(play-sound (.-result reader)))))
+    (if ( < (:current-track @app-state) (count (vals (:music-files @app-state))))
+      (let [reader (new js/FileReader)
+            next-song-blob (nth (vals (:music-files @app-state))
+                                (:current-track @app-state) 1)]
+        (.readAsDataURL reader next-song-blob)
+        (set! (.-onloadend reader) #(play-sound (.-result reader))))
+      (swap! app-state assoc :current-sound nil)))
 
 (.on socket "sync-start"
   (fn []
