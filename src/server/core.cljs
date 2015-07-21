@@ -44,12 +44,11 @@
                   (let [num-of-users (count users)]
                     (.llen redis-client (str (.toString room-reply) ":sync-track-start")
                       (fn [err reply]
-                        (println reply)
-                        (println num-of-users)
                         (if (= num-of-users reply)
-                          (println "starting track!")
-                          (.emit (.to io (.toString room-reply)) "sync-start")
-                          (.del (str (.toString room-reply) ":sync-track-start"))))))))))))))
+                          (do
+                            (println "starting track!")
+                            (.emit (.to io (.toString room-reply)) "sync-start")
+                            (.del redis-client (str (.toString room-reply) ":sync-track-start")))))))))))))))
   (.on socket "file-upload-progress"
     (fn [upload-progress]
       (rooms/get-room-from-id (.-id socket)
