@@ -95,14 +95,6 @@
     (set-progress-ball-position (* 100 (/ (.-position sound) (.-duration sound))))))
 
 (defn play-sound [sound-data]
-  (defn on-finish []
-    (println "Song has finished!")
-    (let [reader (new js/FileReader)
-          next-song-blob (nth (vals (:music-files @app-state))
-                              (:current-track @app-state) 1)]
-      (.readAsDataURL reader next-song-blob)
-      (set! (.-onloadend reader) #(play-sound (.-result reader)))))
-
   (if-not (nil? (:current-sound @app-state))
     (.destroySound js/soundManager (:current-sound-id @app-state)))
   (swap! app-state assoc :current-sound
@@ -114,6 +106,14 @@
                                        ; when using Flash, but we don't use it
   (.emit socket "sync-start")
   (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))
+
+(defn on-finish []
+  (println "Song has finished!")
+    (let [reader (new js/FileReader)
+          next-song-blob (nth (vals (:music-files @app-state))
+                              (:current-track @app-state) 1)]
+      (.readAsDataURL reader next-song-blob)
+      (set! (.-onloadend reader) #(play-sound (.-result reader)))))
 
 (.on socket "sync-start"
   (fn []
