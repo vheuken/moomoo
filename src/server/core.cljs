@@ -23,6 +23,7 @@
 (def redis-subscribe-download-request-client (.createClient (nodejs/require "redis")))
 (def redis-subscribe-client (.createClient (nodejs/require "redis")))
 (def redis-publish-client (.createClient (nodejs/require "redis")))
+(def redis-client (.createClient (nodejs/require "redis")))
 
 (defn emit-userslist-to-room [room]
   (rooms/get-all-users room
@@ -31,6 +32,24 @@
 
 (defn connection [socket]
   (println "A user has connected!")
+  (.on socket "sync-start"
+    (fn []
+      (println (str "Socket ready to start track:" (.-id socket)))
+      (rooms/get-room-from-id (.-id socket)
+        (fn [err room-reply]
+          (.lpush redis-client (str (.toString room-reply) ":sync-track-start") (.-id socket)
+            (fn [err reply]
+              (rooms/get-all-users (.toString room-reply)
+                (fn [err users]
+                  (let [num-of-users (count users)]
+                    (.llen redis-client (str (.toString room-reply) ":sync-track-start")
+                      (fn [err reply]
+                        (println reply)
+                        (println num-of-users)
+                        (if (= num-of-users reply)
+                          (println "starting track!")
+                          (.emit (.to io (.toString room-reply)) "sync-start")
+                          (.del (str (.toString room-reply) ":sync-track-start"))))))))))))))
   (.on socket "file-upload-progress"
     (fn [upload-progress]
       (rooms/get-room-from-id (.-id socket)

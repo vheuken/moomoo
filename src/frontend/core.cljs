@@ -112,11 +112,14 @@
                                        :autoLoad true}))
                                        ; AutoLoad is supposedly a bad idea
                                        ; when using Flash, but we don't use it
-
-  (.play (:current-sound @app-state)
-         #js {:onfinish on-finish
-              :whileplaying while-playing})
+  (.emit socket "sync-start")
   (swap! app-state assoc :current-track (+ 1 (:current-track @app-state))))
+
+(.on socket "sync-start"
+  (fn []
+    (.play (:current-sound @app-state)
+           #js {:onfinish on-finish
+                :whileplaying while-playing})))
 
 (.on (new js/ss socket) "file-to-client"
   (fn [stream file-size tags]
