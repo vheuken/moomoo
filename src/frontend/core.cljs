@@ -126,7 +126,7 @@
 (.on (new js/ss socket) "file-to-client"
   (fn [stream file-size tags]
     (swap! app-state assoc :music-tags
-      (conj (:music-tags @app-state) (str (.-artist tags) " - " (.-title tags))))
+      (conj (:music-tags @app-state) tags))
     (println (:music-tags @app-state))
     (swap! app-state assoc :file-downloading? true)
     (.on stream "data"
@@ -152,7 +152,7 @@
           (request-new-file)
           (println (str "Number of music files downloaded "
                         (count (:music-files @app-state))))
-          (if (nil? (:current-sound @app-state))
+          (if (nil? (:currentiki-sound @app-state))
             (set! (.-onloadend reader) #(play-sound (.-result reader)))))))))
 
 (.change (js/$ "#file_upload_input")

@@ -116,7 +116,9 @@
         (if-not (nil? (:download-progress data))
           (dom/div nil "Downloading: " (:download-progress data) "%"))
         (apply dom/div nil
-          (om/build-all track-view (:music-tags data)))))))
+          (om/build-all track-view (map
+                                     #(str (.-artist %1) " - " (.-title %1))
+                                     (:music-tags data))))))))
 
 (om/root play-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
