@@ -30,6 +30,17 @@
     (fn [err reply]
       (.emit (.to io room) "userslist" (clj->js reply)))))
 
+(defn sync-room-state [socket]
+  (rooms/get-room-from-id (.-id socket)
+    (fn [err room-reply]
+      (.lrange redis-client (str (.toString room-reply) ":music-tags") 0 -1
+        (fn [err tags-reply]
+          (if-not (nil? tags-reply)
+            (do
+              (.reverse tags-reply)
+              (println tags-reply)
+              (.emit socket "all-tags" tags-reply))))))))
+
 (defn connection [socket]
   (println "A user has connected!")
   (.on socket "sync-start"
@@ -46,7 +57,7 @@
                       (fn [err reply]
                         (if (= num-of-users reply)
                           (do
-                            (println "starting track!")
+                            (println "Starting track!")
                             (.emit (.to io (.toString room-reply)) "sync-start")
                             (.del redis-client (str (.toString room-reply) ":sync-track-start")))))))))))))))
   (.on socket "file-upload-progress"
@@ -85,7 +96,8 @@
     (fn [room username]
       (rooms/set-username room (.-id socket) username)
       (emit-userslist-to-room room)
-      (println (string/join [username " has joined " room]))))
+      (println (string/join [username " has joined " room]))
+      (sync-room-state (aget (.-connected (.-sockets io)) (.-id socket)))))
   (.on socket "join_room"
     (fn [room]
       (.join socket room)))
@@ -104,6 +116,11 @@
           (fn []
             (rooms/get-room-from-id (.-id socket)
               (fn [err reply]
+                (id3 #js {:file absolute-file-path :type id3.OPEN_LOCAL }
+                  (fn [err tags]
+                    (let [writer (transit/writer :json-verbose)]
+                      (.rpush redis-client (str (.toString reply) ":music-tags")
+                                           (transit/write writer (js->clj tags))))))
                 (.rpush rooms/redis-client (str (.toString reply) ":music")
                                            absolute-file-path)))
             (println (str "Successfully uploaded " absolute-file-path))
@@ -118,10 +135,10 @@
   (fn [channel message]
     (if (= channel "file-download-request")
       (rooms/get-room-from-id message
-        (fn [err reply]
+        (fn [err room-reply]
           (.get rooms/redis-client (str "file-request:" message)
             (fn [err r]
-              (.lindex rooms/redis-client (str (.toString reply) ":music") (- (.toString r) 1)
+              (.lindex rooms/redis-client (str (.toString room-reply) ":music") (- (.toString r) 1)
                 (fn [err reply]
                   (if-not (nil? reply)
                     (let [client-id message
@@ -135,7 +152,7 @@
                                                                  stream
                                                                  (.-size (.statSync fs absolute-file-path))
                                                                  tags)
-                        (.pipe read-stream stream)))))
+                          (.pipe read-stream stream)))))
                   (if (nil? reply)
                     (.decr rooms/redis-client (str "file-request:" message))))))))))))
 

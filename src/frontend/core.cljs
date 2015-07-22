@@ -54,6 +54,12 @@
     (.show (js/$ "#file_upload_input"))
     false))
 
+(.on socket "all-tags"
+  (fn [tags]
+    (println tags)
+    (swap! app-state assoc :music-tags
+      (map #(.parse js/JSON %1) tags))))
+
 (.on socket "chat message"
   (fn [message]
     (swap! app-state assoc :messages (conj (:messages @app-state) message))
