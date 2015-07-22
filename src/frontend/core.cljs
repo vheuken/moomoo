@@ -20,7 +20,8 @@
                           :current-sound nil
                           :current-sound-id "current-song"
                           :music-tags []
-                          :users-uploading {}}))
+                          :users-uploading {}
+                          :ball-being-dragged? false}))
 
 (enable-console-print!)
 
@@ -36,12 +37,16 @@
 
 (defn on-drag-stop [event ui]
   (println (str "Drop position: " (.-position ui)))
+  (swap! app-state assoc :ball-being-dragged? false)
   (let [bar-width (.width (js/$ "#progress-track-bar"))]
     (.emit socket "sync-to-server" #js {:type "position-change"
                                         :data (/ (.-left (.-position ui)) bar-width)})))
 
 (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
                                                :containment "#progress-track"
+                                               :start #(swap! app-state assoc
+                                                              :ball-being-dragged?
+                                                              true)
                                                :stop on-drag-stop})
 
 ; TODO: We want to get rid of this at some point
@@ -97,8 +102,9 @@
   (.css (js/$ "#progress-track-ball") #js {"left" (str percent-completed "%")}))
 
 (defn while-playing []
-  (let [sound (:current-sound @app-state)]
-    (set-progress-ball-position (* 100 (/ (.-position sound) (.-duration sound))))))
+  (if-not (:ball-being-dragged? @app-state)
+    (let [sound (:current-sound @app-state)]
+      (set-progress-ball-position (* 100 (/ (.-position sound) (.-duration sound)))))))
 
 (defn play-sound [sound-data]
   (if-not (nil? (:current-sound @app-state))
