@@ -27,7 +27,7 @@
 
 (.on socket "connect" #(.emit socket "join_room" room))
 
-(.hide (js/$ "#file_upload_input"))
+(.hide (js/$ "#file-upload-input"))
 
 (.submit (js/$ "#message-form")
   (fn []
@@ -56,7 +56,7 @@
     (swap! app-state assoc :logged-in? true)
     (swap! app-state assoc :username (.val (js/$ "#username")))
     (.emit socket "set_username" room (.val (js/$ "#username")))
-    (.show (js/$ "#file_upload_input"))
+    (.show (js/$ "#file-upload-input"))
     false))
 
 (.on socket "all-tags"
@@ -167,7 +167,7 @@
           (if (nil? (:currentiki-sound @app-state))
             (set! (.-onloadend reader) #(play-sound (.-result reader)))))))))
 
-(.change (js/$ "#file_upload_input")
+(.change (js/$ "#file-upload-input")
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)
           stream (.createStream js/ss)

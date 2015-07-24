@@ -12,6 +12,12 @@ body {
 
 }
 
+#file-upload-input {
+  position: relative;
+  float: right;
+  margin-right: 0%;
+}
+
 #messages {
   width: 50%;
   height: 75%;
