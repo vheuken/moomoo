@@ -1,3 +1,17 @@
+body {
+  background-color: #7E8F99;
+}
+
+#top-bar {
+  width: 100%;
+  height: 16%;
+  background-color: #EBEBEB;
+}
+
+#current-track-tags {
+
+}
+
 #messages {
   width: 50%;
   height: 75%;
@@ -32,3 +46,4 @@
 
   padding: 0px;
 }
+

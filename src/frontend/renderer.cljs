@@ -79,12 +79,25 @@
               #(= (nth %1 0) (:username data))
               (seq (:users-uploading data))))))))
 
+(defn current-track-tags-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (if-not (= 0 (:current-track data))
+        (let [track-index (- (:current-track data) 1)
+              tags (nth (:music-tags data) track-index)]
+          (dom/div nil
+            (dom/div nil (.-title tags))
+            (dom/div nil (.-album tags))
+            (dom/div nil (.-artist tags))))))))
+
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
 (om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
 (om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})
+(om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
 ; music player
 (defn play-button [data owner]
