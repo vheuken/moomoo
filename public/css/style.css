@@ -19,6 +19,7 @@ body {
 }
 
 #progress-track {
+  margin: auto;
   position: relative;
   width: 50%;
   height: 5%;
