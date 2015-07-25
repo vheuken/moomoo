@@ -10,7 +10,7 @@ head
   script(src="/vendor/bar-ui.js")
 html
   body
-    #top-bar
+    #top-bar.top-bottom-bars
       #current-track-tags
       #progress-track
         hr#progress-track-bar
@@ -19,10 +19,11 @@ html
       button#invite-friends-button.top-bar-button Invite Friends
       input#file-upload(type="file")
       button#file-upload-input.top-bar-button(onclick="document.getElementById('file-upload').click();") Add Music
-    #messages-window
-    #message-form
-    #username-form
-    #bottom-bar
+    #center-area
+      #messages-window
+      #message-form
+      #username-form
+    #bottom-bar.top-bottom-bars
 
     #progress
     #users-upload-progress

@@ -4,7 +4,22 @@ body {
 
 #top-bar {
   width: 100%;
-  height: 16%;
+  height: 15%;
+}
+
+#center-area {
+  width: 100%;
+  height: 80%;
+  background-color: #FFFFFF;
+  border: 1px solid #D9D9D9;
+}
+
+#bottom-bar {
+  width: 100%;
+  height: 5%;
+}
+
+.top-bottom-bars {
   background-color: #EBEBEB;
   border: 1px solid #D9D9D9;
 }
@@ -31,9 +46,10 @@ body {
 #messages {
   background-color: #FFFFFF;
   width: 30%;
-  height: 60%;
+  height: 75%;
   overflow-y: scroll;
   word-wrap: break-word;
+  border: 1px solid #D9D9D9;
 }
 
 #progress-track {
@@ -63,7 +79,6 @@ body {
   background-color: #0000FF;
   position: absolute;
   left: 0px;
-
   padding: 0px;
 }
 
