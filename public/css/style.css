@@ -9,13 +9,19 @@ body {
 }
 
 #current-track-tags {
+}
 
+#file-upload {
+  display: none;
 }
 
 #file-upload-input {
   position: relative;
   float: right;
+  margin-left: auto;
   margin-right: 0%;
+  height: 25%;
+  width: 10%;
 }
 
 #messages {

@@ -167,7 +167,7 @@
           (if (nil? (:currentiki-sound @app-state))
             (set! (.-onloadend reader) #(play-sound (.-result reader)))))))))
 
-(.change (js/$ "#file-upload-input")
+(.change (js/$ "#file-upload")
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)
           stream (.createStream js/ss)
