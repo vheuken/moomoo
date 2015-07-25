@@ -22,7 +22,7 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li nil message))))
+      (dom/li nil (.-username message) ": " (.-content message)))))
 
 (defn messages-view [data owner]
   (reify

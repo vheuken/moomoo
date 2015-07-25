@@ -105,7 +105,8 @@
     (fn [room msg]
       (rooms/get-username room (.-id socket)
         (fn [err reply]
-          (let [msg-to-send (string/join [(.toString reply) ": " msg])]
+          (let [msg-to-send #js {:username (.toString reply)
+                                 :content  msg}]
             (.emit (.to io room) "chat message" msg-to-send))))))
   (.on (new socketio-stream socket) "file"
     (fn [stream data]

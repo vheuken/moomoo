@@ -67,6 +67,7 @@
 
 (.on socket "chat message"
   (fn [message]
+    (println message)
     (swap! app-state assoc :messages (conj (:messages @app-state) message))
     (swap! app-state assoc :message-received true)))
 
