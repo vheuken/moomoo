@@ -38,9 +38,10 @@
 (defn on-drag-stop [event ui]
   (println (str "Drop position: " (.-position ui)))
   (swap! app-state assoc :ball-being-dragged? false)
-  (let [bar-width (.width (js/$ "#progress-track-bar"))]
-    (.emit socket "sync-to-server" #js {:type "position-change"
-                                        :data (/ (.-left (.-position ui)) bar-width)})))
+  (if-not (nil? (:current-sound @app-state))
+    (let [bar-width (.width (js/$ "#progress-track-bar"))]
+      (.emit socket "sync-to-server" #js {:type "position-change"
+                                          :data (/ (.-left (.-position ui)) bar-width)}))))
 
 (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
                                                :containment "#progress-track"
