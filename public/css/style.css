@@ -9,13 +9,14 @@ body {
 }
 
 #current-track-tags {
+  position: absolute;
 }
 
 #file-upload {
   display: none;
 }
 
-#file-upload-input {
+.top-bar-button {
   position: relative;
   float: right;
   margin-left: auto;
