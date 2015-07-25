@@ -46,13 +46,14 @@ body {
 
 #progress-track-bar {
   display: block;
-  height: 5px;
+  height: 10px;
   width: 100%;
   border: none;
   background-color: #FF0000;
   position:absolute;
   left: 0px;
   padding: 0px;
+  border-radius: 5px;
 }
 
 #progress-track-ball {
