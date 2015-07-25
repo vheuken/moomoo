@@ -26,9 +26,11 @@ body {
 }
 
 #messages {
-  width: 50%;
-  height: 75%;
-  overflow: scroll;
+  background-color: #FFFFFF;
+  width: 30%;
+  height: 60%;
+  overflow-y: scroll;
+  word-wrap: break-word;
 }
 
 #progress-track {
