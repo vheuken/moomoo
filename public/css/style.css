@@ -42,13 +42,25 @@ body {
   background-color: #F2F2F2;
   border: 1px solid #D9D9D9;
 }
+#center-area {
+  position: relative;
+}
 
 #messages {
-  background-color: #FFFFFF;
-  width: 30%;
+  width: 25%;
   height: 75%;
   overflow-y: scroll;
   word-wrap: break-word;
+  border: 1px solid #D9D9D9;
+}
+
+#track-queue {
+  position: absolute;
+  right: 0;
+  top: 0;
+  left: 25%;
+  width: 70%;
+  height: 100%;
   border: 1px solid #D9D9D9;
 }
 
