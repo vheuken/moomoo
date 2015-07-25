@@ -14,7 +14,6 @@
     om/IRender
     (render [this]
       (dom/div nil
-        (dom/h3 nil "Users")
         (apply dom/div nil
           (om/build-all user-view (:users data)))))))
 
