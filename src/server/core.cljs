@@ -21,7 +21,16 @@
 (def io (.listen socketio server))
 
 (defn connection [socket]
-  (println (str "User " (.-id socket) " has connected!")))
+  (println (str "User " (.-id socket) " has connected!"))
+
+  (.on socket "join-room"
+    (fn [room-id]
+      (.join socket room-id)))
+
+  (.on socket "sign-in"
+    (fn [room-id username]
+      (rooms/set-username room-id (.-id socket) username)
+      (.emit socket "sign-in-success"))))
 
 (.on io "connection" connection)
 
