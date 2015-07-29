@@ -90,7 +90,7 @@
             (dom/div nil (.-album tags))
             (dom/div nil (.-artist tags))))))))
 
-;(om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
+(om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
 ;(om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
 ;(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})

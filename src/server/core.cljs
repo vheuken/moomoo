@@ -37,7 +37,11 @@
   (.on socket "sign-in"
     (fn [room-id username]
       (rooms/set-username room-id (.-id socket) username
-        #(.emit socket "sign-in-success"))))
+        (fn []
+          (.emit socket "sign-in-success")
+          (rooms/get-all-users room-id
+            #(.emit (.to io room-id) "users-list" (clj->js %1)))))))
+
   (.on socket "chat-message"
     (fn [room message]
       (rooms/get-username room (.-id socket)

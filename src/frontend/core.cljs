@@ -4,7 +4,8 @@
 (defonce socket (js/io))
 (defonce app-state (atom {:signed-in? false
                           :messages []
-                          :message-received? false}))
+                          :message-received? false
+                          :users []}))
 
 (enable-console-print!)
 
@@ -33,3 +34,7 @@
   (fn [message]
     (swap! app-state assoc :messages (conj (:messages @app-state) message))
     (swap! app-state assoc :message-received? true)))
+
+(.on socket "users-list"
+  (fn [users]
+    (swap! app-state assoc :users users)))
