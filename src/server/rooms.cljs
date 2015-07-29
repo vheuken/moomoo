@@ -5,26 +5,30 @@
 (def redis-client (.createClient (nodejs/require "redis")))
 
 (defn set-username [room id username]
-  (.hset redis-client (string/join [room ":users"]) id username)
+  (.hset redis-client (string/join ["room:" room ":users"]) id username)
   (.set redis-client (string/join ["users:" id]) room))
 
 (defn get-username [room id callback]
-  (.hget redis-client (string/join [room ":users"]) id callback))
+  (.hget redis-client (string/join ["room:" room ":users"]) id
+    (fn [err reply]
+      (if-not (nil? reply)
+        (callback (.toString reply))
+        (callback nil)))))
 
 (defn get-all-users [room callback]
-  (letfn [(users-to-list [err reply]
+  (letfn [(users-to-list [reply]
             (let [user-hash (js->clj reply)]
               (vec (map #(val %) user-hash))))]
-  (.hgetall redis-client (string/join [room ":users"])
+  (.hgetall redis-client (string/join ["room:" room ":users"])
     (fn [err reply]
-      (callback err (users-to-list err reply))))))
+      (callback (users-to-list reply))))))
 
-(defn get-room-from-id [id callback]
-  (.get redis-client (str "users:" id) callback))
+(defn get-room-from-user-id [id callback]
+  (.get redis-client (str "users:" id) #(callback %2)))
 
 (defn delete-user [id callback]
   (.get redis-client (str "users:" id)
     (fn [err reply]
       (let [room (.toString reply)]
-        (.hdel redis-client (str room ":users") id callback))
+        (.hdel redis-client (str "room:" room ":users") id callback))
       (.del redis-client (str "users:" id)))))

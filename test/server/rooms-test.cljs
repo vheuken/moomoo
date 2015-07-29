@@ -12,17 +12,14 @@
 
 (use-fixtures :once clear-redis-fixture)
 
-(deftest ^:async username
-  (let [room "room:test1"
+(deftest ^:async get-username
+  (let [room "test-room"
         id   "test"
         user "Ricky"]
     (rooms/set-username room id user)
-    (.get rooms/redis-client (string/join ["users:" id])
-      (fn [err reply]
-        (is (= room (.toString reply)))))
     (rooms/get-username room id
-      (fn [err reply]
-        (is (= user (.toString reply)))
+      (fn [reply]
+        (is (= user reply))
         (done)))))
 
 (deftest ^:async get-all-users
@@ -34,18 +31,18 @@
     (rooms/set-username room user-id1 user1)
     (rooms/set-username room user-id2 user2)
     (rooms/get-all-users room
-      (fn [err reply]
+      (fn [reply]
         (is (= [user1 user2] reply))
         (done)))))
 
-(deftest ^:async get-room-from-id
+(deftest ^:async get-room-from-user-id
   (let [id "1"
         n "name"
         room "justatest"]
     (rooms/set-username room id n)
-    (rooms/get-room-from-id id
-      (fn [err reply]
-        (is (= room (.toString reply)))
+    (rooms/get-room-from-user-id id
+      (fn [reply]
+        (is (= room reply))
         (done)))))
 
 (deftest ^:async delete-user
@@ -56,6 +53,6 @@
     (rooms/delete-user id
       (fn []
         (rooms/get-username room id
-          (fn [err reply]
+          (fn [reply]
             (is (nil? reply))
             (done)))))))

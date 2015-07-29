@@ -41,7 +41,8 @@
                 :output-dir "target/test"
                 :target :nodejs
                 :optimizations :simple
-                :hashbang false}}
+                :hashbang false
+                :language-in :ecmascript5}}
              {:id "moomoo-frontend"
               :source-paths ["src/frontend"]
               :compiler {
