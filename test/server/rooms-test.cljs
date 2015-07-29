@@ -75,3 +75,7 @@
                   (fn [reply]
                     (is (= nil reply))
                     (done)))))))))))
+
+; just tests to make sure it doesn't crash/error
+(deftest disconnect-with-not-signed-in-user
+  (rooms/disconnect "foo" nil))
