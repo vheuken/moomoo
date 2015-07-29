@@ -21,7 +21,7 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li nil (.-username message) ": " (.-content message)))))
+      (dom/li nil (.-username message) ": " (.-message message)))))
 
 (defn messages-view [data owner]
   (reify
@@ -31,10 +31,10 @@
         (om/build-all message-view (:messages data))))
     om/IDidUpdate
       (did-update [_ _ _]
-        (if (:message-received @core/app-state)
+        (if (:message-received? @core/app-state)
           (let [div (js/$ "#messages")]
             (.scrollTop div (.prop div "scrollHeight"))
-            (swap! core/app-state assoc :message-received false))))))
+            (swap! core/app-state assoc :message-received? false))))))
 
 (defn file-upload-progress-view [data owner]
   (reify
@@ -90,13 +90,13 @@
             (dom/div nil (.-album tags))
             (dom/div nil (.-artist tags))))))))
 
-(om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
+;(om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
-(om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
-(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
+;(om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
+;(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})
-(om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
+;(om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
 ; music player
 (defn play-button [data owner]
@@ -132,6 +132,6 @@
                                      #(str (.-artist %1) " - " (.-title %1))
                                      (:music-tags data))))))))
 
-(om/root play-button core/app-state {:target (. js/document (getElementById "play-button"))})
-(om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
-(om/root track-queue core/app-state {:target (. js/document (getElementById "track-queue"))})
+;(om/root play-button core/app-state {:target (. js/document (getElementById "play-button"))})
+;(om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
+;(om/root track-queue core/app-state {:target (. js/document (getElementById "track-queue"))})

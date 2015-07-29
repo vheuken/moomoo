@@ -37,7 +37,13 @@
   (.on socket "sign-in"
     (fn [room-id username]
       (rooms/set-username room-id (.-id socket) username
-        #(.emit socket "sign-in-success")))))
+        #(.emit socket "sign-in-success"))))
+  (.on socket "chat-message"
+    (fn [room message]
+      (rooms/get-username room (.-id socket)
+        (fn [username]
+          (.emit (.to io room) "chat-message" #js {:username username
+                                                   :message  message}))))))
 
 (.on io "connection" connection)
 
