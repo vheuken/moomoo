@@ -16,43 +16,47 @@
   (let [room "test-room"
         id   "test"
         user "Ricky"]
-    (rooms/set-username room id user)
-    (rooms/get-username room id
-      (fn [reply]
-        (is (= user reply))
-        (done)))))
+    (rooms/set-username room id user
+      #(rooms/get-username room id
+        (fn [reply]
+          (is (= user reply))
+          (done))))))
 
 (deftest ^:async get-all-users
-  (let [room "room:test2"
+  (let [room "test2"
         user-id1 "One"
         user-id2 "Two"
         user1 "Paul"
         user2 "Lee"]
-    (rooms/set-username room user-id1 user1)
-    (rooms/set-username room user-id2 user2)
-    (rooms/get-all-users room
-      (fn [reply]
-        (is (= [user1 user2] reply))
-        (done)))))
+    (rooms/set-username room user-id1 user1
+      (fn []
+        (rooms/set-username room user-id2 user2
+          (fn []
+            (rooms/get-all-users room
+              (fn [reply]
+                (is (= reply [user1 user2]))
+                (done)))))))))
 
 (deftest ^:async get-room-from-user-id
   (let [id "1"
         n "name"
         room "justatest"]
-    (rooms/set-username room id n)
-    (rooms/get-room-from-user-id id
-      (fn [reply]
-        (is (= room reply))
-        (done)))))
+    (rooms/set-username room id n
+      #(rooms/get-room-from-user-id id
+        (fn [reply]
+          (is (= room reply))
+          (done))))))
 
 (deftest ^:async delete-user
   (let [room "room:testfoo"
         id   "test"
         n    "foo"]
-    (rooms/set-username room id n)
-    (rooms/delete-user id
+    (rooms/set-username room id n
       (fn []
-        (rooms/get-username room id
-          (fn [reply]
-            (is (nil? reply))
-            (done)))))))
+        (rooms/delete-user id
+          (fn []
+            (rooms/get-username room id
+              (fn [reply]
+                (is (nil? reply))
+                (done)))))))))
+
