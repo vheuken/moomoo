@@ -60,3 +60,18 @@
                 (is (nil? reply))
                 (done)))))))))
 
+(deftest ^:async disconnect-with-signed-in-user
+  (let [room "r"
+        socket-id "test-socket-id"
+        username "test-username"]
+    (rooms/set-username room socket-id username
+      (fn []
+        (rooms/disconnect socket-id
+          (fn []
+            (rooms/get-username room socket-id
+              (fn [reply]
+                (is (= nil reply))
+                (rooms/get-room-from-user-id socket-id
+                  (fn [reply]
+                    (is (= nil reply))
+                    (done)))))))))))

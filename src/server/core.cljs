@@ -25,7 +25,10 @@
 (defn connection [socket]
   (println (str "User " (.-id socket) " has connected!"))
 
-  (.on socket "disconnect" #(rooms/disconnect (.-id socket)))
+  (.on socket "disconnect"
+    (fn []
+      (rooms/disconnect (.-id socket)
+        #(println (str (.-id socket) " has disconnected!")))))
 
   (.on socket "join-room"
     (fn [room-id]
