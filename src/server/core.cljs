@@ -16,11 +16,8 @@
 (def file-upload-directory "/tmp/moomoo-uploads")
 (def js-uuid (nodejs/require "uuid"))
 (def fs (nodejs/require "fs"))
-(def id3 (nodejs/require "id3js"))
 
 (def io (.listen socketio server))
-
-
 
 (defn connection [socket]
   (println (str "User " (.-id socket) " has connected!"))

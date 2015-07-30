@@ -2,6 +2,7 @@
   (:require [cljs.nodejs :as nodejs]
             [clojure.string :as string]))
 
+(def id3 (nodejs/require "id3js"))
 (def redis-client (.createClient (nodejs/require "redis")))
 
 (defn set-username [room id username callback]
@@ -41,3 +42,10 @@
       (if-not (nil? reply)
         (delete-user socket-id #(callback reply))
         callback))))
+
+(defn set-music-info [absolute-file-path callback]
+  (id3 #js {:file absolute-file-path
+            :type id3.OPEN_LOCAL}
+    (fn [err tags]
+      (println js/PROJECT_DIR)
+      (callback tags))))

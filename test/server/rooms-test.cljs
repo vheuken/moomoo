@@ -7,6 +7,8 @@
             [cljs.nodejs :as nodejs]
             [moomoo.rooms :as rooms]))
 
+(def path (nodejs/require "path"))
+
 (defn clear-redis-fixture []
   (.flushall rooms/redis-client))
 
@@ -80,3 +82,16 @@
 ; just tests to make sure it doesn't crash/error
 (deftest disconnect-with-not-signed-in-user
   (rooms/disconnect "foo" nil))
+
+(def project-dir js/PROJECT_DIR)
+(deftest ^:async set-music-file-info
+  (let [project-dir project-dir
+        music-file-path "test/server/test.mp3"
+        absolute-file-path (str project-dir "/" music-file-path)]
+    (rooms/set-music-info absolute-file-path
+      (fn [tags]
+        (println tags)
+        (is (= "Test Title"  (.-title tags)))
+        (is (= "Test Album"  (.-album tags)))
+        (is (= "Test Artist" (.-artist tags)))
+        (done)))))
