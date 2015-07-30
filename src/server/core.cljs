@@ -50,12 +50,25 @@
                                                    :message  message})))))
 
   (.on (new socketio-stream socket) "file-upload"
-    (fn [stream data]
+    (fn [stream original-filename file-size]
       (let [file-id (.v4 js-uuid)
             filename (subs file-id 0 7)
             absolute-file-path (str file-upload-directory "/" filename)]
         (println (str "Saving file as " absolute-file-path))
         (.pipe stream (.createWriteStream fs absolute-file-path))
+
+        (.on stream "data"
+          (fn [data-chunk]
+            (rooms/get-room-from-user-id (.-id socket)
+              (fn [room]
+                (rooms/get-username room (.-id socket)
+                  (fn [username]
+                    (let [bytes-received (aget (.statSync fs absolute-file-path) "size")]
+                      (.emit (.to io room) "file-upload-info" #js {:username username
+                                                                  :id       file-id
+                                                                  :bytes-received bytes-received
+                                                                  :total-size file-size
+                                                                  :filename original-filename}))))))))
 
         (.on stream "end"
           (fn []

@@ -30,8 +30,10 @@
           stream (.createStream js/ss)
           blob-stream (.createBlobReadStream js/ss file)]
       (println "File uploading!")
-
-      (.emit (js/ss socket) "file-upload" stream)
+      (println (.-name file))
+      (.emit (js/ss socket) "file-upload" stream
+        (clj->js (.-name file))
+        (.-size file))
       (.pipe blob-stream stream)
 
       (.on blob-stream "end"
@@ -53,3 +55,7 @@
 (.on socket "users-list"
   (fn [users]
     (swap! app-state assoc :users users)))
+
+(.on socket "file-upload-info"
+  (fn [file-upload-info]
+    (println file-upload-info)))
