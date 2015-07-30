@@ -67,11 +67,13 @@
                 (rooms/get-username room (.-id socket)
                   (fn [username]
                     (let [bytes-received (aget (.statSync fs absolute-file-path) "size")]
-                      (.emit (.to io room) "file-upload-info" #js {:username username
-                                                                  :id       file-id
-                                                                  :bytesreceived bytes-received
-                                                                  :totalsize file-size
-                                                                  :filename original-filename}))))))))
+                      (.emit (.to io room)
+                             "file-upload-info"
+                             #js {:username      username
+                                  :id            file-id
+                                  :bytesreceived bytes-received
+                                  :totalsize     file-size
+                                  :filename      original-filename}))))))))
 
         (.on stream "end"
           (fn []
