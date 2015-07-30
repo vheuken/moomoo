@@ -47,7 +47,19 @@
       (rooms/get-username room (.-id socket)
         (fn [username]
           (.emit (.to io room) "chat-message" #js {:username username
-                                                   :message  message}))))))
+                                                   :message  message})))))
+
+  (.on (new socketio-stream socket) "file-upload"
+    (fn [stream data]
+      (let [file-id (.v4 js-uuid)
+            filename (subs file-id 0 7)
+            absolute-file-path (str file-upload-directory "/" filename)]
+        (println (str "Saving file as " absolute-file-path))
+        (.pipe stream (.createWriteStream fs absolute-file-path))
+
+        (.on stream "end"
+          (fn []
+            (println (str "Successfully uploaded " absolute-file-path))))))))
 
 (.on io "connection" connection)
 

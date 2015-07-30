@@ -17,12 +17,27 @@
     (.emit socket "sign-in" room-id (.val (js/$ "#username")))
     (.show (js/$ "#file-upload-input"))
     false))
+
 (.submit (js/$ "#message-form")
   (fn []
     (.emit socket "chat-message" room-id (.val (js/$ "#m")))
     (.val (js/$ "#m") "")
     false))
-; end stuff that should be replaced with react....
+
+(.change (js/$ "#file-upload")
+  (fn [e]
+    (let [file (aget (.-files (.-target e)) 0)
+          stream (.createStream js/ss)
+          blob-stream (.createBlobReadStream js/ss file)]
+      (println "File uploading!")
+
+      (.emit (js/ss socket) "file-upload" stream)
+      (.pipe blob-stream stream)
+
+      (.on blob-stream "end"
+        (fn []
+          (println "Upload successful!"))))))
+; end stuff that should be cleaned up with react....
 
 (.on socket "connect" #(.emit socket "join-room" room-id))
 (.on socket "sign-in-success"
