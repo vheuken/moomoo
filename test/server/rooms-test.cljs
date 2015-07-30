@@ -67,7 +67,8 @@
     (rooms/set-username room socket-id username
       (fn []
         (rooms/disconnect socket-id
-          (fn []
+          (fn [room-id]
+            (is (= room-id room))
             (rooms/get-username room socket-id
               (fn [reply]
                 (is (= nil reply))

@@ -39,5 +39,5 @@
   (.get redis-client (str "users:" socket-id)
     (fn [err reply]
       (if-not (nil? reply)
-        (delete-user socket-id callback)
+        (delete-user socket-id #(callback reply))
         callback))))

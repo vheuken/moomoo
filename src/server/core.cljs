@@ -28,7 +28,10 @@
   (.on socket "disconnect"
     (fn []
       (rooms/disconnect (.-id socket)
-        #(println (str (.-id socket) " has disconnected!")))))
+        (fn [room-id]
+          (rooms/get-all-users room-id
+            #(.emit (.to io room-id) "users-list" (clj->js %1)))
+          (println (str (.-id socket) " has disconnected!"))))))
 
   (.on socket "join-room"
     (fn [room-id]
