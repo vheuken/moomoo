@@ -5,7 +5,8 @@
 (defonce app-state (atom {:signed-in? false
                           :messages []
                           :message-received? false
-                          :users []}))
+                          :users []
+                          :current-uploads-info {}}))
 
 (enable-console-print!)
 
@@ -32,7 +33,7 @@
       (println "File uploading!")
       (println (.-name file))
       (.emit (js/ss socket) "file-upload" stream
-        (clj->js (.-name file))
+        (.-name file)
         (.-size file))
       (.pipe blob-stream stream)
 
@@ -58,4 +59,7 @@
 
 (.on socket "file-upload-info"
   (fn [file-upload-info]
-    (println file-upload-info)))
+    (swap! app-state assoc :current-uploads-info
+      (merge (:current-uploads-info @app-state)
+        {(.-id file-upload-info) file-upload-info}))
+    (println (:current-uploads-info @app-state))))

@@ -66,17 +66,16 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li nil (nth data 0) " is uploading: " (nth data 1) "%"))))
+      (dom/li nil (.-username data)
+                  " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
+                  (.-filename data)))))
 
 (defn users-upload-progress-view [data owner]
   (reify
     om/IRender
     (render [this]
       (apply dom/div nil
-          (om/build-all user-upload-progress
-            (remove
-              #(= (nth %1 0) (:username data))
-              (seq (:users-uploading data))))))))
+          (om/build-all user-upload-progress (vals (:current-uploads-info data)))))))
 
 (defn current-track-tags-view [data owner]
   (reify
@@ -93,7 +92,7 @@
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
 ;(om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
-;(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
+(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})
 ;(om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})

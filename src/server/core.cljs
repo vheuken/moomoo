@@ -66,8 +66,8 @@
                     (let [bytes-received (aget (.statSync fs absolute-file-path) "size")]
                       (.emit (.to io room) "file-upload-info" #js {:username username
                                                                   :id       file-id
-                                                                  :bytes-received bytes-received
-                                                                  :total-size file-size
+                                                                  :bytesreceived bytes-received
+                                                                  :totalsize file-size
                                                                   :filename original-filename}))))))))
 
         (.on stream "end"
