@@ -31,7 +31,7 @@
           stream (.createStream js/ss)
           blob-stream (.createBlobReadStream js/ss file)]
       (println "File uploading!")
-      (println (.-name file))
+
       (.emit (js/ss socket) "file-upload" stream
         (.-name file)
         (.-size file))
