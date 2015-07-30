@@ -59,7 +59,9 @@
 
 (.on socket "file-upload-info"
   (fn [file-upload-info]
-    (swap! app-state assoc :current-uploads-info
-      (merge (:current-uploads-info @app-state)
-        {(.-id file-upload-info) file-upload-info}))
-    (println (:current-uploads-info @app-state))))
+    (if (= (.-totalsize file-upload-info) (.-bytesreceived file-upload-info))
+      (swap! app-state assoc :current-uploads-info
+        (dissoc (:current-uploads-info @app-state) (.-id file-upload-info)))
+      (swap! app-state assoc :current-uploads-info
+        (merge (:current-uploads-info @app-state)
+          {(.-id file-upload-info) file-upload-info})))))
