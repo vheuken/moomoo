@@ -17,7 +17,8 @@
                       [uuid "2.0.1"]
                       [express "4.13"]
                       [jade "1.11"]
-                      [id3js "1.1.3"]]
+                      [id3js "1.1.3"]
+                      [base64-arraybuffer "0.1.2"]]
 
   :plugins [[lein-cljsbuild "1.0.4"]
             [lein-npm "0.4.0"]

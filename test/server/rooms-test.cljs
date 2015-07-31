@@ -118,3 +118,38 @@
                   (fn [file]
                     (is (= file absolute-file-path))
                     (done)))))))))))
+
+(deftest ^:async set-music-file-info-with-image-tag
+  (let [project-dir project-dir
+        music-file-path "test/server/test-with-image-tag.mp3"
+        absolute-file-path (str project-dir "/" music-file-path)
+        track-id "track-id1"
+        socket-id "socket-id1"
+        room-id "music-room1"
+        original-file-name "original.mp3"
+        username "UploadMan"]
+    (rooms/set-username room-id socket-id username
+      (fn []
+        (rooms/set-music-info absolute-file-path
+                              track-id
+                              original-file-name
+                              socket-id
+          (fn [music-info]
+            (let [tags     (:tags music-info)
+                  uploader (:username music-info)
+                  original (:originalfilename music-info)]
+              (is (= "Test Title"  (get tags "title")))
+              (is (= "Test Album"  (get tags "album")))
+              (is (= "Test Artist" (get tags "artist")))
+              (is (= username uploader))
+              (is (= original-file-name original)))
+
+            (rooms/get-music-info room-id track-id
+              (fn [music-info-reply]
+                (let [writer (transit/writer :json)]
+                  (is (= music-info-reply (transit/write writer music-info))))
+                (rooms/get-music-file room-id track-id
+                  (fn [file]
+                    (is (= file absolute-file-path))
+                    (done)))))))))))
+
