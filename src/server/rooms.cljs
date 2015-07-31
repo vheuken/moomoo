@@ -58,7 +58,8 @@
           (fn [username]
             (let [writer (transit/writer :json)
                   music-info {:tags (js->clj tags)
-                              :username username}
+                              :username username
+                              :originalfilename original-file-name}
                   music-info-json (transit/write writer music-info)]
               (.hset redis-client (str "room:" room ":music-info")
                                   track-id

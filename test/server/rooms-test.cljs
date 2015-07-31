@@ -102,11 +102,13 @@
                               socket-id
           (fn [music-info]
             (let [tags     (:tags music-info)
-                  uploader (:username music-info)]
+                  uploader (:username music-info)
+                  original (:originalfilename music-info)]
               (is (= "Test Title"  (get tags "title")))
               (is (= "Test Album"  (get tags "album")))
               (is (= "Test Artist" (get tags "artist")))
-              (is (= username uploader)))
+              (is (= username uploader))
+              (is (= original-file-name original)))
 
             (.hget rooms/redis-client (str "room:" room-id ":music-info") track-id
               (fn [err reply]
