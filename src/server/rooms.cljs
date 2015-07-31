@@ -65,4 +65,8 @@
                                   track-id
                                   music-info-json
                 (fn []
-                  (callback music-info)))))))))))
+                  (.hset redis-client (str "room:" room ":music-files")
+                                      track-id
+                                      absolute-file-path
+                    (fn [err reply]
+                      (callback music-info)))))))))))))
