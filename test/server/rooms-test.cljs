@@ -114,9 +114,7 @@
               (fn [err reply]
                 (let [writer (transit/writer :json)]
                   (is (= reply (transit/write writer music-info))))
-                (.hget rooms/redis-client (str "room:" room-id ":music-files")
-                                          track-id
-                  (fn [err reply]
-                    (println reply)
-                    (is (= reply absolute-file-path))
+                (rooms/get-file room-id track-id
+                  (fn [file]
+                    (is (= file absolute-file-path))
                     (done)))))))))))

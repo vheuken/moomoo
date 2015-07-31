@@ -70,3 +70,8 @@
                                       absolute-file-path
                     (fn [err reply]
                       (callback music-info)))))))))))))
+
+(defn get-file [room track-id callback]
+  (.hget redis-client (str "room:" room ":music-files") track-id
+    (fn [err reply]
+      (callback reply))))
