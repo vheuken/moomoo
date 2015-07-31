@@ -55,21 +55,21 @@
       (get-room-from-user-id socket-id
         (fn [room]
           (get-username room socket-id
-          (fn [username]
-            (let [writer (transit/writer :json)
-                  music-info {:tags (js->clj tags)
-                              :username username
-                              :originalfilename original-file-name}
-                  music-info-json (transit/write writer music-info)]
-              (.hset redis-client (str "room:" room ":music-info")
-                                  track-id
-                                  music-info-json
-                (fn []
-                  (.hset redis-client (str "room:" room ":music-files")
-                                      track-id
-                                      absolute-file-path
-                    (fn [err reply]
-                      (callback music-info)))))))))))))
+            (fn [username]
+              (let [writer (transit/writer :json)
+                    music-info {:tags (js->clj tags)
+                                :username username
+                                :originalfilename original-file-name}
+                    music-info-json (transit/write writer music-info)]
+                (.hset redis-client (str "room:" room ":music-info")
+                                    track-id
+                                    music-info-json
+                  (fn []
+                    (.hset redis-client (str "room:" room ":music-files")
+                                        track-id
+                                        absolute-file-path
+                      (fn [err reply]
+                        (callback music-info)))))))))))))
 
 ; TODO: Transit should translate this
 (defn get-music-info [room track-id callback]

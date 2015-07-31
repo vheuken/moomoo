@@ -65,3 +65,7 @@
       (swap! app-state assoc :current-uploads-info
         (merge (:current-uploads-info @app-state)
           {(.-id file-upload-info) file-upload-info})))))
+
+(.on socket "upload-complete"
+  (fn [music-info]
+    (println music-info)))

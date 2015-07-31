@@ -74,6 +74,15 @@
 
         (.on stream "end"
           (fn []
+            (rooms/set-music-info absolute-file-path
+                                  file-id
+                                  original-filename
+                                  (.-id socket)
+              (fn [music-info]
+                (rooms/get-room-from-user-id (.-id socket)
+                  (fn [room]
+                    (.emit (.to io room) "upload-complete" (clj->js music-info))))))
+
             (println (str "Successfully uploaded " absolute-file-path))))))))
 
 (.on io "connection" connection)
