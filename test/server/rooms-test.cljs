@@ -110,11 +110,11 @@
               (is (= username uploader))
               (is (= original-file-name original)))
 
-            (.hget rooms/redis-client (str "room:" room-id ":music-info") track-id
-              (fn [err reply]
+            (rooms/get-music-info room-id track-id
+              (fn [music-info-reply]
                 (let [writer (transit/writer :json)]
-                  (is (= reply (transit/write writer music-info))))
-                (rooms/get-file room-id track-id
+                  (is (= music-info-reply (transit/write writer music-info))))
+                (rooms/get-music-file room-id track-id
                   (fn [file]
                     (is (= file absolute-file-path))
                     (done)))))))))))
