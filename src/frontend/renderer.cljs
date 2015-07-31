@@ -92,7 +92,7 @@
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
 ;(om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
-;(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
+(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})
 ;(om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
@@ -134,4 +134,4 @@
 
 ;(om/root play-button core/app-state {:target (. js/document (getElementById "play-button"))})
 ;(om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
-(om/root track-queue core/app-state {:target (. js/document (getElementById "track-queue"))})
+(om/root track-queue core/app-state {:target (. js/document (getElementById "playlist"))})
