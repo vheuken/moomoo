@@ -4,6 +4,7 @@
                             done use-fixtures)])
   (:require [cemerick.cljs.test :as t]
             [clojure.string :as string]
+            [cognitect.transit :as transit]
             [cljs.nodejs :as nodejs]
             [moomoo.rooms :as rooms]))
 
@@ -100,12 +101,15 @@
                               original-file-name
                               socket-id
           (fn [music-info]
-            (let [tags (:tags music-info)]
+            (let [tags     (:tags music-info)
+                  uploader (:username music-info)]
               (is (= "Test Title"  (get tags "title")))
               (is (= "Test Album"  (get tags "album")))
-              (is (= "Test Artist" (get tags "artist"))))
+              (is (= "Test Artist" (get tags "artist")))
+              (is (= username uploader)))
+
             (.hget rooms/redis-client (str "room:" room-id ":music-info") track-id
               (fn [err reply]
-                ;(println reply)
-                ;(is (= reply (js->clj tags))
-                (done)))))))))
+                (let [writer (transit/writer :json)]
+                  (is (= reply (transit/write writer music-info)))
+                (done))))))))))

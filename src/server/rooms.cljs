@@ -54,11 +54,14 @@
     (fn [err tags]
       (get-room-from-user-id socket-id
         (fn [room]
-          (let [writer (transit/writer :json)
-                music-info {:tags (js->clj tags)}
-                music-info-json (transit/write writer music-info)]
-            (.hset redis-client (str "room:" room ":music-info")
-                                track-id
-                                music-info-json
-              (fn []
-                (callback music-info)))))))))
+          (get-username room socket-id
+          (fn [username]
+            (let [writer (transit/writer :json)
+                  music-info {:tags (js->clj tags)
+                              :username username}
+                  music-info-json (transit/write writer music-info)]
+              (.hset redis-client (str "room:" room ":music-info")
+                                  track-id
+                                  music-info-json
+                (fn []
+                  (callback music-info)))))))))))
