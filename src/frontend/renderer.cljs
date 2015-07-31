@@ -92,12 +92,13 @@
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
 ;(om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
-(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
+;(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})
 ;(om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
 ; music player
+(comment
 (defn play-button [data owner]
   (reify
     om/IRender
@@ -111,26 +112,26 @@
     (render [this]
       (if (:signed-in? data)
         (dom/button #js {:onClick core/pause} "Pause")))))
+)
 
 (defn track-view [data owner]
   (reify
     om/IRender
     (render [this]
-      (dom/li nil data))))
+      (let [tags (.-tags data)
+            title (.-title tags)
+            artist (.-artist tags)
+            album (.-album tags)
+            username (.-username data)]
+        (dom/li nil title " - " artist " - " album  " - Uploaded by " username)))))
 
 (defn track-queue [data owner]
   (reify
     om/IRender
     (render [this]
-      (dom/span nil
-        ; TODO: download progress should be somewhere else...
-        (if-not (nil? (:download-progress data))
-          (dom/div nil "Downloading: " (:download-progress data) "%"))
-        (apply dom/div nil
-          (om/build-all track-view (map
-                                     #(str (.-artist %1) " - " (.-title %1))
-                                     (:music-tags data))))))))
+      (apply dom/span nil
+        (om/build-all track-view (:music-info data))))))
 
 ;(om/root play-button core/app-state {:target (. js/document (getElementById "play-button"))})
 ;(om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
-;(om/root track-queue core/app-state {:target (. js/document (getElementById "track-queue"))})
+(om/root track-queue core/app-state {:target (. js/document (getElementById "track-queue"))})

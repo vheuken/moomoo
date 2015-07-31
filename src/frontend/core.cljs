@@ -6,7 +6,8 @@
                           :messages []
                           :message-received? false
                           :users []
-                          :current-uploads-info {}}))
+                          :current-uploads-info {}
+                          :music-info []}))
 
 (enable-console-print!)
 
@@ -68,4 +69,5 @@
 
 (.on socket "upload-complete"
   (fn [music-info]
-    (println music-info)))
+    (swap! app-state assoc :music-info
+      (merge (:music-info @app-state) music-info))))
