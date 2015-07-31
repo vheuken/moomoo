@@ -85,7 +85,6 @@
   (reify
     om/IRender
     (render [this]
-      (println (:download-progress data))
       (if-not (nil? (:download-progress data))
         (dom/div nil "Downloading: " (:download-progress data) "%")))))
 
