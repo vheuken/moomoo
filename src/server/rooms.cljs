@@ -1,5 +1,6 @@
 (ns moomoo.rooms
   (:require [cljs.nodejs :as nodejs]
+            [cognitect.transit :as transit]
             [clojure.string :as string]))
 
 (def id3 (nodejs/require "id3js"))
@@ -43,9 +44,21 @@
         (delete-user socket-id #(callback reply))
         callback))))
 
-(defn set-music-info [absolute-file-path callback]
+(defn set-music-info [absolute-file-path
+                      track-id
+                      original-file-name
+                      socket-id
+                      callback]
   (id3 #js {:file absolute-file-path
             :type id3.OPEN_LOCAL}
     (fn [err tags]
-      (println js/PROJECT_DIR)
-      (callback tags))))
+      (get-room-from-user-id socket-id
+        (fn [room]
+          (let [writer (transit/writer :json)
+                music-info {:tags (js->clj tags)}
+                music-info-json (transit/write writer music-info)]
+            (.hset redis-client (str "room:" room ":music-info")
+                                track-id
+                                music-info-json
+              (fn []
+                (callback music-info)))))))))

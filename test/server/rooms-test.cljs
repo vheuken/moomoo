@@ -87,11 +87,25 @@
 (deftest ^:async set-music-file-info
   (let [project-dir project-dir
         music-file-path "test/server/test.mp3"
-        absolute-file-path (str project-dir "/" music-file-path)]
-    (rooms/set-music-info absolute-file-path
-      (fn [tags]
-        (println tags)
-        (is (= "Test Title"  (.-title tags)))
-        (is (= "Test Album"  (.-album tags)))
-        (is (= "Test Artist" (.-artist tags)))
-        (done)))))
+        absolute-file-path (str project-dir "/" music-file-path)
+        track-id "track-id1"
+        socket-id "socket-id1"
+        room-id "music-room1"
+        original-file-name "original.mp3"
+        username "UploadMan"]
+    (rooms/set-username room-id socket-id username
+      (fn []
+        (rooms/set-music-info absolute-file-path
+                              track-id
+                              original-file-name
+                              socket-id
+          (fn [music-info]
+            (let [tags (:tags music-info)]
+              (is (= "Test Title"  (get tags "title")))
+              (is (= "Test Album"  (get tags "album")))
+              (is (= "Test Artist" (get tags "artist"))))
+            (.hget rooms/redis-client (str "room:" room-id ":music-info") track-id
+              (fn [err reply]
+                ;(println reply)
+                ;(is (= reply (js->clj tags))
+                (done)))))))))
