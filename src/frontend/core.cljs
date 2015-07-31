@@ -73,9 +73,7 @@
 (.on socket "upload-complete"
   (fn [music-info]
     (swap! app-state assoc :music-info
-      (merge (:music-info @app-state) music-info))
-    (println (.-id music-info))
-    (.emit socket "file-download-request" (.-id music-info))))
+      (merge (:music-info @app-state) music-info))))
 
 (.on (new js/ss socket) "file-download"
   (fn [stream track-id file-size]
