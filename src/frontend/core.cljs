@@ -7,7 +7,8 @@
                           :message-received? false
                           :users []
                           :current-uploads-info {}
-                          :music-info []}))
+                          :music-info []
+                          :music-files {}}))
 
 (enable-console-print!)
 
@@ -70,4 +71,22 @@
 (.on socket "upload-complete"
   (fn [music-info]
     (swap! app-state assoc :music-info
-      (merge (:music-info @app-state) music-info))))
+      (merge (:music-info @app-state) music-info))
+    (println (.-id music-info))
+    (.emit socket "file-download-request" (.-id music-info))))
+
+(.on (new js/ss socket) "file-download"
+  (fn [stream track-id file-size]
+    (println "Download starting!")
+    (.on stream "data"
+      (fn [data-chunk]
+        (if (nil? (get (:music-files @app-state) track-id))
+          (swap! app-state assoc :music-files
+            (merge (:music-files @app-state) {track-id (new js/Blob)})))
+        (swap! app-state assoc :music-files
+          (merge (:music-files @app-state)
+                 {track-id
+                  (new js/Blob #js [(get (:music-files @app-state) track-id) data-chunk])}))))
+    (.on stream "end"
+      (fn []
+        (println "Download complete!")))))
