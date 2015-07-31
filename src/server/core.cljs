@@ -95,7 +95,7 @@
               (let [client-socket (aget (.-connected (.-sockets io)) (.-id socket))
                     stream (.createStream socketio-stream)
                     read-stream (.createReadStream fs file)
-                    file-size (.statSync fs file)]
+                    file-size (.-size (.statSync fs file))]
                 (.emit (socketio-stream client-socket) "file-download"
                                                        stream
                                                        track-id

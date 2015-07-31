@@ -36,14 +36,6 @@
             (.scrollTop div (.prop div "scrollHeight"))
             (swap! core/app-state assoc :message-received? false))))))
 
-(defn file-upload-progress-view [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (if (nil? (:upload-progress @core/app-state))
-        (dom/span nil "")
-        (dom/span nil (str (:upload-progress data) "%"))))))
-
 (defn username-form [data owner]
   (reify
     om/IRender
@@ -89,9 +81,17 @@
             (dom/div nil (.-album tags))
             (dom/div nil (.-artist tags))))))))
 
+(defn download-progress-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (println (:download-progress data))
+      (if-not (nil? (:download-progress data))
+        (dom/div nil "Downloading: " (:download-progress data) "%")))))
+
+(om/root download-progress-view core/app-state {:target (. js/document (getElementById "download-progress"))})
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
-;(om/root file-upload-progress-view core/app-state {:target (. js/document (getElementById "progress"))})
 (om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})

@@ -8,7 +8,9 @@
                           :users []
                           :current-uploads-info {}
                           :music-info []
-                          :music-files {}}))
+                          :music-files {}
+                          :data-downloaded 0
+                          :download-progress nil}))
 
 (enable-console-print!)
 
@@ -80,6 +82,9 @@
     (println "Download starting!")
     (.on stream "data"
       (fn [data-chunk]
+        (let [size (+ (.-length data-chunk) (:data-downloaded @app-state))]
+          (swap! app-state assoc :download-progress (* 100 (/ size file-size)))
+          (swap! app-state assoc :data-downloaded size))
         (if (nil? (get (:music-files @app-state) track-id))
           (swap! app-state assoc :music-files
             (merge (:music-files @app-state) {track-id (new js/Blob)})))
@@ -89,4 +94,5 @@
                   (new js/Blob #js [(get (:music-files @app-state) track-id) data-chunk])}))))
     (.on stream "end"
       (fn []
-        (println "Download complete!")))))
+        (println "Download complete!")
+        (swap! app-state assoc :download-progress nil)))))
