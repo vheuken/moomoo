@@ -83,7 +83,20 @@
                   (fn [room]
                     (.emit (.to io room) "upload-complete" (clj->js music-info))))))
 
-            (println (str "Successfully uploaded " absolute-file-path))))))))
+            (println (str "Successfully uploaded " absolute-file-path)))))))
+
+  (.on socket "file-download-request"
+    (fn [track-id]
+      (println "Received file download request for " track-id)
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room]
+          (rooms/get-music-file room track-id
+            (fn [file]
+              (let [client-socket (aget (.-connected (.-sockets io)) (.-id socket))
+                    stream (.createStream socketio-stream)
+                    read-stream (.createReadStream fs file)]
+                (.emit (socketio-stream client-socket) "file-download" stream)
+                (.pipe read-stream stream)))))))))
 
 (.on io "connection" connection)
 
