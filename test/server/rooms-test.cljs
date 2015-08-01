@@ -103,6 +103,27 @@
                         (done)))))))))))))
 
 (def project-dir js/PROJECT_DIR)
+(deftest ^:async change-track
+  (let [project-dir project-dir
+        music-file-path "test/server/test.mp3"
+        absolute-file-path (str project-dir "/" music-file-path)
+        track-id "track-id1"
+        socket-id "socket-id1"
+        room-id "change-track-test-room1"
+        original-file-name "original.mp3"
+        username "UploadMan"]
+    (rooms/set-username room-id socket-id username
+      (fn []
+        (rooms/set-music-info absolute-file-path
+                              track-id
+                              original-file-name
+                              socket-id
+          (fn [music-info]
+            (rooms/change-track room-id 0
+              (fn [track-id-reply]
+                (is (= track-id track-id-reply))
+                (done)))))))))
+
 (deftest ^:async set-music-file-info
   (let [project-dir project-dir
         music-file-path "test/server/test.mp3"

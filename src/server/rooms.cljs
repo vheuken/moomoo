@@ -131,3 +131,10 @@
   (.hget redis-client (str "room:" room ":track-order") position
     (fn [err reply]
       (callback reply))))
+
+(defn change-track [room position callback]
+  (.hget redis-client (str "room:" room ":track-order") position
+    (fn [err track-id]
+      (.set redis-client (str "room:" room ":current-track") position
+        (fn []
+          (callback track-id))))))
