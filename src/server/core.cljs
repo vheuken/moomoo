@@ -39,7 +39,7 @@
       (rooms/does-room-exist? room-id
         (fn [reply]
           (if-not reply
-            (rooms/init-room room-id #(println (str room-id " has been created!"))))))
+            (rooms/init-room room-id #(println )))))
       (rooms/set-username room-id (.-id socket) username
         (fn []
           (.emit socket "sign-in-success")
@@ -85,7 +85,15 @@
               (fn [music-info]
                 (rooms/get-room-from-user-id (.-id socket)
                   (fn [room]
-                    (.emit (.to io room) "upload-complete" (clj->js music-info))))))
+                    (.emit (.to io room) "upload-complete" (clj->js music-info))
+                    (rooms/get-current-track room
+                      (fn [current-track]
+                        (println current-track)
+                        (if (= current-track -1)
+                          (rooms/change-track room 0
+                            (fn [track-id]
+                              (println "Track changed to " track-id)
+                              (.emit (.to io room) "track-change" track-id))))))))))
 
             (println (str "Successfully uploaded " absolute-file-path)))))))
 
