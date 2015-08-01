@@ -49,6 +49,13 @@
           (println "Upload successful!"))))))
 ; end stuff that should be cleaned up with react....
 
+(defn set-progress-ball-position [percent-completed]
+  (.css (js/$ "#progress-track-ball") #js {"left" (str percent-completed "%")}))
+
+(defn while-playing []
+  (let [sound (:current-sound @app-state)]
+    (set-progress-ball-position (* 100 (/ (.-position sound) (.-duration sound))))))
+
 (defn play-track [track-id]
   (let [reader (new js/FileReader)
         song-blob (get (:music-files @app-state) track-id)]
@@ -60,7 +67,8 @@
                                              :type "audio/mpeg"
                                              :url (.-result reader)
                                              :autoLoad true}))
-        (.play (:current-sound @app-state))))))
+        (.play (:current-sound @app-state)
+               #js {:whileplaying while-playing})))))
 
 (.on socket "connect" #(.emit socket "join-room" room-id))
 (.on socket "sign-in-success"
