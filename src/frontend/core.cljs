@@ -2,6 +2,7 @@
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
+(defonce current-sound-id "current-song")
 (defonce app-state (atom {:signed-in? false
                           :messages []
                           :message-received? false
@@ -10,7 +11,9 @@
                           :music-info []
                           :music-files {}
                           :data-downloaded 0
-                          :download-progress nil}))
+                          :download-progress nil
+                          :current-track-id nil
+                          :current-sound nil}))
 
 (enable-console-print!)
 
@@ -45,6 +48,19 @@
         (fn []
           (println "Upload successful!"))))))
 ; end stuff that should be cleaned up with react....
+
+(defn play-track [track-id]
+  (let [reader (new js/FileReader)
+        song-blob (get (:music-files @app-state) track-id)]
+    (.readAsDataURL reader song-blob)
+    (set! (.-onloadend reader)
+      (fn []
+        (swap! app-state assoc :current-sound
+          (.createSound js/soundManager #js {:id current-sound-id
+                                             :type "audio/mpeg"
+                                             :url (.-result reader)
+                                             :autoLoad true}))
+        (.play (:current-sound @app-state))))))
 
 (.on socket "connect" #(.emit socket "join-room" room-id))
 (.on socket "sign-in-success"
@@ -89,8 +105,17 @@
         (swap! app-state assoc :music-files
           (merge (:music-files @app-state)
                  {track-id
-                  (new js/Blob #js [(get (:music-files @app-state) track-id) data-chunk])}))))
+                  (new js/Blob #js [(get (:music-files @app-state) track-id) data-chunk]
+                               #js {:type "audio/mpeg"})}))))
     (.on stream "end"
       (fn []
         (println "Download complete!")
-        (swap! app-state assoc :download-progress nil)))))
+        (swap! app-state assoc :download-progress nil)
+
+        (if (= (:current-track-id @app-state) track-id)
+          (play-track track-id))))))
+
+(.on socket "track-change"
+  (fn [track-id]
+    (swap! app-state assoc :current-track-id track-id)
+    (.emit socket "file-download-request" track-id)))
