@@ -36,6 +36,10 @@
 
   (.on socket "sign-in"
     (fn [room-id username]
+      (rooms/does-room-exist? room-id
+        (fn [reply]
+          (if-not reply
+            (rooms/init-room room-id #(println (str room-id " has been created!"))))))
       (rooms/set-username room-id (.-id socket) username
         (fn []
           (.emit socket "sign-in-success")
