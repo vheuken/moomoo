@@ -84,6 +84,21 @@
 (deftest disconnect-with-not-signed-in-user
   (rooms/disconnect "foo" nil))
 
+(deftest ^:async init-room
+  (let [room "init-room-test"]
+    (rooms/does-room-exist? room
+      (fn [reply]
+        (is (= false reply))
+        (rooms/init-room room
+          (fn []
+            (rooms/does-room-exist? room
+              (fn [reply]
+                (is (= true reply))
+                (rooms/get-current-track room
+                  (fn [current-track]
+                    (is (= 0 current-track))
+                    (done)))))))))))
+
 (def project-dir js/PROJECT_DIR)
 (deftest ^:async set-music-file-info
   (let [project-dir project-dir

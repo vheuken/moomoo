@@ -52,6 +52,23 @@
       (merge tags {"v2" (merge image-tag {"data" (.encode base64-arraybuffer image-data)})})
       tags)))
 
+(defn does-room-exist? [room callback]
+  (.get redis-client (str "room:" room ":current-track")
+    (fn [err reply]
+      (if (nil? reply)
+        (callback false)
+        (callback true)))))
+
+(defn init-room [room callback]
+  (.set redis-client (str "room:" room ":current-track") 0
+    (fn []
+      (callback))))
+
+(defn get-current-track [room callback]
+  (.get redis-client (str "room:" room ":current-track")
+    (fn [err reply]
+      (callback (js/parseInt reply)))))
+
 (defn set-music-info [absolute-file-path
                       track-id
                       original-file-name
