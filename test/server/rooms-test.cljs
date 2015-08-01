@@ -135,7 +135,11 @@
                 (rooms/get-music-file room-id track-id
                   (fn [file]
                     (is (= file absolute-file-path))
-                    (done)))))))))))
+
+                    (rooms/get-track-id-from-position room-id 0
+                      (fn [track-id-from-pos]
+                        (is (= track-id-from-pos track-id))
+                        (done)))))))))))))
 
 (deftest ^:async set-music-file-info-with-image-tag
   (let [project-dir project-dir

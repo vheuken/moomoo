@@ -78,6 +78,11 @@
         (callback true)
         (callback false)))))
 
+(defn set-track-position [room track-id position callback]
+  (.hset redis-client (str "room:" room ":track-order") position track-id
+    (fn []
+      (callback))))
+
 (defn set-music-info [absolute-file-path
                       track-id
                       original-file-name
@@ -105,7 +110,11 @@
                                         track-id
                                         absolute-file-path
                       (fn [err reply]
-                        (callback music-info)))))))))))))
+                        (.hlen redis-client (str "room:" room ":music-files")
+                          (fn [err reply]
+                            (set-track-position room track-id (- reply 1)
+                              (fn []
+                                (callback music-info)))))))))))))))))
 
 ; TODO: Transit should translate this(?)
 (defn get-music-info [room track-id callback]
@@ -115,5 +124,10 @@
 
 (defn get-music-file [room track-id callback]
   (.hget redis-client (str "room:" room ":music-files") track-id
+    (fn [err reply]
+      (callback reply))))
+
+(defn get-track-id-from-position [room position callback]
+  (.hget redis-client (str "room:" room ":track-order") position
     (fn [err reply]
       (callback reply))))
