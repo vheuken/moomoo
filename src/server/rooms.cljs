@@ -62,12 +62,21 @@
 (defn init-room [room callback]
   (.set redis-client (str "room:" room ":current-track") 0
     (fn []
-      (callback))))
+      (.set redis-client (str "room:" room ":playing?") "false"
+        (fn []
+          (callback))))))
 
 (defn get-current-track [room callback]
   (.get redis-client (str "room:" room ":current-track")
     (fn [err reply]
       (callback (js/parseInt reply)))))
+
+(defn is-playing? [room callback]
+  (.get redis-client (str "room:" room ":playing?")
+    (fn [err reply]
+      (if (= "true" reply)
+        (callback true)
+        (callback false)))))
 
 (defn set-music-info [absolute-file-path
                       track-id

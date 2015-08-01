@@ -97,7 +97,10 @@
                 (rooms/get-current-track room
                   (fn [current-track]
                     (is (= 0 current-track))
-                    (done)))))))))))
+                    (rooms/is-playing? room
+                      (fn [reply]
+                        (is (= false reply))
+                        (done)))))))))))))
 
 (def project-dir js/PROJECT_DIR)
 (deftest ^:async set-music-file-info
