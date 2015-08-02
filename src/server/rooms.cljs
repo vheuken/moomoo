@@ -208,10 +208,16 @@
     (callback)))
 
 (defn next-track [room callback]
-  (.incr redis-client (str "room:" room ":current-track")
-    (fn [err track-num]
-      (println "TRACK NUM: " track-num)
-      (get-track-id-from-position room track-num
-        (fn [track-id]
-          (println "TRACK-ID " track-id)
-          (callback track-id))))))
+  (.get redis-client (str "room:" room ":current-track")
+    (fn [err current-track-num]
+      (.hlen redis-client (str "room:" room ":music-files")
+        (fn [err num-of-tracks]
+          (if (>= current-track-num num-of-tracks)
+            (callback nil)
+          (.incr redis-client (str "room:" room ":current-track")
+            (fn [err track-num]
+              (println "TRACK NUM: " track-num)
+              (get-track-id-from-position room track-num
+                (fn [track-id]
+                  (println "TRACK-ID " track-id)
+                    (callback track-id)))))))))))
