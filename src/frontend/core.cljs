@@ -90,8 +90,9 @@
   (.emit socket "track-complete"))
 
 (defn play-track [track-id]
-  (println "TRACK ID! " track-id)
-  (println (:music-files @app-state))
+  (if-not (nil? (:current-sound @app-state))
+    (.destruct (:current-sound @app-state)))
+
   (let [reader (new js/FileReader)
         song-blob (get (:music-files @app-state) track-id)]
     (.readAsDataURL reader song-blob)
