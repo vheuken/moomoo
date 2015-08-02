@@ -192,3 +192,17 @@
         (fn [err reply]
           (callback reply))))))
 
+(defn user-track-complete [socket-id callback]
+  (get-room-from-user-id socket-id
+    (fn [room]
+      (.lpush redis-client (str "room:" room ":track-complete") socket-id
+        (fn [err reply]
+          (callback reply))))))
+
+(defn clear-ready-to-start [room callback]
+  (.del redis-client (str "room:" room ":sync-start")
+    (callback)))
+
+(defn clear-track-complete [room callback]
+  (.del redis-client (str "room:" room ":track-complete")
+    (callback)))

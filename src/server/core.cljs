@@ -65,7 +65,9 @@
                   (if (= num-users num-users-ready)
                     (rooms/set-current-track-position room 0
                       (fn []
-                        (.emit (.to io room) "start-track"))))))))))))
+                        (rooms/clear-ready-to-start room
+                          (fn []
+                            (.emit (.to io room) "start-track"))))))))))))))
 
   (.on socket "pause"
     (fn [position]
@@ -90,6 +92,20 @@
           (rooms/change-current-track-position room position
             (fn []
               (.emit (.to io room) "position-change" position)))))))
+
+  (.on socket "track-complete"
+    (fn []
+      (println "Received track-complete signal")
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room]
+          (rooms/get-num-of-users room
+            (fn [num-users]
+              (rooms/user-track-complete (.-id socket)
+                (fn [num-users-track-complete]
+                  (if (= num-users num-users-track-complete)
+                    (rooms/clear-track-complete room
+                      (fn []
+                        (println "TIME TO CHANGE THE TRACK!"))))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]

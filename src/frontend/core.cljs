@@ -84,6 +84,10 @@
                                     (/ (.-position sound)
                                        (.-duration sound)))))))
 
+(defn on-finish []
+  (println "Song has finished!")
+  (.emit socket "track-complete"))
+
 (defn play-track [track-id]
   (let [reader (new js/FileReader)
         song-blob (get (:music-files @app-state) track-id)]
@@ -96,7 +100,8 @@
                                              :url (.-result reader)
                                              :autoLoad true}))
         (.play (:current-sound @app-state)
-               #js {:whileplaying while-playing})))))
+               #js {:whileplaying while-playing
+                    :onfinish on-finish})))))
 
 (.on socket "connect" #(.emit socket "join-room" room-id))
 (.on socket "sign-in-success"
