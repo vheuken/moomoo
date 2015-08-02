@@ -90,6 +90,8 @@
   (.emit socket "track-complete"))
 
 (defn play-track [track-id]
+  (println "TRACK ID! " track-id)
+  (println (:music-files @app-state))
   (let [reader (new js/FileReader)
         song-blob (get (:music-files @app-state) track-id)]
     (.readAsDataURL reader song-blob)
@@ -155,6 +157,7 @@
         (println "Download complete!")
         (swap! app-state assoc :is-file-downloading? true)
         (swap! app-state assoc :download-progress nil)
+        (swap! app-state assoc :data-downloaded 0)
 
         (if (= (:current-track-id @app-state) track-id)
           (.emit socket "ready-to-start"))))))
