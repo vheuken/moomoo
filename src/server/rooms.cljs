@@ -206,3 +206,12 @@
 (defn clear-track-complete [room callback]
   (.del redis-client (str "room:" room ":track-complete")
     (callback)))
+
+(defn next-track [room callback]
+  (.incr redis-client (str "room:" room ":current-track")
+    (fn [err track-num]
+      (println "TRACK NUM: " track-num)
+      (get-track-id-from-position room track-num
+        (fn [track-id]
+          (println "TRACK-ID " track-id)
+          (callback track-id))))))

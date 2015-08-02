@@ -105,7 +105,9 @@
                   (if (= num-users num-users-track-complete)
                     (rooms/clear-track-complete room
                       (fn []
-                        (println "TIME TO CHANGE THE TRACK!"))))))))))))
+                        (rooms/next-track room
+                          (fn [track-id]
+                            (.emit (.to io room) "track-change" track-id))))))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
