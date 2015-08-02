@@ -55,7 +55,15 @@
 
   (.on socket "ready-to-start"
     (fn []
-      (println "Received ready-to-start signal from " (.-id socket))))
+      (println "Received ready-to-start signal from " (.-id socket))
+      (rooms/user-ready-to-start (.-id socket)
+        (fn [num-users-ready]
+          (rooms/get-room-from-user-id (.-id socket)
+            (fn [room]
+              (rooms/get-num-of-users room
+                (fn [num-users]
+                  (if (= num-users num-users-ready)
+                    (.emit (.to io room) "start-track"))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
