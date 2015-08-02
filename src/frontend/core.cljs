@@ -121,7 +121,9 @@
         (swap! app-state assoc :download-progress nil)
 
         (if (= (:current-track-id @app-state) track-id)
-          (play-track track-id))))))
+          (.emit socket "ready-to-start"))))))
+
+(.on socket "start-track" #(play-track (:current-track-id @app-state)))
 
 (.on socket "track-change"
   (fn [track-id]

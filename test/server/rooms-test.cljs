@@ -102,6 +102,24 @@
                         (is (= false reply))
                         (done)))))))))))))
 
+(deftest ^:async start-sync
+  (let [user1 "user1"
+        user2 "user2"
+        user1-socket "user1-socket"
+        user2-socket "user2-socket"
+        room "test-start-sync-room"]
+    (rooms/set-username room user1-socket user1
+      (fn []
+        (rooms/set-username room user2-socket user2
+          (fn []
+            (rooms/user-ready-to-start user1-socket
+              (fn [num-users]
+                (is (= 1 num-users))
+                (rooms/user-ready-to-start user2-socket
+                  (fn [num-users]
+                    (is (= 2 num-users))
+                    (done)))))))))))
+
 (def project-dir js/PROJECT_DIR)
 (deftest ^:async change-track
   (let [project-dir project-dir

@@ -139,3 +139,9 @@
         (fn []
           (callback track-id))))))
 
+(defn user-ready-to-start [socket-id callback]
+  (get-room-from-user-id socket-id
+    (fn [room]
+      (.lpush redis-client (str "room:" room ":sync-start") socket-id
+        (fn [err reply]
+          (callback reply))))))

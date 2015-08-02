@@ -53,6 +53,10 @@
           (.emit (.to io room) "chat-message" #js {:username username
                                                    :message  message})))))
 
+  (.on socket "ready-to-start"
+    (fn []
+      (println "Received ready-to-start signal from " (.-id socket))))
+
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
       (let [file-id (.v4 js-uuid)
