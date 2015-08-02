@@ -97,13 +97,12 @@
 ;(om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
 ; music player
-(comment
-(defn play-button [data owner]
+(defn resume-button [data owner]
   (reify
     om/IRender
     (render [this]
       (if (:signed-in? data)
-        (dom/button #js {:onClick core/resume} "Play")))))
+        (dom/button #js {:onClick core/resume} "Resume")))))
 
 (defn pause-button [data owner]
   (reify
@@ -111,7 +110,6 @@
     (render [this]
       (if (:signed-in? data)
         (dom/button #js {:onClick core/pause} "Pause")))))
-)
 
 (defn track-view [data owner]
   (reify
@@ -131,6 +129,6 @@
       (apply dom/span nil
         (om/build-all track-view (:music-info data))))))
 
-;(om/root play-button core/app-state {:target (. js/document (getElementById "play-button"))})
-;(om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
+(om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
+(om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
 (om/root track-queue core/app-state {:target (. js/document (getElementById "playlist"))})

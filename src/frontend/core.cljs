@@ -49,6 +49,13 @@
           (println "Upload successful!"))))))
 ; end stuff that should be cleaned up with react....
 
+(defn pause []
+  (.pause js/soundManager current-sound-id)
+  (.emit socket "pause" (.-position (:current-sound @app-state))))
+
+(defn resume []
+  (.emit socket "resume"))
+
 (defn set-progress-ball-position [percent-completed]
   (.css (js/$ "#progress-track-ball") #js {"left" (str percent-completed "%")}))
 
@@ -129,3 +136,8 @@
   (fn [track-id]
     (swap! app-state assoc :current-track-id track-id)
     (.emit socket "file-download-request" track-id)))
+
+(.on socket "pause"
+  (fn [position]
+    (.pause js/soundManager current-sound-id)
+    (.setPosition js/soundManager current-sound-id position)))

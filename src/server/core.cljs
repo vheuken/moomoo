@@ -67,6 +67,14 @@
                       (fn []
                         (.emit (.to io room) "start-track"))))))))))))
 
+  (.on socket "pause"
+    (fn [position]
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room]
+          (rooms/pause-current-track room position
+            (fn []
+              (.emit (.to io room) "pause" position)))))))
+
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
       (let [file-id (.v4 js-uuid)
