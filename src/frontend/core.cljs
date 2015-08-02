@@ -13,7 +13,8 @@
                           :data-downloaded 0
                           :download-progress nil
                           :current-track-id nil
-                          :current-sound nil}))
+                          :current-sound nil
+                          :ball-being-dragged? false}))
 
 (enable-console-print!)
 
@@ -47,11 +48,27 @@
       (.on blob-stream "end"
         (fn []
           (println "Upload successful!"))))))
-; end stuff that should be cleaned up with react....
+; end stuff that should probably be cleaned up with react....
 
+(defn on-drag-stop [event ui]
+  (swap! app-state assoc :ball-being-dragged? false)
+  (if-not (nil? (:current-sound @app-state))
+    (let [bar-width (.width (js/$ "#progress-track-bar"))
+          new-position (* (.-duration (:current-sound @app-state))
+                          (/ (.-left (.-position ui)) bar-width))]
+      (println new-position)
+      (.emit socket "position-change" new-position))))
+
+(.draggable (js/$ "#progress-track-ball") #js {:axis "x"
+                                               :containment "#progress-track"
+                                               :start #(swap! app-state assoc
+                                                              :ball-being-dragged?
+                                                              true)
+                                               :stop on-drag-stop})
 (defn pause []
   (.pause js/soundManager current-sound-id)
-  (.emit socket "pause" (.-position (:current-sound @app-state))))
+  (.emit socket "pause" (* (.-duration (:current-sound @app-state))
+                           (.-position (:current-sound @app-state)))))
 
 (defn resume []
   (.emit socket "resume"))
@@ -145,3 +162,8 @@
 (.on socket "resume"
   (fn []
     (.resume js/soundManager current-sound-id)))
+
+(.on socket "position-change"
+  (fn [position]
+    (println "Received pos: " position)
+    (.setPosition js/soundManager current-sound-id position)))
