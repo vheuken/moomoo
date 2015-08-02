@@ -77,8 +77,11 @@
   (.css (js/$ "#progress-track-ball") #js {"left" (str percent-completed "%")}))
 
 (defn while-playing []
-  (let [sound (:current-sound @app-state)]
-    (set-progress-ball-position (* 100 (/ (.-position sound) (.-duration sound))))))
+  (if-not (:ball-being-dragged? @app-state)
+    (let [sound (:current-sound @app-state)]
+      (set-progress-ball-position (* 100
+                                    (/ (.-position sound)
+                                       (.-duration sound)))))))
 
 (defn play-track [track-id]
   (let [reader (new js/FileReader)
