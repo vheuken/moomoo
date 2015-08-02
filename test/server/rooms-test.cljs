@@ -120,6 +120,25 @@
                     (is (= 2 num-users))
                     (done)))))))))))
 
+(deftest ^:async get-num-of-users
+  (let [user1 "user1"
+        user2 "user2"
+        user1-socket "user1-socket"
+        user2-socket "user2-socket"
+        room "test-num-of-users1"]
+    (rooms/set-username room user1-socket user1
+      (fn []
+        (rooms/get-num-of-users room
+          (fn [num-users]
+            (is (= 1 num-users))
+        (rooms/set-username room user2-socket user2
+          (fn []
+            (rooms/get-num-of-users room
+              (fn [num-users]
+                (is (= 2 num-users))
+                  (done)))))))))))
+
+
 (def project-dir js/PROJECT_DIR)
 (deftest ^:async change-track
   (let [project-dir project-dir

@@ -27,6 +27,11 @@
     (fn [err reply]
       (callback (users-to-list reply))))))
 
+(defn get-num-of-users [room callback]
+  (.hlen redis-client (str "room:" room ":users")
+    (fn [err reply]
+      (callback reply))))
+
 (defn get-room-from-user-id [id callback]
   (.get redis-client (str "users:" id) #(callback %2)))
 
@@ -145,3 +150,4 @@
       (.lpush redis-client (str "room:" room ":sync-start") socket-id
         (fn [err reply]
           (callback reply))))))
+
