@@ -68,8 +68,9 @@
                                                :stop on-drag-stop})
 (defn pause []
   (.pause js/soundManager current-sound-id)
-  (.emit socket "pause" (* (.-duration (:current-sound @app-state))
-                           (.-position (:current-sound @app-state)))))
+  (.emit socket "pause" (.-position (:current-sound @app-state))))
+  ;(.emit socket "pause" (* (.-duration (:current-sound @app-state))
+  ;                         (.-position (:current-sound @app-state)))))
 
 (defn resume []
   (.emit socket "resume"))
