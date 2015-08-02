@@ -75,6 +75,14 @@
             (fn []
               (.emit (.to io room) "pause" position)))))))
 
+  (.on socket "resume"
+    (fn []
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room]
+          (rooms/resume-current-track room
+            (fn []
+              (.emit (.to io room) "resume")))))))
+
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
       (let [file-id (.v4 js-uuid)

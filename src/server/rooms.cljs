@@ -99,11 +99,27 @@
 
 (defn pause-current-track [room position callback]
   (let [writer (transit/writer :json)]
-    (.set redis-client (str "room:" room "track-position")
+    (.set redis-client (str "room:" room ":track-position")
                        (transit/write writer {:position position
                                               :start-time (.now js/Date)})
       (fn [err reply]
-        (callback)))))
+        (.set redis-client (str "room:" room ":playing?") "false"
+          (fn [err reply]
+            (callback)))))))
+
+(defn resume-current-track [room callback]
+  (let [reader (transit/reader :json)]
+    (.get redis-client (str "room:" room ":track-position")
+      (fn [err reply]
+        (let [old-track-position-info (transit/read reader reply)
+              new-track-position-info (merge old-track-position-info {:start-time (.now js/Date)})
+              writer (transit/writer :json)]
+          (.set redis-client (str "room:" room ":track-position")
+                             (transit/write writer new-track-position-info)
+            (fn []
+              (.set redis-client (str "room:" room ":playing?") "true"
+                (fn []
+                  (callback))))))))))
 
 (defn set-music-info [absolute-file-path
                       track-id

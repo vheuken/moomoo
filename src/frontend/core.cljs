@@ -141,3 +141,7 @@
   (fn [position]
     (.pause js/soundManager current-sound-id)
     (.setPosition js/soundManager current-sound-id position)))
+
+(.on socket "resume"
+  (fn []
+    (.resume js/soundManager current-sound-id)))
