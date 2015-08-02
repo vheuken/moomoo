@@ -88,6 +88,15 @@
     (fn []
       (callback))))
 
+(defn set-current-track-position [room position callback]
+  (let [writer (transit/writer :json)
+        track-position-info {:position position
+                             :start-time (.now js/Date)}]
+  (.set redis-client (str "room:" room ":track-position")
+                     (transit/write writer track-position-info)
+    (fn [err reply]
+      (callback)))))
+
 (defn set-music-info [absolute-file-path
                       track-id
                       original-file-name
