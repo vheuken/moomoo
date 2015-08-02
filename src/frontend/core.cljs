@@ -15,7 +15,8 @@
                           :is-file-downloading? false
                           :current-track-id nil
                           :current-sound nil
-                          :ball-being-dragged? false}))
+                          :ball-being-dragged? false
+                          :play-next-upload? false}))
 
 (enable-console-print!)
 
@@ -134,7 +135,12 @@
 (.on socket "upload-complete"
   (fn [music-info]
     (swap! app-state assoc :music-info
-      (merge (:music-info @app-state) music-info))))
+      (merge (:music-info @app-state) music-info))
+    (if (:play-next-upload? @app-state)
+      (do
+        (.emit socket "file-download-request" (.-id music-info))
+        (swap! app-state assoc :current-track-id (.-id music-info))
+        (swap! app-state assoc :play-next-upload? false)))))
 
 (.on (new js/ss socket) "file-download"
   (fn [stream track-id file-size]
@@ -185,3 +191,7 @@
   (fn [position]
     (println "Received pos: " position)
     (.setPosition js/soundManager current-sound-id position)))
+
+(.on socket "play-next-upload"
+  (fn []
+    (swap! app-state assoc :play-next-upload? true)))

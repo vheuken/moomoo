@@ -107,7 +107,8 @@
                       (fn []
                         (rooms/next-track room
                           (fn [track-id]
-                            (if-not (nil? track-id)
+                            (if (nil? track-id)
+                              (.emit (.to io room) "play-next-upload")
                               (.emit (.to io room) "track-change" track-id)))))))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
