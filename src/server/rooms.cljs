@@ -241,12 +241,12 @@
 (defn get-all-music-info [room-id callback]
   (.hgetall redis-client (str "room:" room-id ":music-info")
     (fn [err music-info-reply]
-      (if (nil? music-info-reply)
-        (callback nil))
       (let [info (vals (js->clj music-info-reply))
             reader (transit/reader :json)
             info-to-send (map #(transit/read reader %1) info)]
-        (callback  (clj->js info-to-send))))))
+        (if (empty? info-to-send)
+          (callback nil)
+          (callback  (clj->js info-to-send)))))))
 
 (defn has-track-started? [room callback]
   (.get redis-client (str "room:" room ":started?")
