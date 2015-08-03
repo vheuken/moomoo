@@ -154,7 +154,7 @@
                                     :username username
                                     :originalfilename original-file-name
                                     :id track-id
-                                    :track-num track-num}
+                                    :tracknum track-num}
                         music-info-json (transit/write writer music-info)]
                     (.hset redis-client (str "room:" room ":music-info")
                                         track-id

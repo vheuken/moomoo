@@ -196,5 +196,5 @@
 
 (.on socket "hotjoin-music-info"
   (fn [room-music-info]
-    (println room-music-info)
-    (swap! app-state assoc :music-info  room-music-info)))
+    (swap! app-state assoc :music-info (.sort room-music-info
+                                              #(- (.-tracknum %1) (.-tracknum %2))))))
