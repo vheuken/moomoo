@@ -88,7 +88,7 @@
   (println "Song has finished!")
   (.emit socket "track-complete"))
 
-(defn play-track [track-id]
+(defn play-track [track-id position]
   (if-not (nil? (:current-sound @app-state))
     (.destruct (:current-sound @app-state)))
 
@@ -104,7 +104,9 @@
                                              :autoLoad true}))
         (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
-                    :onfinish on-finish})))))
+                    :onfinish on-finish
+                    :onplay #(.setPosition js/soundManager current-sound-id
+                                                           position)})))))
 
 (.on socket "connect" #(.emit socket "join-room" room-id))
 (.on socket "sign-in-success"
@@ -169,8 +171,7 @@
 
 (.on socket "start-track"
   (fn [position]
-     (play-track (:current-track-id @app-state))
-     (.setPosition js/soundManager current-sound-id position)))
+     (play-track (:current-track-id @app-state) position)))
 
 (.on socket "track-change"
   (fn [track-id]

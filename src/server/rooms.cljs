@@ -97,6 +97,12 @@
     (fn [err reply]
       (callback track-position-info)))))
 
+(defn get-current-track-position [room callback]
+ (let [reader (transit/reader :json)]
+   (.get redis-client (str "room:" room ":track-position")
+     (fn [err reply]
+       (callback (transit/read reader reply))))))
+
 (defn pause-current-track [room position callback]
   (let [writer (transit/writer :json)]
     (.set redis-client (str "room:" room ":track-position")
@@ -237,3 +243,17 @@
             reader (transit/reader :json)
             info-to-send (map #(transit/read reader %1) info)]
         (callback  (clj->js info-to-send))))))
+
+(defn has-track-started? [room callback]
+  (.get redis-client (str "room:" room ":started?")
+    (fn [err reply]
+      (if (= "true" reply)
+        (callback true)
+        (callback false)))))
+
+(defn start-current-track [room callback]
+  (.set redis-client (str "room:" room ":started?") "true"
+    (fn []
+      (set-current-track-position room 0
+        (fn [track-position-info]
+          (callback track-position-info))))))

@@ -68,21 +68,31 @@
 
   (.on socket "ready-to-start"
     (fn []
-      (println "Received ready-to-start signal from " (.-id socket))
-      (rooms/user-ready-to-start (.-id socket)
-        (fn [num-users-ready]
-          (rooms/get-room-from-user-id (.-id socket)
-            (fn [room]
-              (rooms/get-num-of-users room
-                (fn [num-users]
-                  (if (= num-users num-users-ready)
-                    (rooms/set-current-track-position room 0
-                      (fn [track-position-info]
-                        (let [track-position (+ (:position track-position-info)
-                                                (- (.now js/Date)
-                                                    (:starttime track-position-info)))]
-                          (println "starting at: " track-position)
-                          (.emit (.to io room) "start-track" track-position)))))))))))))
+      (letfn [(convert-position [track-position-info]
+                (+ (:position track-position-info)
+                   (- (.now js/Date)
+                      (:starttime track-position-info))))
+              (start-track [room track-position-info]
+                (if (nil? track-position-info)
+                  (rooms/get-current-track-position room
+                    (fn [track-position-info]
+                      (.emit socket "start-track" (convert-position track-position-info))))
+                  (.emit (.to io room) "start-track" (convert-position track-position-info))))]
+        (println "Received ready-to-start signal from " (.-id socket))
+        (rooms/user-ready-to-start (.-id socket)
+          (fn [num-users-ready]
+            (rooms/get-room-from-user-id (.-id socket)
+              (fn [room]
+                (rooms/get-num-of-users room
+                  (fn [num-users]
+                    (if (= num-users num-users-ready)
+                      (rooms/has-track-started? room
+                        (fn [started?]
+                          (if started?
+                            (start-track room nil)
+                            (rooms/start-current-track room
+                              (fn [track-position-info]
+                                (start-track room track-position-info))))))))))))))))
 
   (.on socket "pause"
     (fn [position]
