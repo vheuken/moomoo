@@ -24,6 +24,7 @@
   (rooms/get-all-music-info room-id
     (fn [room-music-info]
       (if-not (nil? room-music-info)
+
         (.emit socket "hotjoin-music-info" room-music-info)))))
 
 (defn connection [socket]
@@ -73,13 +74,11 @@
                   (if (= num-users num-users-ready)
                     (rooms/set-current-track-position room 0
                       (fn [track-position-info]
-                        (rooms/clear-ready-to-start room
-                          (fn []
-                            (let [track-position (+ (:position track-position-info)
-                                                    (- (.now js/Date)
-                                                       (:starttime track-position-info)))]
-                              (println "starting at: " track-position)
-                              (.emit (.to io room) "start-track" track-position)))))))))))))))
+                        (let [track-position (+ (:position track-position-info)
+                                                (- (.now js/Date)
+                                                    (:starttime track-position-info)))]
+                          (println "starting at: " track-position)
+                          (.emit (.to io room) "start-track" track-position)))))))))))))
 
   (.on socket "pause"
     (fn [position]
@@ -115,13 +114,15 @@
               (rooms/user-track-complete (.-id socket)
                 (fn [num-users-track-complete]
                   (if (= num-users num-users-track-complete)
-                    (rooms/clear-track-complete room
+                    (rooms/clear-ready-to-start room
                       (fn []
-                        (rooms/next-track room
-                          (fn [track-id]
-                            (if (nil? track-id)
-                              (.emit (.to io room) "play-next-upload")
-                              (.emit (.to io room) "track-change" track-id)))))))))))))))
+                        (rooms/clear-track-complete room
+                          (fn []
+                            (rooms/next-track room
+                              (fn [track-id]
+                                (if (nil? track-id)
+                                  (.emit (.to io room) "play-next-upload")
+                                  (.emit (.to io room) "track-change" track-id)))))))))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
