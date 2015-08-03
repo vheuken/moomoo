@@ -136,6 +136,7 @@
   (fn [music-info]
     (swap! app-state assoc :music-info
       (merge (:music-info @app-state) music-info))
+    (println (:music-info @app-state))
     (if (:play-next-upload? @app-state)
       (do
         (.emit socket "file-download-request" (.-id music-info))
@@ -200,8 +201,9 @@
 
 (.on socket "hotjoin-music-info"
   (fn [room-music-info current-track-id]
-    (swap! app-state assoc :music-info (.sort room-music-info
-                                              #(- (.-tracknum %1)
-                                                  (.-tracknum %2))))
+    (let [sorted-music-info (.sort room-music-info #(- (.-tracknum %1)
+                                                       (.-tracknum %2)))]
+      (swap! app-state assoc :music-info (map #(clj->js %1) (js->clj sorted-music-info)))
+      (println (:music-info @app-state)))
     (swap! app-state assoc :current-track-id current-track-id)
     (.emit socket "file-download-request" current-track-id)))
