@@ -129,6 +129,11 @@
       (fn []
         (callback)))))
 
+(defn get-num-of-tracks [room callback]
+  (.hlen redis-client (str "room:" room ":music-info")
+    (fn [err reply]
+      (callback reply))))
+
 (defn set-music-info [absolute-file-path
                       track-id
                       original-file-name
@@ -141,26 +146,27 @@
         (fn [room]
           (get-username room socket-id
             (fn [username]
-              (let [tags (image-tags-to-base64 (js->clj tags))
-                    writer (transit/writer :json)
-                    music-info {:tags tags
-                                :username username
-                                :originalfilename original-file-name
-                                :id track-id}
-                    music-info-json (transit/write writer music-info)]
-                (.hset redis-client (str "room:" room ":music-info")
-                                    track-id
-                                    music-info-json
-                  (fn []
-                    (.hset redis-client (str "room:" room ":music-files")
+              (get-num-of-tracks room
+                (fn [track-num]
+                  (let [tags (image-tags-to-base64 (js->clj tags))
+                        writer (transit/writer :json)
+                        music-info {:tags tags
+                                    :username username
+                                    :originalfilename original-file-name
+                                    :id track-id
+                                    :track-num track-num}
+                        music-info-json (transit/write writer music-info)]
+                    (.hset redis-client (str "room:" room ":music-info")
                                         track-id
-                                        absolute-file-path
-                      (fn [err reply]
-                        (.hlen redis-client (str "room:" room ":music-files")
+                                        music-info-json
+                      (fn []
+                        (.hset redis-client (str "room:" room ":music-files")
+                                            track-id
+                                            absolute-file-path
                           (fn [err reply]
-                            (set-track-position room track-id (- reply 1)
-                              (fn []
-                                (callback music-info)))))))))))))))))
+                                (set-track-position room track-id track-num
+                                  (fn []
+                                    (callback music-info)))))))))))))))))
 
 ; TODO: Transit should translate this(?)
 (defn get-music-info [room track-id callback]

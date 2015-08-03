@@ -196,4 +196,5 @@
 
 (.on socket "hotjoin-music-info"
   (fn [room-music-info]
+    (println room-music-info)
     (swap! app-state assoc :music-info  room-music-info)))
