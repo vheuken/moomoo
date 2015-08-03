@@ -24,8 +24,12 @@
   (rooms/get-all-music-info room-id
     (fn [room-music-info]
       (if-not (nil? room-music-info)
-
-        (.emit socket "hotjoin-music-info" room-music-info)))))
+        (rooms/get-current-track room-id
+          (fn [current-track]
+            (rooms/get-track-id-from-position room-id current-track
+              (fn [current-track-id]
+                (.emit socket "hotjoin-music-info" room-music-info
+                                                   current-track-id)))))))))
 
 (defn connection [socket]
   (println (str "User " (.-id socket) " has connected!"))

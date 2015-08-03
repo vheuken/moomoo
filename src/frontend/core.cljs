@@ -198,7 +198,9 @@
     (swap! app-state assoc :play-next-upload? true)))
 
 (.on socket "hotjoin-music-info"
-  (fn [room-music-info]
+  (fn [room-music-info current-track-id]
     (swap! app-state assoc :music-info (.sort room-music-info
                                               #(- (.-tracknum %1)
-                                                  (.-tracknum %2))))))
+                                                  (.-tracknum %2))))
+    (swap! app-state assoc :current-track-id current-track-id)
+    (.emit socket "file-download-request" current-track-id)))
