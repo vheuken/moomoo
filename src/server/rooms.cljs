@@ -136,8 +136,10 @@
         (callback)))))
 
 (defn get-num-of-tracks [room callback]
+  (println "Calling get-num-of-tracks")
   (.hlen redis-client (str "room:" room ":music-info")
     (fn [err reply]
+      (println "HI!!!")
       (callback reply))))
 
 (defn set-music-info [absolute-file-path
@@ -222,8 +224,10 @@
 (defn next-track [room callback]
   (.get redis-client (str "room:" room ":current-track")
     (fn [err current-track-num]
-      (.hlen redis-client (str "room:" room ":music-files")
-        (fn [err num-of-tracks]
+      (println "CURRENT_TRACK_NUM" current-track-num)
+      (get-num-of-tracks room
+        (fn [num-of-tracks]
+          (println "NUM_OF_TRACKS" num-of-tracks)
           (if (>= current-track-num num-of-tracks)
             (callback nil)
           (.incr redis-client (str "room:" room ":current-track")
@@ -247,13 +251,21 @@
 (defn has-track-started? [room callback]
   (.get redis-client (str "room:" room ":started?")
     (fn [err reply]
+      (println reply)
       (if (= "true" reply)
         (callback true)
         (callback false)))))
 
 (defn start-current-track [room callback]
+  (println "STARTING!")
   (.set redis-client (str "room:" room ":started?") "true"
     (fn []
       (set-current-track-position room 0
         (fn [track-position-info]
           (callback track-position-info))))))
+
+(defn track-complete [room callback]
+  (.set redis-client (str "room:" room ":started?") "false"
+    (fn [err reply]
+      (callback))))
+

@@ -128,15 +128,18 @@
               (rooms/user-track-complete (.-id socket)
                 (fn [num-users-track-complete]
                   (if (= num-users num-users-track-complete)
-                    (rooms/clear-ready-to-start room
+                    (rooms/track-complete room
                       (fn []
-                        (rooms/clear-track-complete room
+                        (rooms/clear-ready-to-start room
                           (fn []
-                            (rooms/next-track room
-                              (fn [track-id]
-                                (if (nil? track-id)
-                                  (.emit (.to io room) "play-next-upload")
-                                  (.emit (.to io room) "track-change" track-id)))))))))))))))))
+                            (rooms/clear-track-complete room
+                              (fn []
+                                (rooms/next-track room
+                                  (fn [track-id]
+                                    (println track-id)
+                                    (if (nil? track-id)
+                                      (.emit (.to io room) "play-next-upload")
+                                      (.emit (.to io room) "track-change" track-id)))))))))))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
