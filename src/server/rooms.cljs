@@ -91,11 +91,11 @@
 (defn set-current-track-position [room position callback]
   (let [writer (transit/writer :json)
         track-position-info {:position position
-                             :start-time (.now js/Date)}]
+                             :starttime (.now js/Date)}]
   (.set redis-client (str "room:" room ":track-position")
                      (transit/write writer track-position-info)
     (fn [err reply]
-      (callback)))))
+      (callback track-position-info)))))
 
 (defn pause-current-track [room position callback]
   (let [writer (transit/writer :json)]

@@ -167,7 +167,10 @@
         (if (= (:current-track-id @app-state) track-id)
           (.emit socket "ready-to-start"))))))
 
-(.on socket "start-track" #(play-track (:current-track-id @app-state)))
+(.on socket "start-track"
+  (fn [position]
+     (play-track (:current-track-id @app-state))
+     (.setPosition js/soundManager current-sound-id position)))
 
 (.on socket "track-change"
   (fn [track-id]

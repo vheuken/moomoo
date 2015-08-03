@@ -72,10 +72,14 @@
                 (fn [num-users]
                   (if (= num-users num-users-ready)
                     (rooms/set-current-track-position room 0
-                      (fn []
+                      (fn [track-position-info]
                         (rooms/clear-ready-to-start room
                           (fn []
-                            (.emit (.to io room) "start-track"))))))))))))))
+                            (let [track-position (+ (:position track-position-info)
+                                                    (- (.now js/Date)
+                                                       (:starttime track-position-info)))]
+                              (println "starting at: " track-position)
+                              (.emit (.to io room) "start-track" track-position)))))))))))))))
 
   (.on socket "pause"
     (fn [position]
