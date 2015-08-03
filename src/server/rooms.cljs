@@ -221,3 +221,13 @@
                 (fn [track-id]
                   (println "TRACK-ID " track-id)
                     (callback track-id)))))))))))
+
+(defn get-all-music-info [room-id callback]
+  (.hgetall redis-client (str "room:" room-id ":music-info")
+    (fn [err music-info-reply]
+      (if (nil? music-info-reply)
+        (callback nil))
+      (let [info (vals (js->clj music-info-reply))
+            reader (transit/reader :json)
+            info-to-send (map #(transit/read reader %1) info)]
+        (callback  (clj->js info-to-send))))))

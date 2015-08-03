@@ -193,3 +193,7 @@
 (.on socket "play-next-upload"
   (fn []
     (swap! app-state assoc :play-next-upload? true)))
+
+(.on socket "hotjoin-music-info"
+  (fn [room-music-info]
+    (swap! app-state assoc :music-info  room-music-info)))

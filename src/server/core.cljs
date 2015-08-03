@@ -19,6 +19,13 @@
 
 (def io (.listen socketio server))
 
+(defn handle-hotjoin [socket room-id]
+  (println "User has hotjoined")
+  (rooms/get-all-music-info room-id
+    (fn [room-music-info]
+      (if-not (nil? room-music-info)
+        (.emit socket "hotjoin-music-info" room-music-info)))))
+
 (defn connection [socket]
   (println (str "User " (.-id socket) " has connected!"))
 
@@ -39,7 +46,8 @@
       (rooms/does-room-exist? room-id
         (fn [reply]
           (if-not reply
-            (rooms/init-room room-id #(println )))))
+            (rooms/init-room room-id #(println))
+            (handle-hotjoin socket room-id))))
       (rooms/set-username room-id (.-id socket) username
         (fn []
           (.emit socket "sign-in-success")
