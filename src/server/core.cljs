@@ -148,13 +148,16 @@
         (fn [room]
           (rooms/clear-ready-to-start room
             (fn []
-              (rooms/clear-track-complete room
-                (fn []
-                  (rooms/change-track room track-num
-                    (fn [track-id]
-                      (rooms/set-current-track-position room 0
-                        (fn []
-                          (.emit (.to io room) "track-change" track-id)))))))))))))
+              (rooms/get-num-of-tracks room
+                (fn [num-of-tracks]
+                  (if (and (>= track-num 0) (< track-num num-of-tracks))
+                    (rooms/clear-track-complete room
+                      (fn []
+                        (rooms/change-track room track-num
+                          (fn [track-id]
+                            (rooms/set-current-track-position room 0
+                              (fn []
+                                (.emit (.to io room) "track-change" track-id))))))))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]

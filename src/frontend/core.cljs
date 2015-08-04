@@ -76,10 +76,11 @@
   (.emit socket "resume"))
 
 (defn previous-track []
-  (let [track-num (- 1 (.-tracknum (nth (filter #(= (.-id %1)
-                                                    (:current-track-id @app-state))
-                                                (:music-info @app-state)) 0)))]
-    (if (< track-num (count (:music-info @app-state)))
+  (let [track-num (- (.-tracknum (nth (filter #(= (.-id %1)
+                                                (:current-track-id @app-state))
+                                            (:music-info @app-state)) 0))
+                    1)]
+    (if (>= track-num 0)
       (.emit socket "change-track" track-num))))
 
 (defn next-track []
