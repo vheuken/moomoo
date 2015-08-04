@@ -141,6 +141,21 @@
                                       (.emit (.to io room) "play-next-upload")
                                       (.emit (.to io room) "track-change" track-id)))))))))))))))))))
 
+  (.on socket "change-track"
+    (fn [track-num]
+      (println "CHANGING TO TRACK " track-num)
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room]
+          (rooms/clear-ready-to-start room
+            (fn []
+              (rooms/clear-track-complete room
+                (fn []
+                  (rooms/change-track room track-num
+                    (fn [track-id]
+                      (rooms/set-current-track-position room 0
+                        (fn []
+                          (.emit (.to io room) "track-change" track-id)))))))))))))
+
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
       (let [file-id (.v4 js-uuid)

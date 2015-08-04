@@ -79,13 +79,15 @@
   (let [track-num (- 1 (.-tracknum (nth (filter #(= (.-id %1)
                                                     (:current-track-id @app-state))
                                                 (:music-info @app-state)) 0)))]
-    (.emit socket "change-track" (.-id (nth (:music-info @app-state) track-num)))))
+    (if (< track-num (count (:music-info @app-state)))
+      (.emit socket "change-track" track-num))))
 
 (defn next-track []
   (let [track-num (+ 1 (.-tracknum (nth (filter #(= (.-id %1)
                                                     (:current-track-id @app-state))
                                                 (:music-info @app-state)) 0)))]
-    (.emit socket "change-track" (.-id (nth (:music-info @app-state) track-num)))))
+    (if (< track-num (count (:music-info @app-state)))
+      (.emit socket "change-track" track-num))))
 
 (defn set-progress-ball-position [percent-completed]
   (.css (js/$ "#progress-track-ball") #js {"left" (str percent-completed "%")}))
