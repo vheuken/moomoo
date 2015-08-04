@@ -111,6 +111,20 @@
       (if (:signed-in? data)
         (dom/button #js {:onClick core/pause} "Pause")))))
 
+(defn previous-track-button [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (if (:signed-in? data)
+        (dom/button #js {:onClick core/previous-track} "Previous")))))
+
+(defn next-track-button [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (if (:signed-in? data)
+        (dom/button #js {:onClick core/next-track} "Next")))))
+
 (defn track-view [data owner]
   (reify
     om/IRender
@@ -131,4 +145,6 @@
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
+(om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
+(om/root next-track-button core/app-state {:target (. js/document (getElementById "next-track-button"))})
 (om/root track-queue core/app-state {:target (. js/document (getElementById "playlist"))})

@@ -75,6 +75,18 @@
 (defn resume []
   (.emit socket "resume"))
 
+(defn previous-track []
+  (let [track-num (- 1 (.-tracknum (nth (filter #(= (.-id %1)
+                                                    (:current-track-id @app-state))
+                                                (:music-info @app-state)) 0)))]
+    (.emit socket "change-track" (.-id (nth (:music-info @app-state) track-num)))))
+
+(defn next-track []
+  (let [track-num (+ 1 (.-tracknum (nth (filter #(= (.-id %1)
+                                                    (:current-track-id @app-state))
+                                                (:music-info @app-state)) 0)))]
+    (.emit socket "change-track" (.-id (nth (:music-info @app-state) track-num)))))
+
 (defn set-progress-ball-position [percent-completed]
   (.css (js/$ "#progress-track-ball") #js {"left" (str percent-completed "%")}))
 
