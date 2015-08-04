@@ -16,7 +16,8 @@
                           :current-track-id nil
                           :current-sound nil
                           :ball-being-dragged? false
-                          :play-next-upload? false}))
+                          :play-next-upload? false
+                          :num-of-queued-download-requests 0}))
 
 (enable-console-print!)
 
@@ -140,12 +141,27 @@
       (do
         (.emit socket "file-download-request" (.-id music-info))
         (swap! app-state assoc :current-track-id (.-id music-info))
-        (swap! app-state assoc :play-next-upload? false)))))
+        (swap! app-state assoc :play-next-upload? false))
+      (do
+        (swap! app-state assoc :num-of-queued-download-requests
+          (+ 1 (:num-of-queued-download-requests @app-state)))
+        (if-not (:is-file-downloading? @app-state)
+          (let [next-track-num (+ 1 (.-tracknum (nth (filter #(= (.-id %1)
+                                                                 (:current-track-id @app-state))
+                                                      (:music-info @app-state)) 0)))]
+            (if (< next-track-num (count (:music-info @app-state)))
+              (.emit socket "file-download-request" (.-id (nth (:music-info @app-state)
+                                                               next-track-num))))))))))
 
 (.on (new js/ss socket) "file-download"
   (fn [stream track-id file-size]
     (println "Download starting!")
+
     (swap! app-state assoc :is-file-downloading? true)
+    (if (> (:num-of-queued-download-requests @app-state) 0)
+      (swap! app-state assoc :num-of-queued-download-requests
+        (- 1 (:num-of-queued-download-requests @app-state))))
+
     (.on stream "data"
       (fn [data-chunk]
         (let [size (+ (.-length data-chunk) (:data-downloaded @app-state))]
@@ -162,7 +178,7 @@
     (.on stream "end"
       (fn []
         (println "Download complete!")
-        (swap! app-state assoc :is-file-downloading? true)
+        (swap! app-state assoc :is-file-downloading? false)
         (swap! app-state assoc :download-progress nil)
         (swap! app-state assoc :data-downloaded 0)
 
