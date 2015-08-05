@@ -96,7 +96,7 @@
                 (is (= true reply))
                 (rooms/get-current-track room
                   (fn [current-track]
-                    (is (= -1 current-track))
+                    (is (= 0 current-track))
                     (rooms/is-playing? room
                       (fn [reply]
                         (is (= false reply))

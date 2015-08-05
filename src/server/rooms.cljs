@@ -65,7 +65,7 @@
         (callback true)))))
 
 (defn init-room [room callback]
-  (.set redis-client (str "room:" room ":current-track") -1
+  (.set redis-client (str "room:" room ":current-track") 0
     (fn []
       (.set redis-client (str "room:" room ":playing?") "false"
         (fn []

@@ -137,8 +137,7 @@
                                 (rooms/next-track room
                                   (fn [track-id]
                                     (println track-id)
-                                    (if (nil? track-id)
-                                      (.emit (.to io room) "play-next-upload")
+                                    (if-not (nil? track-id)
                                       (.emit (.to io room) "track-change" track-id)))))))))))))))))))
 
   (.on socket "change-track"
@@ -192,14 +191,16 @@
                 (rooms/get-room-from-user-id (.-id socket)
                   (fn [room]
                     (.emit (.to io room) "upload-complete" (clj->js music-info))
-                    (rooms/get-current-track room
-                      (fn [current-track]
-                        (println current-track)
-                        (if (= current-track -1)
-                          (rooms/change-track room 0
-                            (fn [track-id]
-                              (println "Track changed to " track-id)
-                              (.emit (.to io room) "track-change" track-id))))))))))
+                    (rooms/has-track-started? room
+                      (fn [started?]
+                        (if-not started?
+                          (rooms/get-current-track room
+                            (fn [current-track]
+                              (println current-track)
+                              (rooms/change-track room current-track
+                                (fn [track-id]
+                                  (println "Track changed to " track-id)
+                                  (.emit (.to io room) "track-change" track-id))))))))))))
 
             (println (str "Successfully uploaded " absolute-file-path)))))))
 
