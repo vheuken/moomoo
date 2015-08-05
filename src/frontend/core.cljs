@@ -66,6 +66,30 @@
                                                               :ball-being-dragged?
                                                               true)
                                                :stop on-drag-stop})
+(defn get-music-info-from-id [track-id]
+  (nth (filter #(= (.-id %1)
+                   track-id)
+         (:music-info @app-state))
+    0))
+
+(defn get-next-track-to-download []
+  (letfn [(is-track-downloaded? [track-id]
+            (contains? (:music-files @app-state) track-id))]
+    (let [current-track-info (get-music-info-from-id (:current-track-id @app-state))]
+      (loop [track-num (+ (.-tracknum current-track-info) 1)
+             i 0]
+        (if (>= i (count (:music-info @app-state)))
+          nil
+          (let [music-info (nth (:music-info @app-state) track-num)
+                track-id (.-id music-info)]
+            (if-not (is-track-downloaded? track-id)
+              track-id
+              (if (< track-num (count (:music-info @app-state)))
+                (recur (+ 1 track-num)
+                       (+ 1 i))
+                (recur 0
+                       (+ 1 i))))))))))
+
 (defn pause []
   (.pause js/soundManager current-sound-id)
   (.emit socket "pause" (.-position (:current-sound @app-state))))
@@ -149,7 +173,11 @@
 (.on socket "upload-complete"
   (fn [music-info]
     (swap! app-state assoc :music-info
-      (merge (:music-info @app-state) music-info))))
+      (merge (:music-info @app-state) music-info))
+    (if-not (:is-file-downloading? @app-state)
+      (let [id (get-next-track-to-download)]
+        (if-not (nil? id)
+          (.emit socket "file-download-request" id))))))
 
 (.on (new js/ss socket) "file-download"
   (fn [stream track-id file-size]
