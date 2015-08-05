@@ -80,15 +80,20 @@
              i 0]
         (if (>= i (count (:music-info @app-state)))
           nil
-          (let [music-info (nth (:music-info @app-state) track-num)
-                track-id (.-id music-info)]
-            (if-not (is-track-downloaded? track-id)
-              track-id
-              (if (< track-num (count (:music-info @app-state)))
-                (recur (+ 1 track-num)
-                       (+ 1 i))
-                (recur 0
-                       (+ 1 i))))))))))
+          (if (< track-num (count (:music-info @app-state)))
+            (let [music-info (nth (:music-info @app-state) track-num)
+                  track-id (.-id music-info)]
+              (if-not (is-track-downloaded? track-id)
+                track-id
+                  (recur (+ 1 track-num)
+                         (+ 1 i))))
+              (recur 0
+                     (+ 1 i))))))))
+
+(defn request-new-track []
+  (let [id (get-next-track-to-download)]
+    (if-not (nil? id)
+      (.emit socket "file-download-request" id))))
 
 (defn pause []
   (.pause js/soundManager current-sound-id)
@@ -174,10 +179,9 @@
   (fn [music-info]
     (swap! app-state assoc :music-info
       (merge (:music-info @app-state) music-info))
+
     (if-not (:is-file-downloading? @app-state)
-      (let [id (get-next-track-to-download)]
-        (if-not (nil? id)
-          (.emit socket "file-download-request" id))))))
+      (request-new-track))))
 
 (.on (new js/ss socket) "file-download"
   (fn [stream track-id file-size]
@@ -204,7 +208,7 @@
         (swap! app-state assoc :is-file-downloading? false)
         (swap! app-state assoc :download-progress nil)
         (swap! app-state assoc :data-downloaded 0)
-
+        (request-new-track)
         (if (= (:current-track-id @app-state) track-id)
           (.emit socket "ready-to-start"))))))
 
