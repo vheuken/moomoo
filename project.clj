@@ -11,7 +11,7 @@
                  [com.cognitect/transit-cljs "0.8.220"]]
 
   :node-dependencies [[source-map-support "0.2.8"]
-                      [socket.io "1.3.5"]
+                      [socket.io "1.3.6"]
                       [redis "0.12.1"]
                       [socket.io-stream "0.8.0"]
                       [uuid "2.0.1"]
