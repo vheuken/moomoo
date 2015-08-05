@@ -15,8 +15,7 @@
                           :is-file-downloading? false
                           :current-track-id nil
                           :current-sound nil
-                          :ball-being-dragged? false
-                          :num-of-queued-download-requests 0}))
+                          :ball-being-dragged? false}))
 
 (enable-console-print!)
 
@@ -150,26 +149,13 @@
 (.on socket "upload-complete"
   (fn [music-info]
     (swap! app-state assoc :music-info
-      (merge (:music-info @app-state) music-info))
-    (swap! app-state assoc :num-of-queued-download-requests
-      (+ 1 (:num-of-queued-download-requests @app-state)))))
-
-;    (if-not (:is-file-downloading? @app-state)
-;      (let [next-track-num (+ 1 (.-tracknum (nth (filter #(= (.-id %1)
-;                                                             (:current-track-id @app-state))
-;                                                  (:music-info @app-state)) 0)))]
-;        (if (< next-track-num (count (:music-info @app-state)))
-;          (.emit socket "file-download-request" (.-id (nth (:music-info @app-state)
-;                                                           next-track-num))))))))
+      (merge (:music-info @app-state) music-info))))
 
 (.on (new js/ss socket) "file-download"
   (fn [stream track-id file-size]
     (println "Download starting!")
 
     (swap! app-state assoc :is-file-downloading? true)
-    (if (> (:num-of-queued-download-requests @app-state) 0)
-      (swap! app-state assoc :num-of-queued-download-requests
-        (- 1 (:num-of-queued-download-requests @app-state))))
 
     (.on stream "data"
       (fn [data-chunk]
