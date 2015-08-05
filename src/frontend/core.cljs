@@ -218,10 +218,12 @@
 
 (.on socket "track-change"
   (fn [track-id]
+    (println "CHANGING TO TRACK " track-id)
     (swap! app-state assoc :current-track-id track-id)
     (if (nil? (get (:music-files @app-state) track-id))
       (.emit socket "file-download-request" track-id)
-      (.emit socket "ready-to-start"))))
+      (do (println "READY TO START WOO"
+      (.emit socket "ready-to-start"))))))
 
 (.on socket "pause"
   (fn [position]

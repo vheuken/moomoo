@@ -156,7 +156,9 @@
                           (fn [track-id]
                             (rooms/set-current-track-position room 0
                               (fn []
-                                (.emit (.to io room) "track-change" track-id))))))))))))))))
+                                (rooms/track-complete room
+                                  (fn []
+                                    (.emit (.to io room) "track-change" track-id))))))))))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
