@@ -117,6 +117,9 @@
     (if (< track-num (count (:music-info @app-state)))
       (.emit socket "change-track" track-num))))
 
+(defn restart-track []
+  (.emit socket "position-change" 0))
+
 (defn set-progress-ball-position [percent-completed]
   (.css (js/$ "#progress-track-ball") #js {"left" (str percent-completed "%")}))
 
