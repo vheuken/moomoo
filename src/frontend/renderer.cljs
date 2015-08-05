@@ -73,9 +73,9 @@
   (reify
     om/IRender
     (render [this]
-      (if-not (= 0 (:current-track data))
-        (let [track-index (- (:current-track data) 1)
-              tags (nth (:music-tags data) track-index)]
+      (if-not (nil? (:current-track-id data))
+        (let [music-info (core/get-music-info-from-id (:current-track-id data))
+              tags (.-tags music-info)]
           (dom/div nil
             (dom/div nil (.-title tags))
             (dom/div nil (.-album tags))
@@ -94,7 +94,7 @@
 (om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})
-;(om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
+(om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
 ; music player
 (defn resume-button [data owner]
