@@ -285,3 +285,18 @@
       (if (= reply "true")
         (callback true)
         (callback false)))))
+
+(defn is-track-changing? [room callback]
+  (.get redis-client (str "room:" room ":changing-track?")
+    (fn [err reply]
+      (if (= reply "true")
+        (callback true)
+        (callback false)))))
+
+(defn start-changing-track [room callback]
+  (.set redis-client (str "room:" room ":changing-track?") "true"
+    (fn [err reply]
+      (callback))))
+
+(defn stop-changing-track [room]
+  (.set redis-client (str "room:" room ":changing-track?") "false"))

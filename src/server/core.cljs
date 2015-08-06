@@ -167,20 +167,26 @@
       (println "CHANGING TO TRACK " track-num)
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (rooms/clear-ready-to-start room
-            (fn []
-              (rooms/get-num-of-tracks room
-                (fn [num-of-tracks]
-                  (if (and (>= track-num 0) (< track-num num-of-tracks))
-                    (rooms/clear-track-complete room
+          (rooms/is-track-changing? room
+            (fn [changing?]
+              (if-not changing?
+                (rooms/start-changing-track room
+                  (fn []
+                    (rooms/clear-ready-to-start room
                       (fn []
-                        (rooms/change-track room track-num
-                          (fn [track-id]
-                            (rooms/set-current-track-position room 0
-                              (fn []
-                                (rooms/track-complete room
-                                  (fn []
-                                    (.emit (.to io room) "track-change" track-id))))))))))))))))))
+                        (rooms/get-num-of-tracks room
+                          (fn [num-of-tracks]
+                            (if (and (>= track-num 0) (< track-num num-of-tracks))
+                              (rooms/clear-track-complete room
+                                (fn []
+                                  (rooms/change-track room track-num
+                                    (fn [track-id]
+                                      (rooms/set-current-track-position room 0
+                                        (fn []
+                                          (rooms/track-complete room
+                                            (fn []
+                                              (.emit (.to io room) "track-change" track-id)
+                                              (rooms/stop-changing-track room)))))))))))))))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
