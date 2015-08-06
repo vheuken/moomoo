@@ -3,6 +3,8 @@
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
 (defonce current-sound-id "current-song")
+(defonce default-upload-slots 1)
+(defonce default-download-slots 1)
 (defonce app-state (atom {:signed-in? false
                           :messages []
                           :message-received? false
@@ -16,7 +18,11 @@
                           :current-track-id nil
                           :current-sound nil
                           :ball-being-dragged? false
-                          :upload-queue []}))
+                          :upload-queue []
+                          :upload-slots default-upload-slots
+                          :download-slots default-download-slots
+                          :num-of-uploads 0
+                          :num-of-downloads 0}))
 
 (enable-console-print!)
 
@@ -36,6 +42,8 @@
     false))
 
 (defn upload-file [file]
+  (swap! app-state assoc :num-of-uploads (+ 1 (:num-of-uploads @app-state)))
+
   (let [stream (.createStream js/ss)
         blob-stream (.createBlobReadStream js/ss file)]
     (println "File uploading!")
@@ -47,18 +55,23 @@
 
     (.on blob-stream "end"
       (fn []
+        (swap! app-state assoc :num-of-uploads (- (:num-of-uploads @app-state) 1))
+        (println "NUM OF UPLOADS NOW!" (:num-of-uploads @app-state))
         (if-not (empty? (:upload-queue @app-state))
           (let [next-file (first (:upload-queue @app-state))]
             (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
             (if-not (= next-file file)
-              (upload-file next-file))))))))
+              (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
+                (upload-file next-file)))))))))
 
 (.change (js/$ "#file-upload")
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)]
-      (swap! app-state assoc :upload-queue (conj (:upload-queue @app-state) file))
+      (swap! app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state))))
+      (println "SHIT " (:num-of-uploads @app-state))
       (if (= 1 (count (:upload-queue @app-state)))
-        (upload-file file)))))
+        (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
+          (upload-file file))))))
 
 ; end stuff that should probably be cleaned up with react....
 
