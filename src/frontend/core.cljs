@@ -3,7 +3,7 @@
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
 (defonce current-sound-id "current-song")
-(defonce default-upload-slots 2)
+(defonce default-upload-slots 1)
 (defonce default-download-slots 1)
 (defonce app-state (atom {:signed-in? false
                           :messages []
