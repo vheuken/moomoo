@@ -3,7 +3,7 @@
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
 (defonce current-sound-id "current-song")
-(defonce default-upload-slots 1)
+(defonce default-upload-slots 2)
 (defonce default-download-slots 1)
 (defonce app-state (atom {:signed-in? false
                           :messages []
@@ -69,9 +69,8 @@
     (let [file (aget (.-files (.-target e)) 0)]
       (swap! app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state))))
       (println "SHIT " (:num-of-uploads @app-state))
-      (if (= 1 (count (:upload-queue @app-state)))
         (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
-          (upload-file file))))))
+          (upload-file file)))))
 
 ; end stuff that should probably be cleaned up with react....
 
