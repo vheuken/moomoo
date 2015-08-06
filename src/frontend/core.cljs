@@ -50,7 +50,8 @@
         (if-not (empty? (:upload-queue @app-state))
           (let [next-file (first (:upload-queue @app-state))]
             (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
-            (upload-file next-file)))))))
+            (if-not (= next-file file)
+              (upload-file next-file))))))))
 
 (.change (js/$ "#file-upload")
   (fn [e]
