@@ -15,7 +15,8 @@
                           :is-file-downloading? false
                           :current-track-id nil
                           :current-sound nil
-                          :ball-being-dragged? false}))
+                          :ball-being-dragged? false
+                          :upload-queue []}))
 
 (enable-console-print!)
 
@@ -33,22 +34,30 @@
     (.emit socket "chat-message" room-id (.val (js/$ "#m")))
     (.val (js/$ "#m") "")
     false))
+(defn upload-file [file]
+  (let [stream (.createStream js/ss)
+        blob-stream (.createBlobReadStream js/ss file)]
+    (println "File uploading!")
+
+    (.emit (js/ss socket) "file-upload" stream
+                                        (.-name file)
+                                        (.-size file))
+    (.pipe blob-stream stream)
+
+    (.on blob-stream "end"
+      (fn []
+        (if-not (empty? (:upload-queue @app-state))
+          (let [next-file (first (:upload-queue @app-state))]
+            (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
+            (upload-file next-file)))))))
 
 (.change (js/$ "#file-upload")
   (fn [e]
-    (let [file (aget (.-files (.-target e)) 0)
-          stream (.createStream js/ss)
-          blob-stream (.createBlobReadStream js/ss file)]
-      (println "File uploading!")
+    (let [file (aget (.-files (.-target e)) 0)]
+      (swap! app-state assoc :upload-queue (conj (:upload-queue @app-state) file))
+      (if (= 1 (count (:upload-queue @app-state)))
+        (upload-file file)))))
 
-      (.emit (js/ss socket) "file-upload" stream
-        (.-name file)
-        (.-size file))
-      (.pipe blob-stream stream)
-
-      (.on blob-stream "end"
-        (fn []
-          (println "Upload successful!"))))))
 ; end stuff that should probably be cleaned up with react....
 
 (defn on-drag-stop [event ui]
