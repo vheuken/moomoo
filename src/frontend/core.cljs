@@ -34,6 +34,7 @@
     (.emit socket "chat-message" room-id (.val (js/$ "#m")))
     (.val (js/$ "#m") "")
     false))
+
 (defn upload-file [file]
   (let [stream (.createStream js/ss)
         blob-stream (.createBlobReadStream js/ss file)]
@@ -220,7 +221,8 @@
         (swap! app-state assoc :is-file-downloading? false)
         (swap! app-state assoc :download-progress nil)
         (swap! app-state assoc :data-downloaded 0)
-        (request-new-track)
+        (if-not (:is-file-downloading? @app-state)
+          (request-new-track))
         (if (= (:current-track-id @app-state) track-id)
           (.emit socket "ready-to-start"))))))
 
