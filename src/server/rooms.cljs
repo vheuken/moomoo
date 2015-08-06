@@ -269,3 +269,19 @@
     (fn [err reply]
       (callback))))
 
+(defn start-looping [room callback]
+  (.set redis-client (str "room:" room ":looping?") "true"
+    (fn [err reply]
+      (callback))))
+
+(defn stop-looping [room callback]
+  (.set redis-client (str "room:" room ":looping?") "false"
+    (fn [err reply]
+      (callback))))
+
+(defn is-looping? [room callback]
+  (.get redis-client (str "room:" room ":looping?")
+    (fn [err reply]
+      (if (= reply "true")
+        (callback true)
+        (callback false)))))

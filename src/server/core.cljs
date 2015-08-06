@@ -118,6 +118,22 @@
             (fn []
               (.emit (.to io room) "position-change" position)))))))
 
+  (.on socket "start-looping"
+    (fn []
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room]
+          (rooms/start-looping room
+            (fn []
+              (.emit (.to io room) "set-loop" true)))))))
+
+  (.on socket "stop-looping"
+    (fn []
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room]
+          (rooms/stop-looping room
+            (fn []
+              (.emit (.to io room) "set-loop" false)))))))
+
   (.on socket "track-complete"
     (fn []
       (println "Received track-complete signal")
@@ -134,11 +150,17 @@
                           (fn []
                             (rooms/clear-track-complete room
                               (fn []
-                                (rooms/next-track room
-                                  (fn [track-id]
-                                    (println track-id)
-                                    (if-not (nil? track-id)
-                                      (.emit (.to io room) "track-change" track-id)))))))))))))))))))
+                                (rooms/is-looping? room
+                                  (fn [looping?]
+                                    (if looping?
+                                      (rooms/set-current-track-position room 0
+                                        (fn []
+                                          (.emit (.to io room) "position-change" 0)))
+                                      (rooms/next-track room
+                                        (fn [track-id]
+                                          (println track-id)
+                                          (if-not (nil? track-id)
+                                            (.emit (.to io room) "track-change" track-id))))))))))))))))))))))
 
   (.on socket "change-track"
     (fn [track-num]

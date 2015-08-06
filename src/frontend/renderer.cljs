@@ -141,6 +141,14 @@
       (if (:signed-in? data)
         (dom/button #js {:onClick core/restart-track} "Restart")))))
 
+(defn loop-button [data owner]
+  (reify om/IRender
+    (render [this]
+      (if (:signed-in? data)
+        (if (:looping? data)
+          (dom/button #js {:onClick core/toggle-loop} "UnLoop")
+          (dom/button #js {:onClick core/toggle-loop} "Loop"))))))
+
 (defn track-view [data owner]
   (reify
     om/IRender
@@ -164,4 +172,5 @@
 (om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
 (om/root next-track-button core/app-state {:target (. js/document (getElementById "next-track-button"))})
 (om/root restart-button core/app-state {:target (. js/document (getElementById "restart-button"))})
+(om/root loop-button core/app-state {:target (. js/document (getElementById "loop-button"))})
 (om/root track-queue core/app-state {:target (. js/document (getElementById "playlist"))})

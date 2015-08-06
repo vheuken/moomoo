@@ -18,6 +18,7 @@
                           :current-track-id nil
                           :current-sound nil
                           :ball-being-dragged? false
+                          :looping? false
                           :upload-queue []
                           :upload-slots default-upload-slots
                           :download-slots default-download-slots
@@ -73,6 +74,11 @@
           (upload-file file)))))
 
 ; end stuff that should probably be cleaned up with react....
+
+(defn toggle-loop []
+  (if (:looping? @app-state)
+    (.emit socket "stop-looping")
+    (.emit socket "start-looping")))
 
 (defn on-drag-stop [event ui]
   (swap! app-state assoc :ball-being-dragged? false)
@@ -281,3 +287,7 @@
                                               (js->clj sorted-music-info))))
     (swap! app-state assoc :current-track-id current-track-id)
     (.emit socket "file-download-request" current-track-id)))
+
+(.on socket "set-loop"
+  (fn [looping?]
+    (swap! app-state assoc :looping? looping?)))
