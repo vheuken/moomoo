@@ -12,8 +12,6 @@
                           :current-uploads-info {}
                           :music-info []
                           :music-files {}
-                          :data-downloaded 0
-                          :download-progress nil
                           :is-file-downloading? false
                           :current-track-id nil
                           :current-sound nil
@@ -23,7 +21,8 @@
                           :upload-slots default-upload-slots
                           :download-slots default-download-slots
                           :num-of-uploads 0
-                          :num-of-downloads 0}))
+                          :num-of-downloads 0
+                          :download-progress {}}))
 
 (enable-console-print!)
 
@@ -222,9 +221,13 @@
 
     (.on stream "data"
       (fn [data-chunk]
-        (let [size (+ (.-length data-chunk) (:data-downloaded @app-state))]
-          (swap! app-state assoc :download-progress (* 100 (/ size file-size)))
-          (swap! app-state assoc :data-downloaded size))
+        (let [data-downloaded (+ (.-length data-chunk) (:data-downloaded
+                                                         (get (:download-progress @app-state)
+                                                              track-id)))]
+          (swap! app-state assoc :download-progress (merge (:download-progress @app-state)
+                                                           {track-id {:data-downloaded data-downloaded
+                                                                      :file-size file-size}}))
+          (println (:download-progress @app-state)))
         (if (nil? (get (:music-files @app-state) track-id))
           (swap! app-state assoc :music-files
             (merge (:music-files @app-state) {track-id (new js/Blob)})))
@@ -237,8 +240,7 @@
       (fn []
         (println "Download complete!")
         (swap! app-state assoc :num-of-downloads (- (:num-of-downloads @app-state) 1))
-        (swap! app-state assoc :download-progress nil)
-        (swap! app-state assoc :data-downloaded 0)
+        (swap! app-state assoc :download-progress (dissoc (:download-progress @app-state) track-id))
 
         (if (> (:download-slots @app-state) (:num-of-downloads @app-state))
           (request-new-track))
