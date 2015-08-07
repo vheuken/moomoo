@@ -211,14 +211,14 @@
     (swap! app-state assoc :music-info
       (merge (:music-info @app-state) music-info))
 
-    (if-not (:is-file-downloading? @app-state)
+    (if (> (:download-slots @app-state) (:num-of-downloads @app-state))
       (request-new-track))))
 
 (.on (new js/ss socket) "file-download"
   (fn [stream track-id file-size]
     (println "Download starting!")
 
-    (swap! app-state assoc :is-file-downloading? true)
+    (swap! app-state assoc :num-of-downloads (+ 1 (:num-of-downloads @app-state)))
 
     (.on stream "data"
       (fn [data-chunk]
@@ -236,11 +236,13 @@
     (.on stream "end"
       (fn []
         (println "Download complete!")
-        (swap! app-state assoc :is-file-downloading? false)
+        (swap! app-state assoc :num-of-downloads (- (:num-of-downloads @app-state) 1))
         (swap! app-state assoc :download-progress nil)
         (swap! app-state assoc :data-downloaded 0)
-        (if-not (:is-file-downloading? @app-state)
+
+        (if (> (:download-slots @app-state) (:num-of-downloads @app-state))
           (request-new-track))
+
         (if (= (:current-track-id @app-state) track-id)
           (.emit socket "ready-to-start"))))))
 
