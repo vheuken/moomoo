@@ -226,8 +226,7 @@
                                                               track-id)))]
           (swap! app-state assoc :download-progress (merge (:download-progress @app-state)
                                                            {track-id {:data-downloaded data-downloaded
-                                                                      :file-size file-size}}))
-          (println (:download-progress @app-state)))
+                                                                      :file-size file-size}})))
         (if (nil? (get (:music-files @app-state) track-id))
           (swap! app-state assoc :music-files
             (merge (:music-files @app-state) {track-id (new js/Blob)})))
