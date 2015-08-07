@@ -57,9 +57,8 @@
     (.on blob-stream "end"
       (fn []
         (swap! app-state assoc :num-of-uploads (- (:num-of-uploads @app-state) 1))
-        (println "NUM OF UPLOADS NOW!" (:num-of-uploads @app-state))
         (if-not (empty? (:upload-queue @app-state))
-          (let [next-file (first (:upload-queue @app-state))]
+          (let [next-file (last (:upload-queue @app-state))]
             (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
             (if-not (= next-file file)
               (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
@@ -68,10 +67,10 @@
 (.change (js/$ "#file-upload")
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)]
-      (swap! app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state))))
       (println "SHIT " (:num-of-uploads @app-state))
         (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
-          (upload-file file)))))
+          (upload-file file)
+          (swap! app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state))))))))
 
 ; end stuff that should probably be cleaned up with react....
 
