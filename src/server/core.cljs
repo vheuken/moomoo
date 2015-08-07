@@ -71,7 +71,7 @@
       (letfn [(convert-position [track-position-info]
                 (+ (:position track-position-info)
                    (- (.now js/Date)
-                      (:starttime track-position-info))))
+                      (:start-time track-position-info))))
               (start-track [room track-position-info]
                 (if (nil? track-position-info)
                   (rooms/get-current-track-position room
