@@ -208,7 +208,7 @@
 (.on socket "upload-complete"
   (fn [music-info]
     (swap! app-state assoc :music-info
-      (merge (:music-info @app-state) music-info))
+      (conj (:music-info @app-state) music-info))
 
     (if (> (:download-slots @app-state) (:num-of-downloads @app-state))
       (request-new-track))))
@@ -285,8 +285,8 @@
   (fn [room-music-info current-track-id]
     (let [sorted-music-info (.sort room-music-info #(- (.-tracknum %1)
                                                        (.-tracknum %2)))]
-      (swap! app-state assoc :music-info (map #(clj->js %1)
-                                              (js->clj sorted-music-info))))
+      (swap! app-state assoc :music-info (vec (map #(clj->js %1)
+                                                (js->clj sorted-music-info)))))
     (swap! app-state assoc :current-track-id current-track-id)
     (.emit socket "file-download-request" current-track-id)))
 
