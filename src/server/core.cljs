@@ -221,14 +221,16 @@
                     (.emit (.to io room) "upload-complete" (clj->js music-info))
                     (rooms/has-track-started? room
                       (fn [started?]
-                        (if-not started?
-                          (rooms/get-current-track room
-                            (fn [current-track]
-                              (println current-track)
-                              (rooms/change-track room current-track
-                                (fn [track-id]
-                                  (println "Track changed to " track-id)
-                                  (.emit (.to io room) "track-change" track-id))))))))))))
+                        (rooms/is-looping? room
+                          (fn [looping?]
+                            (if-not (and started? looping?)
+                              (rooms/get-current-track room
+                                (fn [current-track]
+                                  (println current-track)
+                                  (rooms/change-track room current-track
+                                    (fn [track-id]
+                                      (println "Track changed to " track-id)
+                                      (.emit (.to io room) "track-change" track-id))))))))))))))
 
             (println (str "Successfully uploaded " absolute-file-path)))))))
 
