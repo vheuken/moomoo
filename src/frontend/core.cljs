@@ -162,9 +162,6 @@
   (.emit socket "track-complete"))
 
 (defn play-track [track-id position]
-  (if-not (nil? (:current-sound @app-state))
-    (.destruct (:current-sound @app-state)))
-
   (let [reader (new js/FileReader)
         song-blob (get (:music-files @app-state) track-id)]
     (.readAsDataURL reader song-blob)
@@ -181,7 +178,7 @@
                     :onplay #(.setPosition js/soundManager current-sound-id
                                                            position)})))))
 
-(.on socket "connect" #(.emit socket "join-room" room-id))
+(.on socket "connect" #(.emit socket "connect" room-id))
 (.on socket "sign-in-success"
   (fn []
     (println "Successfully signed in!")
@@ -255,10 +252,15 @@
   (fn [track-id]
     (println "CHANGING TO TRACK " track-id)
     (swap! app-state assoc :current-track-id track-id)
+
+    (if-not (nil? (:current-sound @app-state))
+      (.destruct (:current-sound @app-state)))
+
     (if (nil? (get (:music-files @app-state) track-id))
       (.emit socket "file-download-request" track-id)
-      (do (println "READY TO START WOO"
-      (.emit socket "ready-to-start"))))))
+      (do
+        (println "READY TO START WOO"
+        (.emit socket "ready-to-start"))))))
 
 (.on socket "pause"
   (fn [position]
