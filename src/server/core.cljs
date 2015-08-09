@@ -42,10 +42,6 @@
             #(.emit (.to io room-id) "users-list" (clj->js %1)))
           (println (str (.-id socket) " has disconnected!"))))))
 
-  (.on socket "connect"
-    (fn [room-id]
-      (println (str (.-id socket) " has connected to " room-id))))
-
   (.on socket "sign-in"
     (fn [room-id username]
       (.join socket room-id
