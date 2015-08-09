@@ -5,7 +5,7 @@
   :url "http://example.com/FIXME"
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.28"]
+                 [org.clojure/clojurescript "1.7.58"]
                  [com.cemerick/clojurescript.test "0.3.3"]
                  [org.omcljs/om "0.8.8"]
                  [com.cognitect/transit-cljs "0.8.220"]]
