@@ -42,22 +42,24 @@
             #(.emit (.to io room-id) "users-list" (clj->js %1)))
           (println (str (.-id socket) " has disconnected!"))))))
 
-  (.on socket "join-room"
+  (.on socket "connect"
     (fn [room-id]
-      (.join socket room-id)))
+      (println (str (.-id socket) " has connected to " room-id))))
 
   (.on socket "sign-in"
     (fn [room-id username]
-      (rooms/does-room-exist? room-id
-        (fn [reply]
-          (if-not reply
-            (rooms/init-room room-id #(println))
-            (handle-hotjoin socket room-id))))
-      (rooms/set-username room-id (.-id socket) username
+      (.join socket room-id
         (fn []
-          (.emit socket "sign-in-success")
-          (rooms/get-all-users room-id
-            #(.emit (.to io room-id) "users-list" (clj->js %1)))))))
+          (rooms/does-room-exist? room-id
+            (fn [reply]
+              (if-not reply
+                (rooms/init-room room-id #(println))
+                (handle-hotjoin socket room-id))))
+          (rooms/set-username room-id (.-id socket) username
+            (fn []
+              (.emit socket "sign-in-success")
+              (rooms/get-all-users room-id
+                #(.emit (.to io room-id) "users-list" (clj->js %1)))))))))
 
   (.on socket "chat-message"
     (fn [room message]
