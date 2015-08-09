@@ -178,7 +178,6 @@
                     :onplay #(.setPosition js/soundManager current-sound-id
                                                            position)})))))
 
-(.on socket "connect" #(.emit socket "connect" room-id))
 (.on socket "sign-in-success"
   (fn []
     (println "Successfully signed in!")
