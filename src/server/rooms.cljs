@@ -7,6 +7,12 @@
 (def base64-arraybuffer (nodejs/require "base64-arraybuffer"))
 (def redis-client (.createClient (nodejs/require "redis")))
 
+; taken from get-all-users fn
+; should probably go back there
+(defn users-to-list [reply]
+  (let [user-hash (js->clj reply)]
+    (vec (map #(val %) user-hash))))
+
 (defn set-username [room id username callback]
   (.hset redis-client (string/join ["room:" room ":users"]) id username
     (fn [err reply]
@@ -20,12 +26,9 @@
         (callback nil)))))
 
 (defn get-all-users [room callback]
-  (letfn [(users-to-list [reply]
-            (let [user-hash (js->clj reply)]
-              (vec (map #(val %) user-hash))))]
   (.hgetall redis-client (string/join ["room:" room ":users"])
     (fn [err reply]
-      (callback (users-to-list reply))))))
+      (callback (users-to-list reply)))))
 
 (defn get-num-of-users [room callback]
   (.hlen redis-client (str "room:" room ":users")
@@ -304,3 +307,13 @@
 (defn delete-room [room]
   (let [lua-command "local keys = redis.call('keys', ARGV[1]) \n for i=1,#keys,5000 do \n redis.call('del', unpack(keys, i, math.min(i+4999, #keys))) \n end \n return keys"]
     (.eval redis-client lua-command 0 (str "room:" room ":*"))))
+
+(defn handle-disconnect [room callback]
+  (let [lua-command
+        "local users = redis.call('hgetall', 'room:' .. ARGV[1] .. ':users') \n if next(users) == nil then \n local keys = redis.call('keys', 'room:' .. ARGV[1] .. ':*') \n for i=1,#keys,5000 do \n redis.call('del', unpack(keys, i, math.min(i+4999, #keys))) \n end \n return nil \n end \n local newIndex = 1 \n local prunedUsers = {} \n for i=2,#users,2 do \n prunedUsers[newIndex] = users[i] \n newIndex = newIndex + 1 \n end \n return prunedUsers"]
+    (.eval redis-client lua-command 0 room
+      (fn [err reply]
+        (println reply)
+        (if (nil? reply)
+          (callback [])
+          (callback (js->clj reply)))))))
