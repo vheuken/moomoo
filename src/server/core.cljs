@@ -39,7 +39,10 @@
       (rooms/disconnect (.-id socket)
         (fn [room-id]
           (rooms/get-all-users room-id
-            #(.emit (.to io room-id) "users-list" (clj->js %1)))
+            (fn [users-list]
+              (if (empty? users-list)
+                (rooms/delete-room room-id)
+                (.emit (.to io room-id) "users-list" (clj->js users-list)))))
           (println (str (.-id socket) " has disconnected!"))))))
 
   (.on socket "sign-in"
