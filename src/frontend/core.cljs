@@ -21,7 +21,8 @@
                           :download-slots default-download-slots
                           :num-of-uploads 0
                           :num-of-downloads 0
-                          :download-progress {}}))
+                          :download-progress {}
+                          :tracks-to-delete []}))
 
 (enable-console-print!)
 
@@ -160,6 +161,23 @@
   (println "Song has finished!")
   (.emit socket "track-complete"))
 
+(defn while-loading []
+  (letfn [(remove-once [pred coll]
+            ((fn inner [coll]
+              (lazy-seq
+                (when-let [[x & xs] (seq coll)]
+                  (if (pred x)
+                    xs
+                    (cons x (inner xs))))))
+              coll))]
+    (this-as sound
+      (if (some #(= (.-id sound) %) (:tracks-to-delete @app-state))
+        (do
+          (println "DESTROYING SOUND FROM whileloading()")
+          (.destruct sound)
+          (swap! app-state assoc :tracks-to-delete
+            (vec (remove #(= (.-id sound) %) (:tracks-to-delete @app-state)))))))))
+
 (defn play-track [track-id position]
   (let [reader (new js/FileReader)
         song-blob (get (:music-files @app-state) track-id)]
@@ -170,12 +188,23 @@
           (.createSound js/soundManager #js {:id track-id
                                              :type "audio/mpeg"
                                              :url (.-result reader)
-                                             :autoLoad true}))
+                                             :autoLoad true
+                                             :whileloading while-loading
+                                             :onload while-loading}))
         (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
                     :onfinish on-finish
                     :onplay #(.setPosition (:current-sound @app-state)
                                            position)})))))
+
+(defn destroy-track [track-id]
+  (if (or
+        (= 0 (.-readyState (:current-sound @app-state)))
+        (= 1 (.-readyState (:current-sound @app-state))))
+    (do
+      (println "HAPPENING!!!")
+      (swap! app-state assoc :tracks-to-delete (conj (:tracks-to-delete @app-state) track-id)))
+    (.destruct (:current-sound @app-state))))
 
 (.on socket "sign-in-success"
   (fn []
@@ -249,10 +278,13 @@
 (.on socket "track-change"
   (fn [track-id]
     (println "CHANGING TO TRACK " track-id)
-    (swap! app-state assoc :current-track-id track-id)
+    (let [last-current-track-id (:current-track-id @app-state)]
+      (swap! app-state assoc :current-track-id track-id)
 
-    (if-not (nil? (:current-sound @app-state))
-      (.destruct (:current-sound @app-state)))
+      (if-not (or
+                (= last-current-track-id track-id)
+                (nil? last-current-track-id))
+        (destroy-track last-current-track-id)))
 
     (if (nil? (get (:music-files @app-state) track-id))
       (.emit socket "file-download-request" track-id)
