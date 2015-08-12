@@ -2,7 +2,6 @@
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
-(defonce current-sound-id "current-song")
 (defonce default-upload-slots 4)
 (defonce default-download-slots 4)
 (defonce app-state (atom {:signed-in? false
@@ -123,7 +122,7 @@
       (.emit socket "file-download-request" id))))
 
 (defn pause []
-  (.pause js/soundManager current-sound-id)
+  (.pause (:current-sound @app-state))
   (.emit socket "pause" (.-position (:current-sound @app-state))))
 
 (defn resume []
@@ -168,15 +167,15 @@
     (set! (.-onloadend reader)
       (fn []
         (swap! app-state assoc :current-sound
-          (.createSound js/soundManager #js {:id current-sound-id
+          (.createSound js/soundManager #js {:id track-id
                                              :type "audio/mpeg"
                                              :url (.-result reader)
                                              :autoLoad true}))
         (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
                     :onfinish on-finish
-                    :onplay #(.setPosition js/soundManager current-sound-id
-                                                           position)})))))
+                    :onplay #(.setPosition (:current-sound @app-state)
+                                           position)})))))
 
 (.on socket "sign-in-success"
   (fn []
@@ -263,17 +262,17 @@
 
 (.on socket "pause"
   (fn [position]
-    (.pause js/soundManager current-sound-id)
-    (.setPosition js/soundManager current-sound-id position)))
+    (.pause (:current-sound @app-state))
+    (.setPosition (:current-sound @app-state) position)))
 
 (.on socket "resume"
   (fn []
-    (.resume js/soundManager current-sound-id)))
+    (.resume (:current-sound @app-state))))
 
 (.on socket "position-change"
   (fn [position]
     (letfn [(set-pos [position]
-              (.setPosition js/soundManager current-sound-id position))]
+              (.setPosition (:current-sound @app-state) position))]
       (println "Received pos: " position)
       (if (= 0 (.-playState (:current-sound @app-state)))
         (.play (:current-sound @app-state)
