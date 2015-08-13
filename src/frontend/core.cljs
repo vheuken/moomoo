@@ -175,8 +175,10 @@
         (do
           (println "DESTROYING SOUND FROM whileloading()")
           (.destruct sound)
+          (println (:tracks-to-delete @app-state))
           (swap! app-state assoc :tracks-to-delete
-            (vec (remove #(= (.-id sound) %) (:tracks-to-delete @app-state)))))))))
+            (vec (remove-once #(= (.-id sound) %) (:tracks-to-delete @app-state))))
+          (println (:tracks-to-delete @app-state)))))))
 
 (defn play-track [track-id position]
   (let [reader (new js/FileReader)
@@ -197,10 +199,9 @@
                     :onplay #(.setPosition (:current-sound @app-state)
                                            position)})))))
 
-(defn destroy-track [track-id]
-  (if (or
-        (= 0 (.-readyState (:current-sound @app-state)))
-        (= 1 (.-readyState (:current-sound @app-state))))
+(defn destroy-track [track-id] )
+  (comment
+  (if-not (= 3 (.-readyState (:current-sound @app-state)))
     (do
       (println "HAPPENING!!!")
       (swap! app-state assoc :tracks-to-delete (conj (:tracks-to-delete @app-state) track-id)))
@@ -284,13 +285,14 @@
       (if-not (or
                 (= last-current-track-id track-id)
                 (nil? last-current-track-id))
-        (destroy-track last-current-track-id)))
+        (destroy-track last-current-track-id))
 
-    (if (nil? (get (:music-files @app-state) track-id))
-      (.emit socket "file-download-request" track-id)
-      (do
-        (println "READY TO START WOO"
-        (.emit socket "ready-to-start"))))))
+      (if (nil? (get (:music-files @app-state) track-id))
+        (.emit socket "file-download-request" track-id)
+          (do
+            (println "READY TO START WOO")
+            (.emit socket "ready-to-start"))))))
+
 
 (.on socket "pause"
   (fn [position]
