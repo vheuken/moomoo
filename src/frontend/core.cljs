@@ -13,6 +13,7 @@
                           :music-files {}
                           :is-file-downloading? false
                           :current-track-id nil
+                          :current-sound-id nil
                           :current-sound nil
                           :ball-being-dragged? false
                           :looping? false
@@ -22,7 +23,8 @@
                           :num-of-uploads 0
                           :num-of-downloads 0
                           :download-progress {}
-                          :tracks-to-delete []}))
+                          :tracks-to-delete []
+                          :sound-ids {}}))
 
 (enable-console-print!)
 
@@ -175,10 +177,8 @@
         (do
           (println "DESTROYING SOUND FROM whileloading()")
           (.destruct sound)
-          (println (:tracks-to-delete @app-state))
           (swap! app-state assoc :tracks-to-delete
-            (vec (remove-once #(= (.-id sound) %) (:tracks-to-delete @app-state))))
-          (println (:tracks-to-delete @app-state)))))))
+            (vec (remove #(= (.-id sound) %) (:tracks-to-delete @app-state)))))))))
 
 (defn play-track [track-id position]
   (let [reader (new js/FileReader)
@@ -186,26 +186,34 @@
     (.readAsDataURL reader song-blob)
     (set! (.-onloadend reader)
       (fn []
-        (swap! app-state assoc :current-sound
-          (.createSound js/soundManager #js {:id track-id
-                                             :type "audio/mpeg"
-                                             :url (.-result reader)
-                                             :autoLoad true
-                                             :whileloading while-loading
-                                             :onload while-loading}))
+        (let [sound-id (first (get (:sound-ids @app-state) track-id))]
+          (swap! app-state assoc :sound-ids
+            (merge (:sound-ids @app-state)
+                   {track-id (vec (remove #(= sound-id %) (get (:sound-ids @app-state) track-id)))}))
+
+          (swap! app-state assoc :current-sound
+            (.createSound js/soundManager #js {:id sound-id
+                                               :type "audio/mpeg"
+                                               :url (.-result reader)
+                                               :autoLoad true
+                                               :whileloading while-loading
+                                               :onload while-loading})))
+
+
         (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
                     :onfinish on-finish
                     :onplay #(.setPosition (:current-sound @app-state)
                                            position)})))))
 
-(defn destroy-track [track-id] )
-  (comment
-  (if-not (= 3 (.-readyState (:current-sound @app-state)))
-    (do
-      (println "HAPPENING!!!")
-      (swap! app-state assoc :tracks-to-delete (conj (:tracks-to-delete @app-state) track-id)))
-    (.destruct (:current-sound @app-state))))
+(defn destroy-track [sound-id]
+  (let [sound (.getSoundById js/soundManager sound-id)]
+    (if (or (undefined? sound)
+            (> 3 (.-readyState sound)))
+      (do
+        (println "HAPPENING!!!")
+        (swap! app-state assoc :tracks-to-delete (conj (:tracks-to-delete @app-state) sound-id)))
+      (.destruct sound))))
 
 (.on socket "sign-in-success"
   (fn []
@@ -279,19 +287,26 @@
 (.on socket "track-change"
   (fn [track-id]
     (println "CHANGING TO TRACK " track-id)
-    (let [last-current-track-id (:current-track-id @app-state)]
+    (let [last-current-track-id (:current-track-id @app-state)
+          last-current-sound-id (:current-sound-id @app-state)
+          sound-id (.v4 js/uuid)]
       (swap! app-state assoc :current-track-id track-id)
+      (swap! app-state assoc :current-sound-id sound-id)
 
-      (if-not (or
-                (= last-current-track-id track-id)
-                (nil? last-current-track-id))
-        (destroy-track last-current-track-id))
+      (swap! app-state assoc :sound-ids
+        (merge (:sound-ids @app-state)
+               {track-id (vec (conj (get (:sound-ids @app-state) track-id)
+                                    sound-id))}))
+      (println (:sound-ids @app-state))
+
+      (if-not (nil? last-current-sound-id)
+        (destroy-track last-current-sound-id)))
 
       (if (nil? (get (:music-files @app-state) track-id))
         (.emit socket "file-download-request" track-id)
-          (do
-            (println "READY TO START WOO")
-            (.emit socket "ready-to-start"))))))
+        (do
+          (println "READY TO START WOO")
+          (.emit socket "ready-to-start")))))
 
 
 (.on socket "pause"
