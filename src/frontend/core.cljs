@@ -189,7 +189,7 @@
         (let [sound-id (first (get (:sound-ids @app-state) track-id))]
           (swap! app-state assoc :sound-ids
             (merge (:sound-ids @app-state)
-                   {track-id (vec (remove #(= sound-id %) (get (:sound-ids @app-state) track-id)))}))
+                   {track-id (vec (drop 1 (get (:sound-ids @app-state) track-id)))}))
 
           (swap! app-state assoc :current-sound
             (.createSound js/soundManager #js {:id sound-id
