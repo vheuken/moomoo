@@ -321,12 +321,13 @@
         (set-pos position)))))
 
 (.on socket "hotjoin-music-info"
-  (fn [room-music-info current-track-id]
+  (fn [room-music-info current-track-id current-sound-id]
     (let [sorted-music-info (.sort room-music-info #(- (.-tracknum %1)
                                                        (.-tracknum %2)))]
       (swap! app-state assoc :music-info (vec (map #(clj->js %1)
                                                 (js->clj sorted-music-info)))))
     (swap! app-state assoc :current-track-id current-track-id)
+    (swap! app-state assoc :current-sound-id current-sound-id)
     (.emit socket "file-download-request" current-track-id)))
 
 (.on socket "set-loop"
