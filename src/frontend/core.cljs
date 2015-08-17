@@ -80,9 +80,9 @@
 
 (defn on-drag-stop [event ui]
   (swap! app-state assoc :ball-being-dragged? false)
-  (if-not (nil? (:current-sound @player/app-state))
+  (if-not (player/is-sound-loaded?)
     (let [bar-width (.width (js/$ "#progress-track-bar"))
-          new-position (* (.-duration (:current-sound @player/app-state))
+          new-position (* (player/get-duration)
                           (/ (.-left (.-position ui)) bar-width))]
       (println new-position)
       (.emit socket "position-change" new-position))))
@@ -244,9 +244,7 @@
     (player/pause)
     (player/set-position position)))
 
-(.on socket "resume"
-  (fn []
-    (player/resume)))
+(.on socket "resume" #(player/resume))
 
 (.on socket "position-change"
   (fn [position]

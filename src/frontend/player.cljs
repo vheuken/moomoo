@@ -50,7 +50,7 @@
                     :onplay #(.setPosition (:current-sound @app-state)
                                            position)})))))
 
-
+; TODO: probably should go into a different module...but which?
 (defn destroy-track [sound-id]
   (let [sound (.getSoundById js/soundManager sound-id)]
     (if (or (undefined? sound)
@@ -69,3 +69,9 @@
 
 (defn resume []
   (.resume (:current-sound @app-state)))
+
+(defn get-duration []
+  (.-duration (:current-sound @app-state)))
+
+(defn is-sound-loaded? []
+  (nil? (:current-sound @app-state)))
