@@ -1,7 +1,8 @@
 (ns moomoo-frontend.renderer
   (:require [om.core :as om  :include-macros true]
             [om.dom  :as dom :include-macros true]
-            [moomoo-frontend.core :as core]))
+            [moomoo-frontend.core :as core]
+            [moomoo-frontend.player :as player]))
 
 (defn user-view [user owner]
   (reify

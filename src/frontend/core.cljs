@@ -1,4 +1,5 @@
-(ns moomoo-frontend.core)
+(ns moomoo-frontend.core
+  (:require [moomoo-frontend.player :as player]))
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
@@ -14,7 +15,6 @@
                           :is-file-downloading? false
                           :current-track-id nil
                           :current-sound-id nil
-                          :current-sound nil
                           :ball-being-dragged? false
                           :looping? false
                           :upload-queue []
@@ -22,9 +22,7 @@
                           :download-slots default-download-slots
                           :num-of-uploads 0
                           :num-of-downloads 0
-                          :download-progress {}
-                          :tracks-to-delete []
-                          :sound-ids {}}))
+                          :download-progress {}}))
 
 (enable-console-print!)
 
@@ -82,9 +80,9 @@
 
 (defn on-drag-stop [event ui]
   (swap! app-state assoc :ball-being-dragged? false)
-  (if-not (nil? (:current-sound @app-state))
+  (if-not (nil? (:current-sound @player/app-state))
     (let [bar-width (.width (js/$ "#progress-track-bar"))
-          new-position (* (.-duration (:current-sound @app-state))
+          new-position (* (.-duration (:current-sound @player/app-state))
                           (/ (.-left (.-position ui)) bar-width))]
       (println new-position)
       (.emit socket "position-change" new-position))))
@@ -125,8 +123,8 @@
       (.emit socket "file-download-request" id))))
 
 (defn pause []
-  (.pause (:current-sound @app-state))
-  (.emit socket "pause" (.-position (:current-sound @app-state))))
+  (player/pause)
+  (.emit socket "pause" (player/get-position)))
 
 (defn resume []
   (.emit socket "resume"))
@@ -149,59 +147,10 @@
 (defn restart-track []
   (.emit socket "position-change" 0))
 
-(defn set-progress-ball-position [percent-completed]
-  (.css (js/$ "#progress-track-ball") #js {"left" (str percent-completed "%")}))
-
-(defn while-playing []
-  (if-not (:ball-being-dragged? @app-state)
-    (let [sound (:current-sound @app-state)]
-      (set-progress-ball-position (* 100
-                                    (/ (.-position sound)
-                                       (.-duration sound)))))))
-
 (defn on-finish []
   (println "Song has finished!")
   (.emit socket "track-complete"))
 
-(defn while-loading []
-  (letfn [(remove-once [pred coll]
-            ((fn inner [coll]
-              (lazy-seq
-                (when-let [[x & xs] (seq coll)]
-                  (if (pred x)
-                    xs
-                    (cons x (inner xs))))))
-              coll))]
-    (this-as sound
-      (if (some #(= (.-id sound) %) (:tracks-to-delete @app-state))
-        (do
-          (println "DESTROYING SOUND FROM whileloading()")
-          (.destruct sound)
-          (swap! app-state assoc :tracks-to-delete
-            (vec (remove #(= (.-id sound) %) (:tracks-to-delete @app-state)))))))))
-
-(defn play-track [track-id position]
-  (let [reader (new js/FileReader)
-        song-blob (get (:music-files @app-state) track-id)]
-    (.readAsDataURL reader song-blob)
-    (set! (.-onloadend reader)
-      (fn []
-        (let [sound-id (:current-sound-id @app-state)]
-
-          (swap! app-state assoc :current-sound
-            (.createSound js/soundManager #js {:id sound-id
-                                               :type "audio/mpeg"
-                                               :url (.-result reader)
-                                               :autoLoad true
-                                               :whileloading while-loading
-                                               :onload while-loading})))
-
-
-        (.play (:current-sound @app-state)
-               #js {:whileplaying while-playing
-                    :onfinish on-finish
-                    :onplay #(.setPosition (:current-sound @app-state)
-                                           position)})))))
 
 (defn destroy-track [sound-id]
   (let [sound (.getSoundById js/soundManager sound-id)]
@@ -279,7 +228,10 @@
 
 (.on socket "start-track"
   (fn [position]
-     (play-track (:current-track-id @app-state) position)))
+     (player/play-track (get (:music-files @app-state) (:current-track-id @app-state))
+                        (:current-sound-id @app-state)
+                        position
+                        on-finish)))
 
 (.on socket "track-change"
   (fn [track-id sound-id]
@@ -306,19 +258,12 @@
 
 (.on socket "resume"
   (fn []
-    (.resume (:current-sound @app-state))))
+    (player/resume)))
 
 (.on socket "position-change"
   (fn [position]
-    (letfn [(set-pos [position]
-              (.setPosition (:current-sound @app-state) position))]
-      (println "Received pos: " position)
-      (if (= 0 (.-playState (:current-sound @app-state)))
-        (.play (:current-sound @app-state)
-          #js {:whileplaying while-playing
-               :onfinish on-finish
-               :onplay #(set-pos position)})
-        (set-pos position)))))
+    (println position)
+    (player/set-position position)))
 
 (.on socket "hotjoin-music-info"
   (fn [room-music-info current-track-id current-sound-id]
