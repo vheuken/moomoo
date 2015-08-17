@@ -195,12 +195,24 @@
     (fn [err reply]
       (callback reply))))
 
-(defn change-track [room position callback]
+(defn change-track [room position sound-id callback]
   (.hget redis-client (str "room:" room ":track-order") position
     (fn [err track-id]
       (.set redis-client (str "room:" room ":current-track") position
         (fn []
-          (callback track-id))))))
+          (.set redis-client (str "room:" room ":current-sound") sound-id
+            (fn []
+              (callback track-id))))))))
+
+(defn get-current-sound-id [room callback]
+  (.get redis-client (str "room:" room ":current-sound")
+    (fn [err reply]
+      (callback reply))))
+
+(defn add-to-change-track-list [room track-num callback]
+  (.rpush redis-client (str "room:" room ":change-track-list") track-num
+    (fn [err reply]
+      (callback))))
 
 (defn user-ready-to-start [socket-id callback]
   (get-room-from-user-id socket-id
@@ -239,7 +251,7 @@
               (get-track-id-from-position room track-num
                 (fn [track-id]
                   (println "TRACK-ID " track-id)
-                    (callback track-id)))))))))))
+                  (callback track-id)))))))))))
 
 (defn get-all-music-info [room-id callback]
   (.hgetall redis-client (str "room:" room-id ":music-info")
@@ -297,7 +309,7 @@
         (callback false)))))
 
 (defn start-changing-track [room callback]
-  (.eval redis-client "local room_id = ARGV[1] local changing = redis.call('get', 'room:' .. room_id .. 'changing-track?') if (changing == false) or (changing == 'false') then redis.call('set', 'room:' .. room_id .. ':changing-track?', 'true') end return changing"
+  (.eval redis-client "local room_id = ARGV[1] local track = redis.call('lrange', 'room:' .. room_id .. ':change-track-list', -1, -1)[1] if track ~= nil then redis.call('del', 'room:' .. room_id .. ':change-track-list') end return track"
         0 "room"
     (fn [err reply]
       (if (= "true" reply)

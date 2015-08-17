@@ -1,5 +1,3 @@
-(def project-dir (str "PROJECT_DIR='" (System/getProperty "user.dir") "'"))
-(println project-dir)
 (defproject moomoo "0.1.0-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
@@ -52,5 +50,4 @@
                 :output-to "public/js/moomoo-frontend.js"
                 :optimizations :simple}}]
     :test-commands {"moomoo" ["node" :node-runner
-                              "PROJECT_DIR = '/home/vincent/Workspace/moomoo'"
                               "target/moomoo-test.js"]}})

@@ -1,8 +1,8 @@
 local room_id = ARGV[1]
-local changing = redis.call('get', 'room:' .. room_id .. 'changing-track?')
+local track = redis.call('lrange', 'room:' .. room_id .. ':change-track-list', -1, -1)[1]
 
-if (changing == false) or (changing == 'false') then
-  redis.call('set', 'room:' .. room_id .. ':changing-track?', 'true')
+if track ~= nil then
+  redis.call('del', 'room:' .. room_id .. ':change-track-list')
 end
 
-return changing
+return track

@@ -137,14 +137,14 @@
                                             (:music-info @app-state)) 0))
                     1)]
     (if (>= track-num 0)
-      (.emit socket "change-track" track-num))))
+      (.emit socket "change-track" track-num (.v4 js/uuid)))))
 
 (defn next-track []
   (let [track-num (+ 1 (.-tracknum (nth (filter #(= (.-id %1)
                                                     (:current-track-id @app-state))
                                                 (:music-info @app-state)) 0)))]
     (if (< track-num (count (:music-info @app-state)))
-      (.emit socket "change-track" track-num))))
+      (.emit socket "change-track" track-num (.v4 js/uuid)))))
 
 (defn restart-track []
   (.emit socket "position-change" 0))
@@ -186,10 +186,7 @@
     (.readAsDataURL reader song-blob)
     (set! (.-onloadend reader)
       (fn []
-        (let [sound-id (first (get (:sound-ids @app-state) track-id))]
-          (swap! app-state assoc :sound-ids
-            (merge (:sound-ids @app-state)
-                   {track-id (vec (drop 1 (get (:sound-ids @app-state) track-id)))}))
+        (let [sound-id (:current-sound-id @app-state)]
 
           (swap! app-state assoc :current-sound
             (.createSound js/soundManager #js {:id sound-id
@@ -278,26 +275,19 @@
           (request-new-track))
 
         (if (= (:current-track-id @app-state) track-id)
-          (.emit socket "ready-to-start"))))))
+          (.emit socket "ready-to-start" (:current-sound-id @app-state)))))))
 
 (.on socket "start-track"
   (fn [position]
      (play-track (:current-track-id @app-state) position)))
 
 (.on socket "track-change"
-  (fn [track-id]
+  (fn [track-id sound-id]
     (println "CHANGING TO TRACK " track-id)
     (let [last-current-track-id (:current-track-id @app-state)
-          last-current-sound-id (:current-sound-id @app-state)
-          sound-id (.v4 js/uuid)]
+          last-current-sound-id (:current-sound-id @app-state)]
       (swap! app-state assoc :current-track-id track-id)
       (swap! app-state assoc :current-sound-id sound-id)
-
-      (swap! app-state assoc :sound-ids
-        (merge (:sound-ids @app-state)
-               {track-id (vec (conj (get (:sound-ids @app-state) track-id)
-                                    sound-id))}))
-      (println (:sound-ids @app-state))
 
       (if-not (nil? last-current-sound-id)
         (destroy-track last-current-sound-id)))
@@ -306,7 +296,7 @@
         (.emit socket "file-download-request" track-id)
         (do
           (println "READY TO START WOO")
-          (.emit socket "ready-to-start")))))
+          (.emit socket "ready-to-start" sound-id)))))
 
 
 (.on socket "pause"

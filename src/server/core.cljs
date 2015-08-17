@@ -67,7 +67,7 @@
                                                    :message  message})))))
 
   (.on socket "ready-to-start"
-    (fn []
+    (fn [sound-id]
       (letfn [(convert-position [track-position-info]
                 (+ (:position track-position-info)
                    (- (.now js/Date)
@@ -79,20 +79,23 @@
                       (.emit socket "start-track" (convert-position track-position-info))))
                   (.emit (.to io room) "start-track" (convert-position track-position-info))))]
         (println "Received ready-to-start signal from " (.-id socket))
-        (rooms/user-ready-to-start (.-id socket)
-          (fn [num-users-ready]
-            (rooms/get-room-from-user-id (.-id socket)
-              (fn [room]
-                (rooms/get-num-of-users room
-                  (fn [num-users]
-                    (if (<= num-users num-users-ready) ; NOTICE!!!! CHANGED from = to <=
-                      (rooms/has-track-started? room
-                        (fn [started?]
-                          (if started?
-                            (start-track room nil)
-                            (rooms/start-current-track room
-                              (fn [track-position-info]
-                                (start-track room track-position-info))))))))))))))))
+        (rooms/get-room-from-user-id (.-id socket)
+          (fn [room]
+            (rooms/get-current-sound-id room
+              (fn [current-sound-id]
+                (if (= sound-id current-sound-id)
+                  (rooms/user-ready-to-start (.-id socket)
+                    (fn [num-users-ready]
+                      (rooms/get-num-of-users room
+                        (fn [num-users]
+                          (if (= num-users num-users-ready)
+                            (rooms/has-track-started? room
+                              (fn [started?]
+                                (if started?
+                                  (start-track room nil)
+                                  (rooms/start-current-track room
+                                    (fn [track-position-info]
+                                      (start-track room track-position-info)))))))))))))))))))
 
   (.on socket "pause"
     (fn [position]
@@ -163,28 +166,32 @@
                                             (.emit (.to io room) "track-change" track-id))))))))))))))))))))))
 
   (.on socket "change-track"
-    (fn [track-num]
+    (fn [track-num sound-id]
       (println "CHANGING TO TRACK " track-num)
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (rooms/start-changing-track room
-            (fn [changing?]
-              (if-not changing?
-                  (rooms/clear-ready-to-start room
-                    (fn []
-                      (rooms/get-num-of-tracks room
-                        (fn [num-of-tracks]
-                          (if (and (>= track-num 0) (< track-num num-of-tracks))
-                            (rooms/clear-track-complete room
-                              (fn []
-                                (rooms/change-track room track-num
-                                  (fn [track-id]
-                                    (rooms/set-current-track-position room 0
-                                      (fn []
-                                        (rooms/track-complete room
-                                          (fn []
-                                            (.emit (.to io room) "track-change" track-id)
-                                            (rooms/stop-changing-track room)))))))))))))))))))))
+          (rooms/add-to-change-track-list room track-num
+            (fn []
+              (rooms/start-changing-track room
+                (fn [reply]
+                  (if-not (nil? reply)
+                    (rooms/clear-ready-to-start room
+                      (fn []
+                        (rooms/get-num-of-tracks room
+                          (fn [num-of-tracks]
+                            (if (and (>= track-num 0) (< track-num num-of-tracks))
+                              (rooms/clear-track-complete room
+                                (fn []
+                                  (rooms/change-track room track-num sound-id
+                                    (fn [track-id]
+                                      (rooms/set-current-track-position room 0
+                                        (fn []
+                                          (rooms/track-complete room
+                                            (fn []
+                                              (.emit (.to io room)
+                                                     "track-change"
+                                                     track-id
+                                                     sound-id)))))))))))))))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
@@ -228,10 +235,11 @@
                                 (rooms/get-current-track room
                                   (fn [current-track]
                                     (println current-track)
-                                    (rooms/change-track room current-track
-                                      (fn [track-id]
-                                        (println "Track changed to " track-id)
-                                        (.emit (.to io room) "track-change" track-id)))))))))))))))
+                                    (let [sound-id (.v4 js-uuid)]
+                                      (rooms/change-track room current-track sound-id
+                                        (fn [track-id]
+                                          (println "Track changed to " track-id)
+                                          (.emit (.to io room) "track-change" track-id sound-id))))))))))))))))
 
             (println (str "Successfully uploaded " absolute-file-path)))))))
 
