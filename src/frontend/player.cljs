@@ -50,6 +50,14 @@
                     :onplay #(.setPosition (:current-sound @app-state)
                                            position)})))))
 
+
+(defn destroy-track [sound-id]
+  (let [sound (.getSoundById js/soundManager sound-id)]
+    (if (or (undefined? sound)
+            (> 3 (.-readyState sound)))
+      (swap! app-state assoc :tracks-to-delete (conj (:tracks-to-delete @app-state) sound-id)))
+      (.destruct sound)))
+
 (defn set-position [position]
   (.setPosition (:current-sound @app-state) position))
 

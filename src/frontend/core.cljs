@@ -151,16 +151,6 @@
   (println "Song has finished!")
   (.emit socket "track-complete"))
 
-
-(defn destroy-track [sound-id]
-  (let [sound (.getSoundById js/soundManager sound-id)]
-    (if (or (undefined? sound)
-            (> 3 (.-readyState sound)))
-      (do
-        (println "HAPPENING!!!")
-        (swap! app-state assoc :tracks-to-delete (conj (:tracks-to-delete @app-state) sound-id)))
-      (.destruct sound))))
-
 (.on socket "sign-in-success"
   (fn []
     (println "Successfully signed in!")
@@ -242,19 +232,17 @@
       (swap! app-state assoc :current-sound-id sound-id)
 
       (if-not (nil? last-current-sound-id)
-        (destroy-track last-current-sound-id)))
+        (player/destroy-track last-current-sound-id)))
 
       (if (nil? (get (:music-files @app-state) track-id))
         (.emit socket "file-download-request" track-id)
-        (do
-          (println "READY TO START WOO")
-          (.emit socket "ready-to-start" sound-id)))))
+        (.emit socket "ready-to-start" sound-id))))
 
 
 (.on socket "pause"
   (fn [position]
-    (.pause (:current-sound @app-state))
-    (.setPosition (:current-sound @app-state) position)))
+    (player/pause)
+    (player/set-position position)))
 
 (.on socket "resume"
   (fn []
@@ -262,7 +250,6 @@
 
 (.on socket "position-change"
   (fn [position]
-    (println position)
     (player/set-position position)))
 
 (.on socket "hotjoin-music-info"
@@ -271,8 +258,10 @@
                                                        (.-tracknum %2)))]
       (swap! app-state assoc :music-info (vec (map #(clj->js %1)
                                                 (js->clj sorted-music-info)))))
+
     (swap! app-state assoc :current-track-id current-track-id)
     (swap! app-state assoc :current-sound-id current-sound-id)
+
     (.emit socket "file-download-request" current-track-id)))
 
 (.on socket "set-loop"
