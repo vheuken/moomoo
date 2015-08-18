@@ -5,6 +5,7 @@
 
 (def id3 (nodejs/require "id3js"))
 (def base64-arraybuffer (nodejs/require "base64-arraybuffer"))
+(def js-uuid (nodejs/require "uuid"))
 (def redis-client (.createClient (nodejs/require "redis")))
 
 ; taken from get-all-users fn
@@ -239,19 +240,18 @@
 (defn next-track [room callback]
   (.get redis-client (str "room:" room ":current-track")
     (fn [err current-track-num]
-      (println "CURRENT_TRACK_NUM" current-track-num)
       (get-num-of-tracks room
         (fn [num-of-tracks]
-          (println "NUM_OF_TRACKS" num-of-tracks)
           (if (>= current-track-num num-of-tracks)
             (callback nil)
           (.incr redis-client (str "room:" room ":current-track")
             (fn [err track-num]
-              (println "TRACK NUM: " track-num)
               (get-track-id-from-position room track-num
                 (fn [track-id]
-                  (println "TRACK-ID " track-id)
-                  (callback track-id)))))))))))
+                  (let [sound-id (.v4 js-uuid)]
+                    (.set redis-client (str "room:" room ":current-sound") sound-id
+                      (fn [err reply]
+                        (callback track-id sound-id))))))))))))))
 
 (defn get-all-music-info [room-id callback]
   (.hgetall redis-client (str "room:" room-id ":music-info")

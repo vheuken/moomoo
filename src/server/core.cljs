@@ -163,10 +163,12 @@
                                         (fn []
                                           (.emit (.to io room) "position-change" 0)))
                                       (rooms/next-track room
-                                        (fn [track-id]
-                                          (println track-id)
+                                        (fn [track-id sound-id]
                                           (if-not (nil? track-id)
-                                            (.emit (.to io room) "track-change" track-id))))))))))))))))))))))
+                                            (.emit (.to io room)
+                                                   "track-change"
+                                                   track-id
+                                                   sound-id))))))))))))))))))))))
 
   (.on socket "change-track"
     (fn [track-num sound-id]
