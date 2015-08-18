@@ -31,11 +31,11 @@
       (apply dom/div #js {:id "messages"}
         (om/build-all message-view (:messages data))))
     om/IDidUpdate
-      (did-update [_ _ _]
-        (if (:message-received? @core/app-state)
-          (let [div (js/$ "#messages")]
-            (.scrollTop div (.prop div "scrollHeight"))
-            (swap! core/app-state assoc :message-received? false))))))
+    (did-update [_ _ _]
+      (if (:message-received? @core/app-state)
+        (let [div (js/$ "#messages")]
+          (.scrollTop div (.prop div "scrollHeight"))
+          (swap! core/app-state assoc :message-received? false))))))
 
 (defn username-form [data owner]
   (reify
@@ -176,11 +176,20 @@
 
 (defn progress-track [data owner]
   (reify
+    om/IShouldUpdate
+    (should-update [_ _ _]
+      true)
     om/IRender
     (render [this]
       (dom/div nil
         (dom/hr #js {:id "progress-track-bar"}
-          (dom/div #js {:id "progress-track-ball"}))))))
+          (let [sound (:current-sound data)
+                percent-completed (if (nil? sound)
+                                      0
+                                      (* 100 (/ (:current-sound-position data) (.-duration sound))))
+                style #js {:left (str percent-completed "%")}]
+            (dom/div #js {:id "progress-track-ball"
+                          :style style})))))))
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})

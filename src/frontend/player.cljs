@@ -1,19 +1,15 @@
 (ns moomoo-frontend.player)
 
 (defonce app-state (atom {:current-sound nil
-                          :tracks-to-delete []}))
+                          :tracks-to-delete []
+                          :current-sound-position 0}))
 
-; TODO: this shouldn't be here; renderer should handle this by polling position
-(defn set-progress-ball-position [percent-completed]
-  (.css (js/$ "#progress-track-ball") #js {"left" (str percent-completed "%")}))
-
-; TODO: shouldnt even need this once we move this to react
+; TODO: can we get rid of this?
+;       This is just used because om updates when the state atom updates
+;       Maybe there is a way to do this in om with just :current-sound?
 (defn while-playing []
-  (if-not (:ball-being-dragged? @app-state)
-    (let [sound (:current-sound @app-state)]
-      (set-progress-ball-position (* 100
-                                    (/ (.-position sound)
-                                       (.-duration sound)))))))
+  (swap! app-state assoc :current-sound-position (.-position (:current-sound @app-state))))
+
 (defn while-loading []
   (letfn [(remove-once [pred coll]
             ((fn inner [coll]
