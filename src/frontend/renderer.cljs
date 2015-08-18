@@ -181,8 +181,8 @@
       (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
                                                     :containment "#progress-track"
                                                     :start #(swap! core/app-state assoc
-                                                                   :ball-being-dragged?
-                                                                   true)
+                                                                  :ball-being-dragged?
+                                                                  true)
                                                     :stop core/on-drag-stop}))
     om/IRender
     (render [this]
@@ -193,8 +193,10 @@
                                       0
                                       (* 100 (/ (:current-sound-position data) (.-duration sound))))
                 style #js {:left (str percent-completed "%")}]
-            (dom/div #js {:id "progress-track-ball"
-                          :style style})))))))
+            (if (:ball-being-dragged? @core/app-state)
+              (dom/div #js {:id "progress-track-ball"})
+              (dom/div #js {:id "progress-track-ball"
+                            :style style}))))))))
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})

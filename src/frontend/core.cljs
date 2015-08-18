@@ -84,7 +84,6 @@
     (let [bar-width (.width (js/$ "#progress-track-bar"))
           new-position (* (player/get-duration)
                           (/ (.-left (.-position ui)) bar-width))]
-      (println new-position)
       (.emit socket "position-change" new-position))))
 
 (defn get-music-info-from-id [track-id]
