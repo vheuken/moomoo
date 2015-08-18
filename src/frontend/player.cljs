@@ -2,13 +2,15 @@
 
 (defonce app-state (atom {:current-sound nil
                           :tracks-to-delete []
-                          :current-sound-position 0}))
+                          :current-sound-position 0
+                          :ball-being-dragged? false}))
 
 ; TODO: can we get rid of this?
 ;       This is just used because om updates when the state atom updates
 ;       Maybe there is a way to do this in om with just :current-sound?
 (defn while-playing []
-  (swap! app-state assoc :current-sound-position (.-position (:current-sound @app-state))))
+  (if-not (:ball-being-dragged? @app-state)
+    (swap! app-state assoc :current-sound-position (.-position (:current-sound @app-state)))))
 
 (defn while-loading []
   (letfn [(remove-once [pred coll]
