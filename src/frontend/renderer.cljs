@@ -176,9 +176,14 @@
 
 (defn progress-track [data owner]
   (reify
-    om/IShouldUpdate
-    (should-update [_ _ _]
-      true)
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
+                                                    :containment "#progress-track"
+                                                    :start #(swap! core/app-state assoc
+                                                                   :ball-being-dragged?
+                                                                   true)
+                                                    :stop core/on-drag-stop}))
     om/IRender
     (render [this]
       (dom/div nil

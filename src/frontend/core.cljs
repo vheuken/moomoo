@@ -87,12 +87,6 @@
       (println new-position)
       (.emit socket "position-change" new-position))))
 
-(.draggable (js/$ "#progress-track-ball") #js {:axis "x"
-                                               :containment "#progress-track"
-                                               :start #(swap! app-state assoc
-                                                              :ball-being-dragged?
-                                                              true)
-                                               :stop on-drag-stop})
 (defn get-music-info-from-id [track-id]
   (nth (filter #(= (.-id %1)
                    track-id)
