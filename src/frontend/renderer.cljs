@@ -174,6 +174,14 @@
       (apply dom/span nil
         (om/build-all track-view (:music-info data))))))
 
+(defn progress-track [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div nil
+        (dom/hr #js {:id "progress-track-bar"}
+          (dom/div #js {:id "progress-track-ball"}))))))
+
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
 (om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
@@ -181,3 +189,4 @@
 (om/root restart-button core/app-state {:target (. js/document (getElementById "restart-button"))})
 (om/root loop-button core/app-state {:target (. js/document (getElementById "loop-button"))})
 (om/root track-queue core/app-state {:target (. js/document (getElementById "playlist"))})
+(om/root progress-track player/app-state {:target (. js/document (getElementById "progress-track"))})
