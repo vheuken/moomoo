@@ -3,7 +3,8 @@
 (defonce app-state (atom {:current-sound nil
                           :tracks-to-delete []
                           :current-sound-position 0
-                          :ball-being-dragged? false}))
+                          :ball-being-dragged? false
+                          :on-finish nil}))
 
 ; TODO: can we get rid of this?
 ;       This is just used because om updates when the state atom updates
@@ -30,6 +31,8 @@
             (vec (remove #(= (.-id sound) %) (:tracks-to-delete @app-state)))))))))
 
 (defn play-track [sound-blob sound-id position on-finish]
+  (swap! app-state assoc :on-finish on-finish)
+
   (let [reader (new js/FileReader)]
     (.readAsDataURL reader sound-blob)
     (set! (.-onloadend reader)
@@ -57,7 +60,12 @@
       (.destruct sound)))
 
 (defn set-position [position]
-  (.setPosition (:current-sound @app-state) position))
+  (if (= 0 (.-playState (:current-sound @app-state)))
+    (.play (:current-sound @app-state)
+           #js {:whileplaying while-playing
+                :onfinish (:on-finish @app-state)
+                :onplay #(.setPosition (:current-sound @app-state) position)})
+    (.setPosition (:current-sound @app-state) position)))
 
 (defn get-position []
   (.-position (:current-sound @app-state)))
