@@ -92,12 +92,19 @@ body {
 }
 
 #progress-track-ball {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  left: 0px;
+}
+
+#progress-track-ball-display {
   border-radius: 50%;
   width: 20px;
   height: 20px;
   background-color: #96C8E9;
   position: absolute;
-  left: 0px;
+  right: 10px;
   padding: 0px;
 }
 

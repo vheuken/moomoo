@@ -194,7 +194,8 @@
                                       (* 100 (/ (:current-sound-position data) (.-duration sound))))
                 style #js {:left (str percent-completed "%")}]
               (dom/div #js {:id "progress-track-ball"
-                            :style style})))))))
+                            :style style}
+                (dom/div #js {:id "progress-track-ball-display"}))))))))
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
