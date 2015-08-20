@@ -33,21 +33,9 @@
                 :target :nodejs
                 :optimizations :none
                 :source-map true}}
-             {:id "moomoo-server-test"
-              :source-paths ["src/server" "test/server"]
-              :notify-command ["node" :cljs.test/node-runner
-                               "target/moomoo-test.js"]
-              :compiler {
-                :output-to "target/moomoo-test.js"
-                :output-dir "target/test"
-                :target :nodejs
-                :optimizations :simple
-                :hashbang false
-                :language-in :ecmascript5}}
+
              {:id "moomoo-frontend"
               :source-paths ["src/frontend"]
               :compiler {
                 :output-to "public/js/moomoo-frontend.js"
-                :optimizations :simple}}]
-    :test-commands {"moomoo" ["node" :node-runner
-                              "target/moomoo-test.js"]}})
+                :optimizations :simple}}]})
