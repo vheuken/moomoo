@@ -81,3 +81,6 @@
 
 (defn is-sound-loaded? []
   (nil? (:current-sound @app-state)))
+
+(defn set-volume [volume]
+  (.setVolume (:current-sound @app-state) volume))

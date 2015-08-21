@@ -86,6 +86,11 @@
                           (/ (.-left (.-position ui)) bar-width))]
       (.emit socket "position-change" new-position))))
 
+(defn on-volume-drag-stop [event ui]
+  (let [bar-width (.width (js/$ "#volume-bar"))
+        new-volume (* 100 (/ (.-left (.-position ui)) bar-width))]
+    (player/set-volume new-volume)))
+
 (defn get-music-info-from-id [track-id]
   (nth (filter #(= (.-id %1)
                    track-id)

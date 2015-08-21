@@ -210,3 +210,17 @@
 (om/root loop-button core/app-state {:target (. js/document (getElementById "loop-button"))})
 (om/root track-queue core/app-state {:target (. js/document (getElementById "playlist"))})
 (om/root progress-track player/app-state {:target (. js/document (getElementById "progress-track"))})
+
+(defn volume [data owner]
+  (reify
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (.draggable (js/$ "#volume-ball") #js {:axis "x"
+                                                    :containment "#volume"
+                                                    :stop core/on-volume-drag-stop}))
+    om/IRender
+    (render [this]
+      (dom/hr #js {:id "volume-bar"}
+        (dom/div #js {:id "volume-ball"})))))
+
+(om/root volume player/app-state {:target (. js/document (getElementById "volume"))})

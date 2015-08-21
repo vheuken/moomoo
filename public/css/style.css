@@ -120,3 +120,31 @@ body {
   left: -10px;
 }
 
+#volume {
+  position: relative;
+  margin: auto;
+  width: 20%;
+  height: 5%;
+}
+
+#volume-bar {
+  position: absolute;
+  width: 100%;
+  height: 10px;
+  background-color: #D7D7D7;
+  border: none;
+  display: block;
+  border-radius: 5px;
+}
+
+#volume-ball {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  background-color: #96C8E9;
+  position: absolute;
+  padding: 0px;
+  opacity: 0.6;
+}
+
+
