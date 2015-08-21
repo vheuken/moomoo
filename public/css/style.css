@@ -84,9 +84,19 @@ body {
   height: 10px;
   width: 100%;
   border: none;
-  background-color: #FFFFFF;
+  background-color: #FF0000;
   position:absolute;
   left: 0px;
+  padding: 0px;
+}
+
+#progress-track-bar-display {
+  display: block;
+  height: 10px;
+  width: 100%;
+  border: none;
+  background-color: #FFFFFF;
+  position:absolute;
   padding: 0px;
   border-radius: 5px;
 }
@@ -101,10 +111,12 @@ body {
 
 #progress-track-ball-display {
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 2000%;
+  height: 2000%;
   background-color: #96C8E9;
   position: absolute;
   padding: 0px;
+  opacity: 0.6;
+  left: -10px;
 }
 

@@ -188,14 +188,19 @@
     (render [this]
       (dom/div nil
         (dom/hr #js {:id "progress-track-bar"}
-          (let [sound (:current-sound data)
-                percent-completed (if (nil? sound)
-                                      0
-                                      (* 100 (/ (:current-sound-position data) (.-duration sound))))
-                style #js {:left (str percent-completed "%")}]
-              (dom/div #js {:id "progress-track-ball"
-                            :style style}
-                (dom/div #js {:id "progress-track-ball-display"}))))))))
+          (dom/hr #js {:id "progress-track-bar-display"
+                       :style #js {:left "-5px"
+                                   :width (str (+ (.-offsetWidth (. js/document (getElementById "progress-track")))
+                                                  10)
+                                               "px")}}
+            (let [sound (:current-sound data)
+                  percent-completed (if (nil? sound)
+                                        0
+                                        (* 100 (/ (:current-sound-position data) (.-duration sound))))
+                  style #js {:left (str percent-completed "%")}]
+                (dom/div #js {:id "progress-track-ball"
+                              :style style}
+                  (dom/div #js {:id "progress-track-ball-display"})))))))))
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
