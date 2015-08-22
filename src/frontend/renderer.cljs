@@ -33,7 +33,7 @@
     om/IDidUpdate
     (did-update [_ _ _]
       (if (:message-received? @core/app-state)
-        (let [div (js/$ "#messages")]
+        (let [div (js/$ "#messages-window")]
           (.scrollTop div (.prop div "scrollHeight"))
           (swap! core/app-state assoc :message-received? false))))))
 
