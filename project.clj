@@ -18,7 +18,7 @@
                       [id3js "1.1.3"]
                       [base64-arraybuffer "0.1.2"]]
 
-  :plugins [[lein-cljsbuild "1.0.4"]
+  :plugins [[lein-cljsbuild "1.1.0"]
             [lein-npm "0.4.0"]
             [com.cemerick/clojurescript.test "0.3.3"]]
 
