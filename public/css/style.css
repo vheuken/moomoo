@@ -1,3 +1,6 @@
+@import url(//fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic,700italic&subset=latin,latin-ext);
+
+
 body,html {
   background-color: #7E8F99;
   width: 100%;
@@ -5,6 +8,7 @@ body,html {
   padding: 0;
   margin: 0;
   overflow: hidden;
+  font-family: 'Noto Sans', sans-serif;
 }
 
 #top-bar {
