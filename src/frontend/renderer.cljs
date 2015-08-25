@@ -182,11 +182,11 @@
     om/IDidUpdate
     (did-update [_ _ _]
       (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
-                                                    :containment "#progress-track"
-                                                    :start #(swap! player/app-state assoc
-                                                                  :ball-being-dragged?
-                                                                  true)
-                                                    :stop core/on-drag-stop}))
+                                                     :containment "#progress-track"
+                                                     :start #(swap! player/app-state assoc
+                                                                   :ball-being-dragged?
+                                                                   true)
+                                                     :stop core/on-drag-stop}))
     om/IRender
     (render [this]
       (dom/div nil
@@ -224,8 +224,8 @@
     om/IDidUpdate
     (did-update [_ _ _]
       (.draggable (js/$ "#volume-ball") #js {:axis "x"
-                                                    :containment "#volume"
-                                                    :stop core/on-volume-drag-stop}))
+                                             :containment "#volume"
+                                             :stop core/on-volume-drag-stop}))
     om/IRender
     (render [this]
       (dom/hr #js {:id "volume-bar"}
