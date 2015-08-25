@@ -205,7 +205,10 @@
                               :className "bar-tracker"
                               :style style}
                   (dom/div #js {:id "progress-track-ball-display"
-                                :className "track-ball-display"})))))))))
+                                :className "track-ball-display"})))))))
+    om/IDidMount
+    (did-mount [this]
+      (.addEventListener js/window "resize" #(om/set-state! owner #js {})))))
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
@@ -230,6 +233,10 @@
           (dom/div #js {:id "volume-ball"
                         :className "bar-tracker"}
             (dom/div #js {:id "volume-ball-display"
-                          :className "track-ball-display"})))))))
+                          :className "track-ball-display"})))))
+
+    om/IDidMount
+    (did-mount [this]
+      (.addEventListener js/window "resize" #(om/set-state! owner #js {})))))
 
 (om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
