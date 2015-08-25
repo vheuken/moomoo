@@ -4,7 +4,8 @@
                           :tracks-to-delete []
                           :current-sound-position 0
                           :ball-being-dragged? false
-                          :on-finish nil}))
+                          :on-finish nil
+                          :volume 100}))
 
 ; TODO: can we get rid of this?
 ;       This is just used because om updates when the state atom updates
@@ -43,7 +44,8 @@
                                              :url (.-result reader)
                                              :autoLoad true
                                              :whileloading while-loading
-                                             :onload while-loading}))
+                                             :onload while-loading
+                                             :volume (:volume @app-state)}))
 
         (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
@@ -83,4 +85,5 @@
   (nil? (:current-sound @app-state)))
 
 (defn set-volume [volume]
+  (swap! app-state assoc :volume volume)
   (.setVolume (:current-sound @app-state) volume))

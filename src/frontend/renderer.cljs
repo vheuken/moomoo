@@ -231,7 +231,8 @@
       (dom/hr #js {:id "volume-bar"}
         (dom/hr #js {:id "volume-bar-display"}
           (dom/div #js {:id "volume-ball"
-                        :className "bar-tracker"}
+                        :className "bar-tracker"
+                        :style #js {:left (str (:volume data) "%")}}
             (dom/div #js {:id "volume-ball-display"
                           :className "track-ball-display"})))))
 
