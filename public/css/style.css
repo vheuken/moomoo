@@ -87,7 +87,7 @@ body,html {
 }
 
 #progress-track-bar {
-  display: block;
+  display: none;
   height: 10px;
   width: 100%;
   border: none;
@@ -108,15 +108,16 @@ body,html {
   border-radius: 5px;
 }
 
-#progress-track-ball {
+.bar-tracker {
   width: 1px;
   height: 1px;
   background-color: #FF0000;
   position: absolute;
   left: 0px;
+
 }
 
-#progress-track-ball-display {
+.track-ball-display {
   border-radius: 50%;
   width: 2000%;
   height: 2000%;
@@ -125,6 +126,7 @@ body,html {
   padding: 0px;
   opacity: 0.6;
   left: -10px;
+  margin-top: 2px;
 }
 
 #volume {
@@ -135,23 +137,23 @@ body,html {
 }
 
 #volume-bar {
+  display: none;
+  height: 10px;
+  width: 100%;
+  border: none;
+  position: absolute;
+  left: 0px;
+  padding: 0px;
+}
+
+#volume-bar-display {
   position: absolute;
   width: 100%;
   height: 10px;
-  background-color: #D7D7D7;
+  background-color: #FFFFFF;
   border: none;
   display: block;
   border-radius: 5px;
+  left: -5px;
 }
-
-#volume-ball {
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  background-color: #96C8E9;
-  position: absolute;
-  padding: 0px;
-  opacity: 0.6;
-}
-
 

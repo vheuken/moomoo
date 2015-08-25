@@ -199,8 +199,10 @@
                                         (* 100 (/ (:current-sound-position data) (.-duration sound))))
                   style #js {:left (str percent-completed "%")}]
                 (dom/div #js {:id "progress-track-ball"
+                              :className "bar-tracker"
                               :style style}
-                  (dom/div #js {:id "progress-track-ball-display"})))))))))
+                  (dom/div #js {:id "progress-track-ball-display"
+                                :className "track-ball-display"})))))))))
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
@@ -221,6 +223,10 @@
     om/IRender
     (render [this]
       (dom/hr #js {:id "volume-bar"}
-        (dom/div #js {:id "volume-ball"})))))
+        (dom/hr #js {:id "volume-bar-display"}
+          (dom/div #js {:id "volume-ball"
+                        :className "bar-tracker"}
+            (dom/div #js {:id "volume-ball-display"
+                          :className "track-ball-display"})))))))
 
 (om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
