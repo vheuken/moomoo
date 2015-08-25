@@ -208,7 +208,7 @@
                                 :className "track-ball-display"})))))))
     om/IDidMount
     (did-mount [this]
-      (.addEventListener js/window "resize" #(om/set-state! owner #js {})))))
+      (.addEventListener js/window "resize" #(om/refresh! owner)))))
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
@@ -237,6 +237,6 @@
 
     om/IDidMount
     (did-mount [this]
-      (.addEventListener js/window "resize" #(om/set-state! owner #js {})))))
+      (.addEventListener js/window "resize" #(om/refresh! owner)))))
 
 (om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
