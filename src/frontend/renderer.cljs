@@ -22,7 +22,10 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li nil (.-username message) ": " (.-message message)))))
+      (dom/div #js {:className "message-username"}
+               (.-username message) ":"
+        (dom/div #js {:className "message-content"}
+                 (.-message message))))))
 
 (defn messages-view [data owner]
   (reify

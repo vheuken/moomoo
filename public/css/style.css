@@ -157,3 +157,10 @@ body,html {
   left: -5px;
 }
 
+.message-username {
+  color: #898781;
+}
+
+.message-content {
+  color: #000000;
+}
