@@ -88,6 +88,42 @@ body,html {
   width: 95%;
   background-color: #DDDDDD;
   margin-bottom: 2px;
+  text-overflow: clip;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.track-title {
+  width: 30%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+  display: inline-block;
+}
+
+.track-album {
+  width: 20%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+  display: inline-block;
+}
+
+.track-artist {
+  width: 20%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+  display: inline-block;
+}
+
+
+.track-uploader {
+  width: 30%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+  display: inline-block;
 }
 
 #progress-track {

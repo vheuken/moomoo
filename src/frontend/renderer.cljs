@@ -169,7 +169,11 @@
             album (.-album tags)
             username (.-username data)]
         (dom/div #js {:className "track-view"}
-                 title " - " artist " - " album  " - Added by " username)))))
+          (list
+            (dom/span #js {:className "track-title"} title)
+            (dom/span #js {:className "track-album"} album)
+            (dom/span #js {:className "track-artist"} artist)
+            (dom/span #js {:className "track-uploader"} "Added by " username)))))))
 
 (defn track-queue [data owner]
   (reify
