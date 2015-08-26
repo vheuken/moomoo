@@ -170,10 +170,17 @@
             username (.-username data)]
         (dom/div #js {:className "track-view"}
           (list
-            (dom/span #js {:className "track-title"} title)
-            (dom/span #js {:className "track-album"} album)
-            (dom/span #js {:className "track-artist"} artist)
-            (dom/span #js {:className "track-uploader"} "Added by " username)))))))
+            (dom/span #js {:className "track-title"
+                           :title title}
+                      title)
+            (dom/span #js {:className "track-album"
+                           :title album}
+                      album)
+            (dom/span #js {:className "track-artist"
+                           :title artist}
+                      artist)
+            (dom/span #js {:className "track-uploader"
+                           :title (str "Added by " username)} "Added by " username)))))))
 
 (defn track-queue [data owner]
   (reify
