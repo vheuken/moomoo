@@ -20,7 +20,8 @@
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-npm "0.4.0"]
-            [com.cemerick/clojurescript.test "0.3.3"]]
+            [com.cemerick/clojurescript.test "0.3.3"]
+            [lein-figwheel "0.3.7"]]
 
   :source-paths ["src"]
 
@@ -28,7 +29,7 @@
     :builds [{:id "moomoo-server"
               :source-paths ["src/server"]
               :compiler {
-                :output-to "target/moomoo.js"
+                :output-to  "target/moomoo.js"
                 :output-dir "target"
                 :target :nodejs
                 :optimizations :none
@@ -37,5 +38,8 @@
              {:id "moomoo-frontend"
               :source-paths ["src/frontend"]
               :compiler {
-                :output-to "public/js/moomoo-frontend.js"
-                :optimizations :simple}}]})
+                :main "moomoo-frontend.renderer"
+                :asset-path "/js/out"
+                :output-to  "public/js/moomoo-frontend.js"
+                :output-dir "public/js/out"
+                :optimizations :none}}]})
