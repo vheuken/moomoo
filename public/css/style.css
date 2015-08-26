@@ -82,6 +82,14 @@ body,html {
   overflow-y: scroll;
 }
 
+.track-view {
+  position: relative;
+  margin: 0 auto;
+  width: 95%;
+  background-color: #DDDDDD;
+  margin-bottom: 2px;
+}
+
 #progress-track {
   margin: auto;
   position: relative;

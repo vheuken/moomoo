@@ -168,7 +168,8 @@
             artist (.-artist tags)
             album (.-album tags)
             username (.-username data)]
-        (dom/li nil title " - " artist " - " album  " - Uploaded by " username)))))
+        (dom/div #js {:className "track-view"}
+                 title " - " artist " - " album  " - Added by " username)))))
 
 (defn track-queue [data owner]
   (reify
