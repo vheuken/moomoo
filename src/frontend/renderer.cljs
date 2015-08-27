@@ -180,8 +180,7 @@
                                 artist)
                       (dom/span #js {:className "track-uploader"
                                      :title (str "Added by " username)} "Added by " username))]
-                  (dom/div #js {:className "track-view"}
-                    content)))))
+        (dom/div #js {:className "track-view"} content)))))
 
 (defn track-queue [data owner]
   (reify
