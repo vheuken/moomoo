@@ -8,15 +8,14 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li nil user))))
+      (dom/div nil user))))
 
 (defn users-list-view [data owner]
   (reify
     om/IRender
     (render [this]
-      (dom/div nil
         (apply dom/div nil
-          (om/build-all user-view (:users data)))))))
+          (om/build-all user-view (:users data))))))
 
 (defn message-view [message owner]
   (reify

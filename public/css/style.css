@@ -68,6 +68,12 @@ body,html {
   border-top-width: 0px;
 }
 
+#userslist {
+  width: 25%;
+  height: 21%;
+  overflow-y: scroll;
+}
+
 #track-queue {
   position: absolute;
   right: 0;
