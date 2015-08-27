@@ -167,20 +167,21 @@
             title (.-title tags)
             artist (.-artist tags)
             album (.-album tags)
-            username (.-username data)]
-        (dom/div #js {:className "track-view"}
-          (list
-            (dom/span #js {:className "track-title"
-                           :title title}
-                      title)
-            (dom/span #js {:className "track-album"
-                           :title album}
-                      album)
-            (dom/span #js {:className "track-artist"
-                           :title artist}
-                      artist)
-            (dom/span #js {:className "track-uploader"
-                           :title (str "Added by " username)} "Added by " username)))))))
+            username (.-username data)
+            content (list
+                      (dom/span #js {:className "track-title"
+                                     :title title}
+                                title)
+                      (dom/span #js {:className "track-album"
+                                     :title album}
+                                album)
+                      (dom/span #js {:className "track-artist"
+                                     :title artist}
+                                artist)
+                      (dom/span #js {:className "track-uploader"
+                                     :title (str "Added by " username)} "Added by " username))]
+                  (dom/div #js {:className "track-view"}
+                    content)))))
 
 (defn track-queue [data owner]
   (reify
