@@ -161,11 +161,22 @@
 
 (defn track-view [data owner]
   (reify
-    om/IShouldUpdate
-    (should-update [_ _ _]
-      true)
-    om/IRender
-    (render [this]
+    om/IInitState
+    (init-state [_]
+      {:playing? false
+       :track-id (.-id data)})
+    om/IWillReceiveProps
+    (will-receive-props [_ _]
+      (let [state (om/get-state owner)
+            playing? (:playing? state)
+            track-id (:track-id state)]
+        (if (= track-id (:current-track-id @core/app-state))
+          (if-not playing?
+            (om/set-state! owner (merge state {:playing? true})))
+          (if playing?
+            (om/set-state! owner (merge state {:playing? false}))))))
+    om/IRenderState
+    (render-state [_ state]
       (let [tags (.-tags data)
             title (.-title tags)
             artist (.-artist tags)
@@ -185,7 +196,7 @@
                                 artist)
                       (dom/span #js {:className "track-uploader"
                                      :title (str "Added by " username)} "Added by " username))]
-        (if (= current-track-id track-id)
+        (if (:playing? state)
           (dom/div #js {:className "track-view"
                         :style #js {:backgroundColor "#BABAB9"}} content)
           (dom/div #js {:className "track-view"} content))))))

@@ -41,4 +41,5 @@
                 :asset-path "/js/out"
                 :output-to  "public/js/moomoo-frontend.js"
                 :output-dir "public/js/out"
-                :optimizations :none}}]})
+                :optimizations :none
+                :source-map true}}]})
