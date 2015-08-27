@@ -168,6 +168,8 @@
             artist (.-artist tags)
             album (.-album tags)
             username (.-username data)
+            track-id (.-id data)
+            current-track-id (:current-track-id @core/app-state)
             content (list
                       (dom/span #js {:className "track-title"
                                      :title title}
@@ -180,7 +182,10 @@
                                 artist)
                       (dom/span #js {:className "track-uploader"
                                      :title (str "Added by " username)} "Added by " username))]
-        (dom/div #js {:className "track-view"} content)))))
+        (if (= current-track-id track-id)
+          (dom/div #js {:className "track-view"
+                        :style #js {:backgroundColor "#BABAB9"}} content)
+          (dom/div #js {:className "track-view"} content))))))
 
 (defn track-queue [data owner]
   (reify
