@@ -161,6 +161,9 @@
 
 (defn track-view [data owner]
   (reify
+    om/IShouldUpdate
+    (should-update [_ _ _]
+      true)
     om/IRender
     (render [this]
       (let [tags (.-tags data)
