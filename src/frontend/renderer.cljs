@@ -50,12 +50,15 @@
 
 (defn message-form [data owner]
   (reify
+    om/IDidMount
+    (did-mount [_]
+      (.on (js/$ "#message-input") "keydown" core/keydown-message-input))
+    om/IWillUnmount
+    (will-unmount [_]
+      (.off (js/$ "#message-input") "keydown" core/keydown-message-input))
     om/IRender
     (render [this]
-      (if (:signed-in? data)
-        (dom/form #js {:action "" :ref "message"}
-          (dom/input #js {:id "m" :autoComplete "off" :type "text"})
-          (dom/button nil "Send"))))))
+      (dom/textarea #js {:id "message-input"} nil))))
 
 (defn user-upload-progress [data owner]
   (reify
@@ -102,7 +105,7 @@
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
 (om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
 (om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
-(om/root message-form core/app-state {:target (. js/document (getElementById "message-form"))})
+(om/root message-form core/app-state {:target (. js/document (getElementById "message-box"))})
 (om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
 ; music player

@@ -35,11 +35,15 @@
     (.show (js/$ "#file-upload-input"))
     false))
 
-(.submit (js/$ "#message-form")
-  (fn []
-    (.emit socket "chat-message" room-id (.val (js/$ "#m")))
-    (.val (js/$ "#m") "")
-    false))
+(defn send-chat-message [message]
+  (.emit socket "chat-message" room-id message))
+
+(defn keydown-message-input [event]
+  (if (= 13 (.-keyCode event))
+    (this-as this
+      (send-chat-message (.val (js/$ this)))
+      (.val (js/$ this) "")
+      false)))
 
 (defn upload-file [file]
   (swap! app-state assoc :num-of-uploads (+ 1 (:num-of-uploads @app-state)))
