@@ -214,20 +214,24 @@
   (reify
     om/IDidUpdate
     (did-update [_ _ _]
-      (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
-                                                     :containment "#progress-track"
-                                                     :start #(swap! player/app-state assoc
-                                                                   :ball-being-dragged?
-                                                                   true)
-                                                     :stop core/on-drag-stop}))
+      (let [offset (.offset (js/$ "#progress-track-bar"))
+            top (.-top offset)
+            left (.-left offset)
+            width (.width (js/$ "#progress-track-bar"))
+            height (.height (js/$ "#progress-track-bar"))
+            containment #js [left, top, (+ width left),  (+ top height)]]
+        (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
+                                                       :containment containment
+                                                       :start #(swap! player/app-state assoc
+                                                                     :ball-being-dragged?
+                                                                     true)
+                                                       :stop core/on-drag-stop})))
     om/IRender
     (render [this]
       (dom/div nil
         (dom/hr #js {:id "progress-track-bar"}
           (dom/hr #js {:id "progress-track-bar-display"
-                       :style #js {:left "-5px"
-                                   :width (str (+ (.-offsetWidth (. js/document (getElementById "progress-track")))
-                                                  10)
+                       :style #js {:width (str (.-offsetWidth (. js/document (getElementById "progress-track")))
                                                "px")}}
             (let [sound (:current-sound data)
                   percent-completed (if (nil? sound)
@@ -236,9 +240,7 @@
                   style #js {:left (str percent-completed "%")}]
                 (dom/div #js {:id "progress-track-ball"
                               :className "bar-tracker"
-                              :style style}
-                  (dom/div #js {:id "progress-track-ball-display"
-                                :className "track-ball-display"})))))))
+                              :style style}))))))
     om/IDidMount
     (did-mount [this]
       (.addEventListener js/window "resize" #(om/refresh! owner)))))
@@ -273,4 +275,4 @@
     (did-mount [this]
       (.addEventListener js/window "resize" #(om/refresh! owner)))))
 
-(om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
+;(om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
