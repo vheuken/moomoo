@@ -214,17 +214,21 @@
   (reify
     om/IRender
     (render [this]
-      (dom/div #js {:id "progress-track-bar"
-                    :className "track-bar"}
-        (let [sound (:current-sound data)
-              percent-completed (if (nil? sound)
-                                    0
-                                    (* 100 (/ (:current-sound-position data) (.-duration sound))))
-              style #js {:left (str percent-completed "%")}]
-            (dom/div #js {:id "progress-track-ball"
-                          :className "bar-tracker"
-                          :style style}
-              (dom/div #js {:className "track-ball-display"})))))
+      (dom/div nil
+        (dom/div #js {:id "progress-track-bar-display"})
+
+        (dom/div #js {:id "progress-track-bar"
+                      :className "track-bar"}
+          (let [sound (:current-sound data)
+                percent-completed (if (nil? sound)
+                                      0
+                                      (* 100 (/ (:current-sound-position data) (.-duration sound))))
+                style #js {:left (str percent-completed "%")}]
+              (dom/div #js {:id "progress-track-ball"
+                            :className "bar-tracker"
+                            :style style}
+                (dom/div #js {:className "track-ball-display"}))))))
+
     om/IDidMount
     (did-mount [this]
       (.addEventListener js/window "resize" #(om/refresh! owner))
