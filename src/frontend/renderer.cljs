@@ -212,8 +212,24 @@
 
 (defn progress-track [data owner]
   (reify
-    om/IDidUpdate
-    (did-update [_ _ _]
+    om/IRender
+    (render [this]
+      (dom/div #js {:id "progress-track-bar"
+                    :className "track-bar"}
+        (let [sound (:current-sound data)
+              percent-completed (if (nil? sound)
+                                    0
+                                    (* 100 (/ (:current-sound-position data) (.-duration sound))))
+              style #js {:left (str percent-completed "%")}]
+            (dom/div #js {:id "progress-track-ball"
+                          :className "bar-tracker"
+                          :style style}
+              (dom/div #js {:className "track-ball-display"})))))
+    om/IDidMount
+    (did-mount [this]
+      (.addEventListener js/window "resize" #(om/refresh! owner))
+
+      ;TODO: undo draggable on unmount(?)
       (let [offset (.offset (js/$ "#progress-track-bar"))
             top (.-top offset)
             left (.-left offset)
@@ -223,27 +239,9 @@
         (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
                                                        :containment containment
                                                        :start #(swap! player/app-state assoc
-                                                                     :ball-being-dragged?
-                                                                     true)
-                                                       :stop core/on-drag-stop})))
-    om/IRender
-    (render [this]
-      (dom/div nil
-        (dom/hr #js {:id "progress-track-bar"}
-          (dom/hr #js {:id "progress-track-bar-display"
-                       :style #js {:width (str (.-offsetWidth (. js/document (getElementById "progress-track")))
-                                               "px")}}
-            (let [sound (:current-sound data)
-                  percent-completed (if (nil? sound)
-                                        0
-                                        (* 100 (/ (:current-sound-position data) (.-duration sound))))
-                  style #js {:left (str percent-completed "%")}]
-                (dom/div #js {:id "progress-track-ball"
-                              :className "bar-tracker"
-                              :style style}))))))
-    om/IDidMount
-    (did-mount [this]
-      (.addEventListener js/window "resize" #(om/refresh! owner)))))
+                                                                      :ball-being-dragged?
+                                                                      true)
+                                                       :stop core/on-drag-stop})))))
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
