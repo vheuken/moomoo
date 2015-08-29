@@ -228,20 +228,12 @@
     om/IDidMount
     (did-mount [this]
       (.addEventListener js/window "resize" #(om/refresh! owner))
-
-      ;TODO: undo draggable on unmount(?)
-      (let [offset (.offset (js/$ "#progress-track-bar"))
-            top (.-top offset)
-            left (.-left offset)
-            width (.width (js/$ "#progress-track-bar"))
-            height (.height (js/$ "#progress-track-bar"))
-            containment #js [left, top, (+ width left),  (+ top height)]]
-        (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
-                                                       :containment containment
-                                                       :start #(swap! player/app-state assoc
-                                                                      :ball-being-dragged?
-                                                                      true)
-                                                       :stop core/on-drag-stop})))))
+      (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
+                                                     :containment "#progress-track-bar"
+                                                     :start #(swap! player/app-state assoc
+                                                                    :ball-being-dragged?
+                                                                    true)
+                                                     :stop core/on-drag-stop}))))
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
