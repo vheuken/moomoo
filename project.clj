@@ -42,4 +42,6 @@
                 :output-to  "public/js/moomoo-frontend.js"
                 :output-dir "public/js/out"
                 :optimizations :none
-                :source-map true}}]})
+                :source-map true}}]}
+
+  :clean-targets ["target/" "public/js/"])
