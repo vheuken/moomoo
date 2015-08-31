@@ -232,14 +232,21 @@
               (dom/div #js {:id progress-ball-id
                             :className "bar-tracker"
                             :style style}
-                (dom/div #js {:className "track-ball-display"}))))))))
+                (let [diameter 20
+                      radius (/ diameter 2)
+                      track-ball-display-style #js {:width  (str diameter "px")
+                                                    :height (str diameter "px")
+                                                    :bottom (str radius "px")
+                                                    :right  (str radius "px")}]
+                  (dom/div #js {:className "track-ball-display"
+                                :style track-ball-display-style})))))))))
 
 (defn track-bar-did-mount [data owner ball-id containment start stop]
   (.addEventListener js/window "resize" #(om/refresh! owner))
   (.draggable (js/$ ball-id) #js {:axis "x"
-                                                 :containment containment
-                                                 :start start
-                                                 :stop stop}))
+                                  :containment containment
+                                  :start start
+                                  :stop stop}))
 
 
 (defn progress-track [data owner]

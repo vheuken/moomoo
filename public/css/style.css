@@ -180,7 +180,6 @@ body,html {
   position: absolute;
   left: 0px;
   background-color: #FF0000;
-  text-align: center;
 }
 
 .bar-tracker {
@@ -191,12 +190,8 @@ body,html {
 
 .track-ball-display {
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
   background-color: #96C8E9;
   position: relative;
-  bottom: 10px;
-  right: 10px;
 }
 
 #volume-bar-display {
