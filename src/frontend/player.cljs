@@ -86,4 +86,6 @@
 
 (defn set-volume [volume]
   (swap! app-state assoc :volume volume)
-  (.setVolume (:current-sound @app-state) volume))
+
+  (if-not (nil? (:current-sound @app-state))
+    (.setVolume (:current-sound @app-state) volume)))
