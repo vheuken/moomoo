@@ -228,9 +228,9 @@
                         :style style}
             (dom/div #js {:className "track-ball-display"}))))))
 
-(defn track-bar-did-mount [data owner containment start stop]
+(defn track-bar-did-mount [data owner ball-id containment start stop]
   (.addEventListener js/window "resize" #(om/refresh! owner))
-  (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
+  (.draggable (js/$ ball-id) #js {:axis "x"
                                                  :containment containment
                                                  :start start
                                                  :stop stop}))
@@ -250,7 +250,8 @@
 
     om/IDidMount
     (did-mount [this]
-     (track-bar-did-mount data owner "#progress-track-bar"
+     (track-bar-did-mount data owner "#progress-track-ball"
+                                     "#progress-track-bar"
                                      #(swap! player/app-state assoc
                                              :ball-being-dragged?
                                              true)
@@ -267,23 +268,19 @@
 
 (defn volume [data owner]
   (reify
-    om/IDidUpdate
-    (did-update [_ _ _]
-      (.draggable (js/$ "#volume-ball") #js {:axis "x"
-                                             :containment "#volume"
-                                             :stop core/on-volume-drag-stop}))
     om/IRender
     (render [this]
-      (dom/hr #js {:id "volume-bar"}
-        (dom/hr #js {:id "volume-bar-display"}
-          (dom/div #js {:id "volume-ball"
-                        :className "bar-tracker"
-                        :style #js {:left (str (:volume data) "%")}}
-            (dom/div #js {:id "volume-ball-display"
-                          :className "track-ball-display"})))))
+      (render-track-bar data "volume-bar-display"
+                             "volume-bar"
+                             "volume-ball"
+                             #(:volume data)))
+
 
     om/IDidMount
     (did-mount [this]
-      (.addEventListener js/window "resize" #(om/refresh! owner)))))
+      (track-bar-did-mount data owner "#volume-ball"
+                                      "#volume-bar"
+                                      nil
+                                      core/on-drag-stop))))
 
-;(om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
+(om/root volume player/app-state {:target (. js/document (getElementById "volume"))})

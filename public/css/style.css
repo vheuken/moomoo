@@ -199,33 +199,23 @@ body,html {
   opacity: 0.5;
 }
 
+#volume-bar-display {
+  display: block;
+  width: 100%;
+  border: none;
+  background-color: #FFFFFF;
+  position: relative;
+  padding: 0px;
+  border-radius: 5px;
+}
+
+
 
 #volume {
   position: relative;
   margin: auto;
   width: 20%;
   height: 5%;
-}
-
-#volume-bar {
-  display: none;
-  height: 10px;
-  width: 100%;
-  border: none;
-  position: absolute;
-  left: 0px;
-  padding: 0px;
-}
-
-#volume-bar-display {
-  position: absolute;
-  width: 100%;
-  height: 10px;
-  background-color: #FFFFFF;
-  border: none;
-  display: block;
-  border-radius: 5px;
-  left: -5px;
 }
 
 .message-username {
