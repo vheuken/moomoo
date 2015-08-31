@@ -169,7 +169,6 @@ body,html {
   background-color: #FFFFFF;
   position: relative;
   padding: 0px;
-  border-radius: 5px;
 }
 
 .track-bar {
@@ -179,7 +178,6 @@ body,html {
   border: none;
   position: absolute;
   left: 0px;
-  background-color: #FF0000;
 }
 
 .bar-tracker {
@@ -201,7 +199,6 @@ body,html {
   background-color: #FFFFFF;
   position: relative;
   padding: 0px;
-  border-radius: 5px;
 }
 
 
