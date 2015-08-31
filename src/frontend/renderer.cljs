@@ -210,7 +210,7 @@
       (apply dom/span nil
         (om/build-all track-view (:music-info data))))))
 
-(defn render-track-bar [data display-bar-id]
+(defn render-track-bar [data display-bar-id progress-bar-id progress-ball-id ball-position]
   (dom/div nil
     (let [height 10
           top (/ height 2)
@@ -219,14 +219,11 @@
       (dom/div #js {:id display-bar-id
                     :style style}))
 
-    (dom/div #js {:id "progress-track-bar"
+    (dom/div #js {:id progress-bar-id
                   :className "track-bar"}
-      (let [sound (:current-sound data)
-            percent-completed (if (nil? sound)
-                                  0
-                                  (* 100 (/ (:current-sound-position data) (.-duration sound))))
+      (let [percent-completed (ball-position)
             style #js {:left (str percent-completed "%")}]
-          (dom/div #js {:id "progress-track-ball"
+          (dom/div #js {:id progress-ball-id
                         :className "bar-tracker"
                         :style style}
             (dom/div #js {:className "track-ball-display"}))))))
@@ -243,7 +240,13 @@
   (reify
     om/IRender
     (render [this]
-      (render-track-bar data "progress-track-bar-display"))
+      (render-track-bar data "progress-track-bar-display"
+                             "progress-track-bar"
+                             "progress-track-ball"
+                             #(if (nil? (:current-sound data))
+                                  0
+                                  (* 100 (/ (:current-sound-position data)
+                                            (.-duration (:current-sound data)))))))
 
     om/IDidMount
     (did-mount [this]
