@@ -210,23 +210,28 @@
       (apply dom/span nil
         (om/build-all track-view (:music-info data))))))
 
-(defn render-track-bar [data display-bar-id progress-bar-id progress-ball-id ball-position]
-  (dom/div nil
-    (let [height 10
-          top (/ height 2)
-          style #js {:height (str height "px")
-                     :top (str top "px")}]
-      (dom/div #js {:id display-bar-id
-                    :style style}))
+(defn render-track-bar [data root-id display-bar-id progress-bar-id progress-ball-id ball-position]
+  (let [height 10]
+    (dom/div nil
+      (let [top (/ height 2)
+            width (+ (.height (js/$ "#display-bar-id")))
+            display-style #js {:height (str height "px")
+                       :top (str top "px")}]
+        (dom/div #js {:id display-bar-id
+                      :style display-style}))
 
-    (dom/div #js {:id progress-bar-id
-                  :className "track-bar"}
-      (let [percent-completed (ball-position)
-            style #js {:left (str percent-completed "%")}]
-          (dom/div #js {:id progress-ball-id
-                        :className "bar-tracker"
-                        :style style}
-            (dom/div #js {:className "track-ball-display"}))))))
+      (let [root-width (.width (js/$ root-id))
+            bar-width (- root-width height)
+            bar-style #js {:width bar-width}]
+        (dom/div #js {:id progress-bar-id
+                      :className "track-bar"
+                      :style bar-style}
+          (let [percent-completed (ball-position)
+                style #js {:left (str percent-completed "%")}]
+              (dom/div #js {:id progress-ball-id
+                            :className "bar-tracker"
+                            :style style}
+                (dom/div #js {:className "track-ball-display"}))))))))
 
 (defn track-bar-did-mount [data owner ball-id containment start stop]
   (.addEventListener js/window "resize" #(om/refresh! owner))
@@ -240,7 +245,8 @@
   (reify
     om/IRender
     (render [this]
-      (render-track-bar data "progress-track-bar-display"
+      (render-track-bar data "#progress-track"
+                             "progress-track-bar-display"
                              "progress-track-bar"
                              "progress-track-ball"
                              #(if (nil? (:current-sound data))
@@ -283,4 +289,4 @@
                                       nil
                                       core/on-volume-drag-stop))))
 
-(om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
+;(om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
