@@ -164,14 +164,12 @@ body,html {
 
 #progress-track-bar-display {
   display: block;
-  height: 10px;
   width: 100%;
   border: none;
   background-color: #FFFFFF;
   position: relative;
   padding: 0px;
   border-radius: 5px;
-  top: 5px;
 }
 
 .track-bar {

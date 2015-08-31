@@ -210,34 +210,48 @@
       (apply dom/span nil
         (om/build-all track-view (:music-info data))))))
 
+(defn render-track-bar [data display-bar-id]
+  (dom/div nil
+    (let [height 10
+          top (/ height 2)
+          style #js {:height (str height "px")
+                     :top (str top "px")}]
+      (dom/div #js {:id display-bar-id
+                    :style style}))
+
+    (dom/div #js {:id "progress-track-bar"
+                  :className "track-bar"}
+      (let [sound (:current-sound data)
+            percent-completed (if (nil? sound)
+                                  0
+                                  (* 100 (/ (:current-sound-position data) (.-duration sound))))
+            style #js {:left (str percent-completed "%")}]
+          (dom/div #js {:id "progress-track-ball"
+                        :className "bar-tracker"
+                        :style style}
+            (dom/div #js {:className "track-ball-display"}))))))
+
+(defn track-bar-did-mount [data owner containment start stop]
+  (.addEventListener js/window "resize" #(om/refresh! owner))
+  (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
+                                                 :containment containment
+                                                 :start start
+                                                 :stop stop}))
+
+
 (defn progress-track [data owner]
   (reify
     om/IRender
     (render [this]
-      (dom/div nil
-        (dom/div #js {:id "progress-track-bar-display"})
-
-        (dom/div #js {:id "progress-track-bar"
-                      :className "track-bar"}
-          (let [sound (:current-sound data)
-                percent-completed (if (nil? sound)
-                                      0
-                                      (* 100 (/ (:current-sound-position data) (.-duration sound))))
-                style #js {:left (str percent-completed "%")}]
-              (dom/div #js {:id "progress-track-ball"
-                            :className "bar-tracker"
-                            :style style}
-                (dom/div #js {:className "track-ball-display"}))))))
+      (render-track-bar data "progress-track-bar-display"))
 
     om/IDidMount
     (did-mount [this]
-      (.addEventListener js/window "resize" #(om/refresh! owner))
-      (.draggable (js/$ "#progress-track-ball") #js {:axis "x"
-                                                     :containment "#progress-track-bar"
-                                                     :start #(swap! player/app-state assoc
-                                                                    :ball-being-dragged?
-                                                                    true)
-                                                     :stop core/on-drag-stop}))))
+     (track-bar-did-mount data owner "#progress-track-bar"
+                                     #(swap! player/app-state assoc
+                                             :ball-being-dragged?
+                                             true)
+                                     core/on-drag-stop))))
 
 (om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
 (om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
