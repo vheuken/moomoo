@@ -281,6 +281,6 @@
       (track-bar-did-mount data owner "#volume-ball"
                                       "#volume-bar"
                                       nil
-                                      core/on-drag-stop))))
+                                      core/on-volume-drag-stop))))
 
 (om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
