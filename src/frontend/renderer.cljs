@@ -211,12 +211,13 @@
         (om/build-all track-view (:music-info data))))))
 
 (defn render-track-bar [data root-id display-bar-id progress-bar-id progress-ball-id ball-position]
-  (let [height 10]
+  (let [height 20]
     (dom/div nil
       (let [top (/ height 2)
             width (+ (.height (js/$ "#display-bar-id")))
             display-style #js {:height (str height "px")
-                       :top (str top "px")}]
+                       :top (str top "px")
+                       :borderRadius (str (/ height 2) "px")}]
         (dom/div #js {:id display-bar-id
                       :style display-style}))
 
