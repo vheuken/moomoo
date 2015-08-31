@@ -277,7 +277,8 @@
   (reify
     om/IRender
     (render [this]
-      (render-track-bar data "volume-bar-display"
+      (render-track-bar data "#volume"
+                             "volume-bar-display"
                              "volume-bar"
                              "volume-ball"
                              #(:volume data)))
@@ -290,4 +291,4 @@
                                       nil
                                       core/on-volume-drag-stop))))
 
-;(om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
+(om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
