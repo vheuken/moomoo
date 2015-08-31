@@ -179,6 +179,8 @@ body,html {
   border: none;
   position: absolute;
   left: 0px;
+  background-color: #FF0000;
+  text-align: center;
 }
 
 .bar-tracker {

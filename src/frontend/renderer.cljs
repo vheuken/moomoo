@@ -222,7 +222,8 @@
 
       (let [root-width (.width (js/$ root-id))
             bar-width (- root-width height)
-            bar-style #js {:width bar-width}]
+            bar-style #js {:width bar-width
+                           :left (/ height 2)}]
         (dom/div #js {:id progress-bar-id
                       :className "track-bar"
                       :style bar-style}
