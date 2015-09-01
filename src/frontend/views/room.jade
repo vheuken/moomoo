@@ -14,9 +14,10 @@ html
     #top-bar.top-bottom-bars
       #current-track-tags
       #progress-track
-
       #player-buttons
-        #play-pause-button
+        #previous-track-button.player-button
+        #play-pause-button.player-button
+        #next-track-button.player-button
 
       button#invite-friends-button.top-bar-button Invite Friends
       input#file-upload(type="file")
@@ -32,12 +33,6 @@ html
         #playlist
         #download-progress
         #users-upload-progress
-        #music-player
-          span#play-button
-          span#pause-button
-        #playlist-manip
-          span#previous-track-button
-          span#next-track-button
         #misc
           span#restart-button
           span#loop-button

@@ -108,30 +108,6 @@
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-box"))})
 (om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
-(defn previous-track-button [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (if (:signed-in? data)
-        (if-not (nil? (:current-track-id data))
-          (if (< 0
-                 (.-tracknum (core/get-music-info-from-id (:current-track-id data))))
-            (dom/button #js {:onClick core/previous-track} "Previous")
-            (dom/button #js {:onClick core/previous-track :disabled true} "Previous"))
-          (dom/button #js {:onClick core/previous-track :disabled true} "Previous"))))))
-
-(defn next-track-button [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (if (:signed-in? data)
-        (if-not (nil? (:current-track-id data))
-          (if (> (- (count (:music-info data)) 1)
-                (.-tracknum (core/get-music-info-from-id (:current-track-id data))))
-            (dom/button #js {:onClick core/next-track} "Next")
-            (dom/button #js {:onClick core/next-track :disabled true} "Next"))
-          (dom/button #js {:onClick core/next-track :disabled true} "Next"))))))
-
 (defn restart-button [data owner]
   (reify om/IRender
     (render [this]
@@ -266,6 +242,20 @@
                       :onClick player/resume})
         (dom/img #js {:src "/images/player/pause.svg"
                       :onClick player/pause})))))
+
+(defn previous-track-button [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/img #js {:src "/images/player/prev.svg"
+                    :onClick core/previous-track}))))
+
+(defn next-track-button [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/img #js {:src "/images/player/next.svg"
+                    :onClick core/next-track}))))
 
 (om/root play-pause-button player/app-state {:target (. js/document (getElementById "play-pause-button"))})
 (om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})

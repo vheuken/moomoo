@@ -36,11 +36,18 @@ body,html {
 #player-buttons {
   display: block;
   position: relative;
-  width: 5%;
+  width: 50%;
   height: 5%;
   margin-left: auto;
   margin-right: auto;
   margin-top: 30px;
+  text-align: center;
+}
+
+.player-button {
+  display: inline-block;
+  width: 10%;
+  height: 100%;
 }
 
 #current-track-tags {
