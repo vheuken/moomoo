@@ -108,12 +108,6 @@
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-box"))})
 (om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
-(defn restart-button [data owner]
-  (reify om/IRender
-    (render [this]
-      (if (:signed-in? data)
-        (dom/button #js {:onClick core/restart-track} "Restart")))))
-
 (defn loop-button [data owner]
   (reify om/IRender
     (render [this]
@@ -239,23 +233,35 @@
     (render [this]
       (if (:paused? data)
         (dom/img #js {:src "/images/player/play.svg"
-                      :onClick player/resume})
+                      :onClick player/resume
+                      :title "Resume Track"})
         (dom/img #js {:src "/images/player/pause.svg"
-                      :onClick player/pause})))))
+                      :onClick player/pause
+                      :title "Pause Track"})))))
 
 (defn previous-track-button [data owner]
   (reify
     om/IRender
     (render [this]
       (dom/img #js {:src "/images/player/prev.svg"
-                    :onClick core/previous-track}))))
+                    :onClick core/previous-track
+                    :title "Previous Track"}))))
 
 (defn next-track-button [data owner]
   (reify
     om/IRender
     (render [this]
       (dom/img #js {:src "/images/player/next.svg"
-                    :onClick core/next-track}))))
+                    :onClick core/next-track
+                    :title "Next Track"}))))
+
+(defn restart-button [data owner]
+  (reify om/IRender
+    (render [this]
+      (dom/img #js {:style #js {:transform "scale(-1, 1)"}
+                    :src "/images/player/restart.svg"
+                    :onClick core/restart-track
+                    :title "Restart Track"}))))
 
 (om/root play-pause-button player/app-state {:target (. js/document (getElementById "play-pause-button"))})
 (om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
