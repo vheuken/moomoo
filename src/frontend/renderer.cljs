@@ -259,11 +259,6 @@
 
 (defn play-pause-button [data owner]
   (reify
-    om/IDidMount
-    (did-mount [_]
-      (.click (js/$ "#foo")
-        (fn []
-          (println "YOYOYO"))))
     om/IRender
     (render [this]
       (if (:paused? data)
