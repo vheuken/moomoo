@@ -5,7 +5,8 @@
                           :current-sound-position 0
                           :ball-being-dragged? false
                           :on-finish nil
-                          :volume 100}))
+                          :volume 100
+                          :paused? false}))
 
 ; TODO: can we get rid of this?
 ;       This is just used because om updates when the state atom updates
@@ -73,10 +74,12 @@
   (.-position (:current-sound @app-state)))
 
 (defn pause []
-  (.pause (:current-sound @app-state)))
+  (.pause (:current-sound @app-state))
+  (swap! app-state assoc :paused? true))
 
 (defn resume []
-  (.resume (:current-sound @app-state)))
+  (.resume (:current-sound @app-state))
+  (swap! app-state assoc :paused? false))
 
 (defn get-duration []
   (.-duration (:current-sound @app-state)))

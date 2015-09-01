@@ -108,21 +108,6 @@
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-box"))})
 (om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
-; music player
-(defn resume-button [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (if (:signed-in? data)
-        (dom/button #js {:onClick core/resume} "Resume")))))
-
-(defn pause-button [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (if (:signed-in? data)
-        (dom/button #js {:onClick core/pause} "Pause")))))
-
 (defn previous-track-button [data owner]
   (reify
     om/IRender
@@ -272,8 +257,22 @@
                                              true)
                                      core/on-drag-stop))))
 
-(om/root resume-button core/app-state {:target (. js/document (getElementById "play-button"))})
-(om/root pause-button core/app-state {:target (. js/document (getElementById "pause-button"))})
+(defn play-pause-button [data owner]
+  (reify
+    om/IDidMount
+    (did-mount [_]
+      (.click (js/$ "#foo")
+        (fn []
+          (println "YOYOYO"))))
+    om/IRender
+    (render [this]
+      (if (:paused? data)
+        (dom/img #js {:src "/images/player/play.svg"
+                      :onClick player/resume})
+        (dom/img #js {:src "/images/player/pause.svg"
+                      :onClick player/pause})))))
+
+(om/root play-pause-button player/app-state {:target (. js/document (getElementById "play-pause-button"))})
 (om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
 (om/root next-track-button core/app-state {:target (. js/document (getElementById "next-track-button"))})
 (om/root restart-button core/app-state {:target (. js/document (getElementById "restart-button"))})
