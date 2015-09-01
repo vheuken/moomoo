@@ -108,14 +108,6 @@
 (om/root message-form core/app-state {:target (. js/document (getElementById "message-box"))})
 (om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
-(defn loop-button [data owner]
-  (reify om/IRender
-    (render [this]
-      (if (:signed-in? data)
-        (if (:looping? data)
-          (dom/button #js {:onClick core/toggle-loop} "UnLoop")
-          (dom/button #js {:onClick core/toggle-loop} "Loop"))))))
-
 (defn track-view [data owner]
   (reify
     om/IInitState
@@ -262,6 +254,17 @@
                     :src "/images/player/restart.svg"
                     :onClick core/restart-track
                     :title "Restart Track"}))))
+
+(defn loop-button [data owner]
+  (reify om/IRender
+    (render [this]
+      (if (:looping? data)
+        (dom/img #js {:onClick core/toggle-loop
+                      :src "/images/player/looping.svg"
+                      :title "Unloop Track"})
+        (dom/img #js {:src "/images/player/looping.svg"
+                      :onClick core/toggle-loop
+                      :title "Loop Track"})))))
 
 (om/root play-pause-button player/app-state {:target (. js/document (getElementById "play-pause-button"))})
 (om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
