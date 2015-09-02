@@ -224,12 +224,15 @@
     om/IRender
     (render [this]
       (if (:paused? data)
-        (dom/img #js {:src "/images/player/play.svg"
-                      :onClick core/resume
-                      :title "Resume Track"})
-        (dom/img #js {:src "/images/player/pause.svg"
-                      :onClick core/pause
-                      :title "Pause Track"})))))
+        (dom/div #js {:className "svg"
+                      :onClick core/resume}
+          (dom/object #js {:data "/images/player/play.svg"
+                           :title "Resume Track"}))
+
+        (dom/div #js {:className "svg"
+                      :onClick core/pause}
+          (dom/object #js {:data "/images/player/pause.svg"
+                           :title "Pause Track"}))))))
 
 (defn previous-track-button [data owner]
   (reify
