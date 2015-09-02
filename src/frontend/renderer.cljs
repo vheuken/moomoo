@@ -225,10 +225,10 @@
     (render [this]
       (if (:paused? data)
         (dom/img #js {:src "/images/player/play.svg"
-                      :onClick player/resume
+                      :onClick core/resume
                       :title "Resume Track"})
         (dom/img #js {:src "/images/player/pause.svg"
-                      :onClick player/pause
+                      :onClick core/pause
                       :title "Pause Track"})))))
 
 (defn previous-track-button [data owner]
