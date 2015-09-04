@@ -44,9 +44,10 @@
     om/IRender
     (render [this]
       (if-not (:signed-in? data)
-        (dom/form #js {:action ""} "Enter Name: "
-          (dom/input #js {:id "username" :type "text" :autoComplete "off"})
-          (dom/button nil "Join"))))))
+        (dom/div #js {:id "temp-background"}
+          (dom/form #js {:id "username-input" :action ""} "Enter Name: "
+            (dom/input #js {:id "username" :type "text" :autoComplete "off"})
+            (dom/button nil "Join")))))))
 
 (defn message-form [data owner]
   (reify
