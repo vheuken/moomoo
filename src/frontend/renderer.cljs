@@ -241,42 +241,53 @@
   (reify
     om/IRender
     (render [this]
-      (dom/img #js {:src "/images/player/prev.svg"
-                    :onClick core/previous-track
-                    :title "Previous Track"}))))
+      (dom/div #js {:className "svg-player-button-clickable"
+                    :onClick core/previous-track}
+        (dom/object #js {:className "svg-player-button"
+                         :data "/images/player/prev.svg"
+                         :title "Previous Track"})))))
 
 (defn next-track-button [data owner]
   (reify
     om/IRender
     (render [this]
-      (dom/img #js {:src "/images/player/next.svg"
-                    :onClick core/next-track
-                    :title "Next Track"}))))
+      (dom/div #js {:className "svg-player-button-clickable"
+                    :onClick core/next-track}
+        (dom/object #js {:className "svg-player-button"
+                         :data "/images/player/next.svg"
+                         :title "Next Track"})))))
 
 (defn restart-button [data owner]
   (reify om/IRender
     (render [this]
-      (dom/img #js {:style #js {:transform "scale(-1, 1)"}
-                    :src "/images/player/restart.svg"
-                    :onClick core/restart-track
-                    :title "Restart Track"}))))
+      (dom/div #js {:className "svg-player-button-clickable"
+                    :onClick core/restart-track}
+        (dom/object #js {:style #js {:transform "scale(-1, 1)"}
+                         :className "svg-player-button"
+                         :data "/images/player/restart.svg"
+                         :title "Restart Track"})))))
 
 (defn loop-button [data owner]
   (reify om/IRender
     (render [this]
       (if (:looping? data)
-        (dom/img #js {:onClick core/toggle-loop
-                      :src "/images/player/looping.svg"
-                      :title "Unloop Track"})
-        (dom/img #js {:src "/images/player/looping.svg"
-                      :onClick core/toggle-loop
-                      :title "Loop Track"})))))
+        (dom/div #js {:className "svg-player-button-clickable"
+                      :onClick core/toggle-loop}
+          (dom/object #js {:className "svg-player-button"
+                           :data "/images/player/looping.svg"
+                           :title "Unloop Track"}))
+
+        (dom/div #js {:className "svg-player-button-clickable"
+                      :onClick core/toggle-loop}
+          (dom/object #js {:className "svg-player-button"
+                           :data "/images/player/looping.svg"
+                           :title "Loop Track"}))))))
 
 (om/root play-pause-button player/app-state {:target (. js/document (getElementById "play-pause-button"))})
-;(om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
-;(om/root next-track-button core/app-state {:target (. js/document (getElementById "next-track-button"))})
-;(om/root restart-button core/app-state {:target (. js/document (getElementById "restart-button"))})
-;(om/root loop-button core/app-state {:target (. js/document (getElementById "loop-button"))})
+(om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
+(om/root next-track-button core/app-state {:target (. js/document (getElementById "next-track-button"))})
+(om/root restart-button core/app-state {:target (. js/document (getElementById "restart-button"))})
+(om/root loop-button core/app-state {:target (. js/document (getElementById "loop-button"))})
 (om/root track-queue core/app-state {:target (. js/document (getElementById "playlist"))})
 (om/root progress-track player/app-state {:target (. js/document (getElementById "progress-track"))})
 
