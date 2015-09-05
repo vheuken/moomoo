@@ -225,9 +225,10 @@
     om/IRender
     (render [this]
       (if (:paused? data)
-        (dom/div #js {:className "svg"
+        (dom/div #js {:className "svg-player-button-clickable"
                       :onClick core/resume}
-          (dom/object #js {:data "/images/player/play.svg"
+          (dom/object #js {:className "svg-player-button"
+                           :data "/images/player/play.svg"
                            :title "Resume Track"}))
 
         (dom/div #js {:className "svg-player-button-clickable"
