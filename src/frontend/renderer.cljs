@@ -230,9 +230,10 @@
           (dom/object #js {:data "/images/player/play.svg"
                            :title "Resume Track"}))
 
-        (dom/div #js {:className "svg"
+        (dom/div #js {:className "svg-player-button-clickable"
                       :onClick core/pause}
-          (dom/object #js {:data "/images/player/pause.svg"
+          (dom/object #js {:className "svg-player-button"
+                           :data "/images/player/pause.svg"
                            :title "Pause Track"}))))))
 
 (defn previous-track-button [data owner]
@@ -271,10 +272,10 @@
                       :title "Loop Track"})))))
 
 (om/root play-pause-button player/app-state {:target (. js/document (getElementById "play-pause-button"))})
-(om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
-(om/root next-track-button core/app-state {:target (. js/document (getElementById "next-track-button"))})
-(om/root restart-button core/app-state {:target (. js/document (getElementById "restart-button"))})
-(om/root loop-button core/app-state {:target (. js/document (getElementById "loop-button"))})
+;(om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
+;(om/root next-track-button core/app-state {:target (. js/document (getElementById "next-track-button"))})
+;(om/root restart-button core/app-state {:target (. js/document (getElementById "restart-button"))})
+;(om/root loop-button core/app-state {:target (. js/document (getElementById "loop-button"))})
 (om/root track-queue core/app-state {:target (. js/document (getElementById "playlist"))})
 (om/root progress-track player/app-state {:target (. js/document (getElementById "progress-track"))})
 
