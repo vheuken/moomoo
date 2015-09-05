@@ -72,6 +72,15 @@ body,html {
   position: absolute;
   left: 50%;
   bottom: 0;
+
+  /* make sure you can't accidentally highlight
+   * the buttons */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .player-button {
