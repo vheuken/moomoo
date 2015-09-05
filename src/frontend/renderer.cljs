@@ -222,75 +222,63 @@
 
 (defn play-pause-button [data owner]
   (reify
-    om/IDidMount
-    (did-mount [this]
-      (.load (js/$ "#pause")
-        #(let [svg-doc (.-contentDocument  (. js/document (getElementById "pause")))
-               style-element (.createElementNS svg-doc "http://www.w3.org/2000/svg" "style")]
-          (set! (.-textContent style-element) "svg { fill: #96C8E9 }")
-          (.appendChild (. svg-doc  (getElementById  "Pause")) style-element))))
     om/IRender
     (render [this]
       (if (:paused? data)
-        (dom/div #js {:className "svg-player-button-clickable"
-                      :onClick core/resume}
-          (dom/object #js {:className "svg-player-button"
-                           :data "/images/player/play.svg"
-                           :title "Resume Track"}))
-
-        (dom/div #js {:id "pause-clickable"
-                      :className "svg-player-button-clickable"
-                      :onClick core/pause}
-          (dom/object #js {:id "pause"
-                           :className "svg-player-button"
-                           :data "/images/player/pause.svg"
-                           :title "Pause Track"}))))))
+        (dom/img #js {:id "resume"
+                      :className "player-button"
+                      :src "/images/player/play.svg"
+                      :title "Resume Track"
+                      :onClick core/resume})
+        (dom/img #js {:id "pause"
+                      :className "player-button"
+                      :src "/images/player/pause.svg"
+                      :title "Pause Track"
+                      :onClick core/pause})))))
 
 (defn previous-track-button [data owner]
   (reify
     om/IRender
     (render [this]
-      (dom/div #js {:className "svg-player-button-clickable"
-                    :onClick core/previous-track}
-        (dom/object #js {:className "svg-player-button"
-                         :data "/images/player/prev.svg"
-                         :title "Previous Track"})))))
+      (dom/img #js {:id "previous-track"
+                    :className "player-button"
+                    :src "/images/player/prev.svg"
+                    :title "Previous Track"
+                    :onClick core/previous-track}))))
 
 (defn next-track-button [data owner]
   (reify
     om/IRender
     (render [this]
-      (dom/div #js {:className "svg-player-button-clickable"
+      (dom/div #js {:className "player-button-clickable"
                     :onClick core/next-track}
-        (dom/object #js {:className "svg-player-button"
-                         :data "/images/player/next.svg"
-                         :title "Next Track"})))))
+        (dom/img #js {:id "next-track"
+                      :className "player-button"
+                      :src "/images/player/next.svg"
+                      :title "Next Track"
+                      :onClick core/next-track})))))
 
 (defn restart-button [data owner]
   (reify om/IRender
     (render [this]
-      (dom/div #js {:className "svg-player-button-clickable"
-                    :onClick core/restart-track}
-        (dom/object #js {:style #js {:transform "scale(-1, 1)"}
-                         :className "svg-player-button"
-                         :data "/images/player/restart.svg"
-                         :title "Restart Track"})))))
+      (dom/img #js {:style #js {:transform "scale(-1, 1)"}
+                    :className "player-button"
+                    :src "/images/player/restart.svg"
+                    :title "Restart Track"
+                    :onClick core/restart-track}))))
 
 (defn loop-button [data owner]
   (reify om/IRender
     (render [this]
       (if (:looping? data)
-        (dom/div #js {:className "svg-player-button-clickable"
-                      :onClick core/toggle-loop}
-          (dom/object #js {:className "svg-player-button"
-                           :data "/images/player/looping.svg"
-                           :title "Unloop Track"}))
-
-        (dom/div #js {:className "svg-player-button-clickable"
-                      :onClick core/toggle-loop}
-          (dom/object #js {:className "svg-player-button"
-                           :data "/images/player/looping.svg"
-                           :title "Loop Track"}))))))
+        (dom/img #js {:className "player-button"
+                      :src "/images/player/looping.svg"
+                      :title "Unloop Track"
+                      :onClick core/toggle-loop})
+        (dom/img #js {:className "player-button"
+                      :src "/images/player/looping.svg"
+                      :title "Loop Track"
+                      :onClick core/toggle-loop})))))
 
 (om/root play-pause-button player/app-state {:target (. js/document (getElementById "play-pause-button"))})
 (om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
