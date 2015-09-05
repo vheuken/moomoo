@@ -222,6 +222,13 @@
 
 (defn play-pause-button [data owner]
   (reify
+    om/IDidMount
+    (did-mount [this]
+      (.load (js/$ "#pause")
+        #(let [svg-doc (.-contentDocument  (. js/document (getElementById "pause")))
+               style-element (.createElementNS svg-doc "http://www.w3.org/2000/svg" "style")]
+          (set! (.-textContent style-element) "svg { fill: #96C8E9 }")
+          (.appendChild (. svg-doc  (getElementById  "Pause")) style-element))))
     om/IRender
     (render [this]
       (if (:paused? data)
@@ -231,9 +238,11 @@
                            :data "/images/player/play.svg"
                            :title "Resume Track"}))
 
-        (dom/div #js {:className "svg-player-button-clickable"
+        (dom/div #js {:id "pause-clickable"
+                      :className "svg-player-button-clickable"
                       :onClick core/pause}
-          (dom/object #js {:className "svg-player-button"
+          (dom/object #js {:id "pause"
+                           :className "svg-player-button"
                            :data "/images/player/pause.svg"
                            :title "Pause Track"}))))))
 
