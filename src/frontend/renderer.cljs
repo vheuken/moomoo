@@ -226,12 +226,12 @@
     (render [this]
       (if (:paused? data)
         (dom/img #js {:id "resume"
-                      :className "player-button"
+                      :className "player-button-img"
                       :src "/images/player/play.svg"
                       :title "Resume Track"
                       :onClick core/resume})
         (dom/img #js {:id "pause"
-                      :className "player-button"
+                      :className "player-button-img"
                       :src "/images/player/pause.svg"
                       :title "Pause Track"
                       :onClick core/pause})))))
@@ -241,7 +241,7 @@
     om/IRender
     (render [this]
       (dom/img #js {:id "previous-track"
-                    :className "player-button"
+                    :className "player-button-img"
                     :src "/images/player/prev.svg"
                     :title "Previous Track"
                     :onClick core/previous-track}))))
@@ -253,7 +253,7 @@
       (dom/div #js {:className "player-button-clickable"
                     :onClick core/next-track}
         (dom/img #js {:id "next-track"
-                      :className "player-button"
+                      :className "player-button-img"
                       :src "/images/player/next.svg"
                       :title "Next Track"
                       :onClick core/next-track})))))
@@ -262,7 +262,7 @@
   (reify om/IRender
     (render [this]
       (dom/img #js {:style #js {:transform "scale(-1, 1)"}
-                    :className "player-button"
+                    :className "player-button-img"
                     :src "/images/player/restart.svg"
                     :title "Restart Track"
                     :onClick core/restart-track}))))
@@ -271,11 +271,11 @@
   (reify om/IRender
     (render [this]
       (if (:looping? data)
-        (dom/img #js {:className "player-button"
+        (dom/img #js {:className "player-button-img"
                       :src "/images/player/looping.svg"
                       :title "Unloop Track"
                       :onClick core/toggle-loop})
-        (dom/img #js {:className "player-button"
+        (dom/img #js {:className "player-button-img"
                       :src "/images/player/looping.svg"
                       :title "Loop Track"
                       :onClick core/toggle-loop})))))

@@ -10,23 +10,6 @@ body,html {
   font-family: 'Noto Sans', sans-serif;
 }
 
-.svg-player-button-clickable {
-  position: relative;
-  z-index: 1;
-  width: 10px;
-  height: 10px;
-}
-
-.svg-player-button {
-  content: "";
-  position: relative;
-  top: 0;
-  right: 0;
-  z-index: -1;
-  width: 20px;
-  height: 20px;
-}
-
 #username-input {
   position: fixed;
   top: 50%;
@@ -86,8 +69,7 @@ body,html {
 
 .player-button {
   display: inline-block;
-  width: 10%;
-  height: 100%;
+  width: 6%;
 }
 
 #current-track-tags {
