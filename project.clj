@@ -20,7 +20,8 @@
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-npm "0.4.0"]
-            [com.cemerick/clojurescript.test "0.3.3"]]
+            [com.cemerick/clojurescript.test "0.3.3"]
+            [lein-cljfmt "0.3.0"]]
 
   :source-paths ["src"]
 
