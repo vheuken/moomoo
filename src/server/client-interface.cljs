@@ -163,6 +163,15 @@
                                                    track-id
                                                    sound-id))))))))))))))))))))))
 
+  (.on socket "clear-songs"
+    (fn []
+      (println "Clearing songs!")
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room-id]
+          (rooms/clear-songs room-id
+            (fn []
+              (.emit (.to io room-id) "clear-songs")))))))
+
   (.on socket "change-track"
     (fn [track-num sound-id]
       (println "CHANGING TO TRACK " track-num)

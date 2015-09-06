@@ -272,3 +272,8 @@
 (.on socket "set-loop"
   (fn [looping?]
     (swap! app-state assoc :looping? looping?)))
+
+(.on socket "clear-songs"
+  (fn []
+    (swap! app-state assoc :music-info [])
+    (swap! app-state assoc :music-files {})))

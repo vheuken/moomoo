@@ -332,3 +332,19 @@
         (if (nil? reply)
           (callback [])
           (callback (js->clj reply)))))))
+
+(defn clear-songs [room-id callback]
+  (.del redis-client (str "room:" room-id ":music-info")
+    (fn [err reply]
+      (.del redis-client (str "room:" room-id ":music-files")
+        (fn [err reply]
+          (.del redis-client  (str "room:" room-id ":track-order")
+            (fn [err reply]
+              (.del redis-client (str "room:" room-id ":current-track")
+                (fn [err reply]
+                  (.del redis-client (str "room:" room-id ":current-sound")
+                    (.del redis-client (str "room:" room-id ":sync-start")
+                      (fn [err reply]
+                        (.set redis-client (str "room:" room-id ":playing?") "false"
+                          (fn [err reply]
+                            (callback)))))))))))))))
