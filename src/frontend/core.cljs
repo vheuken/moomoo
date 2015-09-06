@@ -275,5 +275,8 @@
 
 (.on socket "clear-songs"
   (fn []
+    (player/destroy-track (:current-sound-id @app-state))
     (swap! app-state assoc :music-info [])
-    (swap! app-state assoc :music-files {})))
+    (swap! app-state assoc :music-files {})
+    (swap! app-state assoc :current-track-id nil)
+    (swap! app-state assoc :current-sound-id nil)))
