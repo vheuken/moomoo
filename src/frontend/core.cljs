@@ -75,6 +75,11 @@
           (upload-file file)
           (swap! app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state))))))))
 
+(.click (js/$ "#clear-songs-button")
+  (fn [e]
+    (println "Sending clear songs signal!")
+    (.emit socket "clear-songs")))
+
 ; end stuff that should probably be cleaned up with react....
 
 (defn toggle-loop []
