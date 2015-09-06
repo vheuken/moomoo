@@ -281,24 +281,30 @@
 (defn restart-button [data owner]
   (reify om/IRender
     (render [this]
-      (dom/img #js {:style #js {:transform "scale(-1, 1)"}
-                    :className "player-button-img"
-                    :src "/images/player/restart.svg"
-                    :title "Restart Track"
-                    :onClick core/restart-track}))))
+      (if (nil? (:current-track-id data))
+        (dom/img #js {:className "player-button-img"
+                      :src grey-out-image})
+        (dom/img #js {:style #js {:transform "scale(-1, 1)"}
+                      :className "player-button-img"
+                      :src "/images/player/restart.svg"
+                      :title "Restart Track"
+                      :onClick core/restart-track})))))
 
 (defn loop-button [data owner]
   (reify om/IRender
     (render [this]
-      (if (:looping? data)
+      (if (nil? (:current-track-id data))
         (dom/img #js {:className "player-button-img"
-                      :src "/images/player/looping.svg"
-                      :title "Unloop Track"
-                      :onClick core/toggle-loop})
-        (dom/img #js {:className "player-button-img"
-                      :src "/images/player/looping.svg"
-                      :title "Loop Track"
-                      :onClick core/toggle-loop})))))
+                      :src grey-out-image})
+        (if (:looping? data)
+          (dom/img #js {:className "player-button-img"
+                        :src "/images/player/looping.svg"
+                        :title "Unloop Track"
+                        :onClick core/toggle-loop})
+          (dom/img #js {:className "player-button-img"
+                        :src "/images/player/looping.svg"
+                        :title "Loop Track"
+                        :onClick core/toggle-loop}))))))
 
 (om/root play-pause-button player/app-state {:target (. js/document (getElementById "play-pause-button"))})
 (om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
