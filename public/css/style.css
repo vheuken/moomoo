@@ -204,11 +204,15 @@ body,html {
 
 .track-uploader {
   margin-left: 10px;
-  width: 30%;
+  width: 25%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: clip;
   display: inline-block;
+}
+
+.track-delete-button {
+  width: 5%;
 }
 
 #progress-track {

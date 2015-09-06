@@ -148,7 +148,10 @@
                                      :title artist}
                                 artist)
                       (dom/span #js {:className "track-uploader"
-                                     :title (str "Added by " username)} "Added by " username))]
+                                     :title (str "Added by " username)} "Added by " username)
+                      (dom/span #js {:className "track-delete-button"
+                                     :title "Delete Track"
+                                     :onClick #(core/delete-track track-id)} "X"))]
         (if (:playing? state)
           (dom/div #js {:className "track-view"
                         :style #js {:backgroundColor "#BABAB9"}} content)

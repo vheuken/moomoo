@@ -82,6 +82,10 @@
 
 ; end stuff that should probably be cleaned up with react....
 
+(defn delete-track [track-id]
+  (println (str "Deleting track " track-id))
+  (.emit socket "delete-track" track-id))
+
 (defn toggle-loop []
   (if (:looping? @app-state)
     (.emit socket "stop-looping")
