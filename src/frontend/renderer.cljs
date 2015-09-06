@@ -246,11 +246,19 @@
   (reify
     om/IRender
     (render [this]
-      (dom/img #js {:id "previous-track"
-                    :className "player-button-img"
-                    :src "/images/player/prev.svg"
-                    :title "Previous Track"
-                    :onClick core/previous-track}))))
+      (if (nil? (:current-track-id data))
+        (dom/img #js {:className "player-button-img"
+                      :src grey-out-image})
+        (if (< 0
+               (.-tracknum (core/get-music-info-from-id (:current-track-id data))))
+          (dom/img #js {:id "previous-track"
+                        :className "player-button-img"
+                        :src "/images/player/prev.svg"
+                        :title "Previous Track"
+                        :onClick core/previous-track})
+
+          (dom/img #js {:className "player-button-img"
+                        :src grey-out-image}))))))
 
 (defn next-track-button [data owner]
   (reify
