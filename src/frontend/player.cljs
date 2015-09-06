@@ -1,6 +1,7 @@
 (ns moomoo-frontend.player)
 
 (defonce app-state (atom {:current-sound nil
+                          :current-sound-id nil
                           :tracks-to-delete []
                           :current-sound-position 0
                           :ball-being-dragged? false
@@ -34,6 +35,7 @@
 
 (defn play-track [sound-blob sound-id position on-finish]
   (swap! app-state assoc :on-finish on-finish)
+  (swap! app-state assoc :current-sound-id sound-id)
 
   (let [reader (new js/FileReader)]
     (.readAsDataURL reader sound-blob)

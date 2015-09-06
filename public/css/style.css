@@ -72,6 +72,11 @@ body,html {
   width: 6%;
 }
 
+.player-button-img {
+  height: 100%;
+  width: 100%;
+}
+
 #current-track-tags {
   position: absolute;
 }

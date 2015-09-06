@@ -4,6 +4,9 @@
             [moomoo-frontend.core :as core]
             [moomoo-frontend.player :as player]))
 
+; Temporary; remove when we get correct button grey images
+(def grey-out-image "https://media.licdn.com/mpr/mpr/shrink_200_200/p/8/005/082/26a/1ecd9a2.jpg")
+
 (defn user-view [user owner]
   (reify
     om/IRender
@@ -224,17 +227,20 @@
   (reify
     om/IRender
     (render [this]
-      (if (:paused? data)
-        (dom/img #js {:id "resume"
-                      :className "player-button-img"
-                      :src "/images/player/play.svg"
-                      :title "Resume Track"
-                      :onClick core/resume})
-        (dom/img #js {:id "pause"
-                      :className "player-button-img"
-                      :src "/images/player/pause.svg"
-                      :title "Pause Track"
-                      :onClick core/pause})))))
+      (if (nil? (:current-sound-id @data))
+        (dom/img #js {:className "player-button-img"
+                      :src grey-out-image})
+        (if (:paused? data)
+          (dom/img #js {:id "resume"
+                        :className "player-button-img"
+                        :src "/images/player/play.svg"
+                        :title "Resume Track"
+                        :onClick core/resume})
+          (dom/img #js {:id "pause"
+                        :className "player-button-img"
+                        :src "/images/player/pause.svg"
+                        :title "Pause Track"
+                        :onClick core/pause}))))))
 
 (defn previous-track-button [data owner]
   (reify
@@ -250,13 +256,19 @@
   (reify
     om/IRender
     (render [this]
-      (dom/div #js {:className "player-button-clickable"
-                    :onClick core/next-track}
-        (dom/img #js {:id "next-track"
-                      :className "player-button-img"
-                      :src "/images/player/next.svg"
-                      :title "Next Track"
-                      :onClick core/next-track})))))
+      (if (nil? (:current-track-id data))
+        (dom/img #js {:className "player-button-img"
+                      :src grey-out-image})
+        (if (> (- (count (:music-info data)) 1)
+               (.-tracknum (core/get-music-info-from-id (:current-track-id data))))
+          (dom/img #js {:id "next-track"
+                        :className "player-button-img"
+                        :src "/images/player/next.svg"
+                        :title "Next Track"
+                        :onClick core/next-track})
+
+          (dom/img #js {:className "player-button-img"
+                        :src grey-out-image}))))))
 
 (defn restart-button [data owner]
   (reify om/IRender
