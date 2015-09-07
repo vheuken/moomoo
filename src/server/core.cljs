@@ -11,6 +11,8 @@
 (defonce app (express))
 (defonce server (.Server (nodejs/require "http") app))
 
+(client-interface/initialize! server)
+
 (.set app "views" "src/frontend/views")
 (.set app "view engine" "jade")
 
@@ -20,7 +22,6 @@
 (.get app "/rooms/:id" #(. %2 (render "room" (clj->js {:roomid (.-id (.-params %1))}))))
 
 (defn -main []
-  (client-interface/initialize! server)
   (client-interface/start-listening!)
 
   (println (str "Listening on port " port))
