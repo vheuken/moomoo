@@ -10,13 +10,14 @@
 
   :node-dependencies [[source-map-support "0.3.2"]
                       [socket.io "1.3.6"]
-                      [redis "0.12.1"]
+                      [redis "1.0.0"]
                       [socket.io-stream "0.8.0"]
                       [uuid "2.0.1"]
                       [express "4.13"]
                       [jade "1.11"]
                       [id3js "1.1.3"]
-                      [base64-arraybuffer "0.1.2"]]
+                      [base64-arraybuffer "0.1.2"]
+                      [redis-scripto "0.1.3"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-npm "0.4.0"]

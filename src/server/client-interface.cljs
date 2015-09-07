@@ -174,6 +174,7 @@
 
   (.on socket "delete-track"
     (fn [track-id]
+      (println "DELETING TRACK!")
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room-id]
           (rooms/delete-track room-id track-id
