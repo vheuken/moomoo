@@ -1,17 +1,15 @@
 (ns moomoo.core
   (:require [cljs.nodejs :as nodejs]
-            [moomoo.client-interface :as client-interface]))
+            [moomoo.client-interface :as client-interface]
+            [figwheel.client :as fw]))
 
 (nodejs/enable-util-print!)
 
-(def port 3001)
+(defonce port 3001)
 
-(def express (nodejs/require "express"))
-(def app (express))
-(def server (.Server (nodejs/require "http") app))
-
-(client-interface/initialize! server)
-(client-interface/start-listening!)
+(defonce express (nodejs/require "express"))
+(defonce app (express))
+(defonce server (.Server (nodejs/require "http") app))
 
 (.set app "views" "src/frontend/views")
 (.set app "view engine" "jade")
@@ -22,8 +20,12 @@
 (.get app "/rooms/:id" #(. %2 (render "room" (clj->js {:roomid (.-id (.-params %1))}))))
 
 (defn -main []
+  (client-interface/initialize! server)
+  (client-interface/start-listening!)
+
   (println (str "Listening on port " port))
   (.listen server port))
 
 (set! *main-cli-fn* -main)
 
+(fw/start { })

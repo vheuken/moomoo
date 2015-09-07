@@ -3,14 +3,14 @@
             [cognitect.transit :as transit]
             [moomoo.rooms :as rooms]))
 
-(def socketio (nodejs/require "socket.io"))
-(def socketio-stream (nodejs/require "socket.io-stream"))
-(def file-upload-directory "/tmp/moomoo-uploads")
-(def js-uuid (nodejs/require "uuid"))
-(def fs (nodejs/require "fs"))
+(defonce socketio (nodejs/require "socket.io"))
+(defonce socketio-stream (nodejs/require "socket.io-stream"))
+(defonce file-upload-directory "/tmp/moomoo-uploads")
+(defonce js-uuid (nodejs/require "uuid"))
+(defonce fs (nodejs/require "fs"))
 
 (defn initialize! [server]
-  (def io (.listen socketio server)))
+  (defonce io (.listen socketio server)))
 
 (defn handle-hotjoin [socket room-id]
   (println "User has hotjoined")

@@ -3,10 +3,10 @@
             [cognitect.transit :as transit]
             [clojure.string :as string]))
 
-(def id3 (nodejs/require "id3js"))
-(def base64-arraybuffer (nodejs/require "base64-arraybuffer"))
-(def js-uuid (nodejs/require "uuid"))
-(def redis-client (.createClient (nodejs/require "redis")))
+(defonce id3 (nodejs/require "id3js"))
+(defonce base64-arraybuffer (nodejs/require "base64-arraybuffer"))
+(defonce js-uuid (nodejs/require "uuid"))
+(defonce redis-client (.createClient (nodejs/require "redis")))
 
 ; taken from get-all-users fn
 ; should probably go back there
