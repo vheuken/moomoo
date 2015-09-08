@@ -178,7 +178,8 @@
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room-id]
           (rooms/delete-track room-id track-id
-            (fn [track-id]
+            (fn [next-track-id]
+              ; todo: if next-track-id is not nil, change track
               (.emit (.to io room-id) "delete-track" track-id)))))))
 
   (.on socket "change-track"
