@@ -22,9 +22,8 @@
 (.get app "/rooms/:id" #(. %2 (render "room" (clj->js {:roomid (.-id (.-params %1))}))))
 
 (defn -main []
-  (client-interface/start-listening!)
-
   (println (str "Listening on port " port))
+  (client-interface/start-listening!)
   (.listen server port))
 
 (set! *main-cli-fn* -main)
