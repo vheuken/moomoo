@@ -287,7 +287,6 @@
 
 (.on socket "delete-track"
   (fn [track-id]
-    (println track-id)
     (let [new-music-files (dissoc (:music-files @app-state) track-id)
           new-music-info  (vec (remove #(= track-id (.-id %1))
                                        (:music-info @app-state)))]
