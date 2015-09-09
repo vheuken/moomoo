@@ -26,6 +26,30 @@
                     (.emit socket "hotjoin-music-info" room-music-info
                                                        current-track-id
                                                        current-sound-id)))))))))))
+(defn change-track [room track-num sound-id]
+  (rooms/add-to-change-track-list room track-num
+    (fn []
+      (rooms/start-changing-track room
+        (fn [reply]
+          (if-not (nil? reply)
+            (rooms/clear-ready-to-start room
+              (fn []
+                (rooms/get-num-of-tracks room
+                  (fn [num-of-tracks]
+                    (if (and (>= track-num 0) (< track-num num-of-tracks))
+                      (rooms/clear-track-complete room
+                        (fn []
+                          (rooms/change-track room track-num sound-id
+                            (fn [track-id]
+                              (rooms/set-current-track-position room 0
+                                (fn []
+                                  (rooms/track-complete room
+                                    (fn []
+                                      (.emit (.to io room)
+                                             "track-change"
+                                             track-id
+                                             sound-id))))))))))))))))))))
+
 
 (defn connection [socket]
   (println (str "User " (.-id socket) " has connected!"))
@@ -178,48 +202,18 @@
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room-id]
           (rooms/delete-track room-id track-id
-            (fn [next-track]
+            (fn [next-track-num]
               (.emit (.to io room-id) "delete-track" track-id)
-              (if-not (nil? next-track)
+              (if-not (nil? next-track-num)
                 (let [sound-id (.v4 js-uuid)]
-                  (println "NEXT TRACK P" next-track)
-                  (rooms/change-track room-id next-track sound-id
-                    (fn [next-track-id]
-                      (if-not (nil? next-track-id)
-                        (do
-                        (println next-track-id)
-                        (.emit (.to io room-id)
-                               "track-change"
-                               next-track-id
-                               sound-id)))))))))))))
+                  (change-track room-id next-track-num sound-id)))))))))
 
   (.on socket "change-track"
     (fn [track-num sound-id]
       (println "CHANGING TO TRACK " track-num)
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (rooms/add-to-change-track-list room track-num
-            (fn []
-              (rooms/start-changing-track room
-                (fn [reply]
-                  (if-not (nil? reply)
-                    (rooms/clear-ready-to-start room
-                      (fn []
-                        (rooms/get-num-of-tracks room
-                          (fn [num-of-tracks]
-                            (if (and (>= track-num 0) (< track-num num-of-tracks))
-                              (rooms/clear-track-complete room
-                                (fn []
-                                  (rooms/change-track room track-num sound-id
-                                    (fn [track-id]
-                                      (rooms/set-current-track-position room 0
-                                        (fn []
-                                          (rooms/track-complete room
-                                            (fn []
-                                              (.emit (.to io room)
-                                                     "track-change"
-                                                     track-id
-                                                     sound-id)))))))))))))))))))))))
+          (change-track room track-num sound-id)))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
