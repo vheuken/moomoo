@@ -178,9 +178,20 @@
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room-id]
           (rooms/delete-track room-id track-id
-            (fn [next-track-id]
-              ; todo: if next-track-id is not nil, change track
-              (.emit (.to io room-id) "delete-track" track-id)))))))
+            (fn [next-track]
+              (.emit (.to io room-id) "delete-track" track-id)
+              (if-not (nil? next-track)
+                (let [sound-id (.v4 js-uuid)]
+                  (println "NEXT TRACK P" next-track)
+                  (rooms/change-track room-id next-track sound-id
+                    (fn [next-track-id]
+                      (if-not (nil? next-track-id)
+                        (do
+                        (println next-track-id)
+                        (.emit (.to io room-id)
+                               "track-change"
+                               next-track-id
+                               sound-id)))))))))))))
 
   (.on socket "change-track"
     (fn [track-num sound-id]

@@ -38,7 +38,7 @@ for i=2, #track_order, 2 do
       end
     end
 
-    return next_track_id
+    return {track_order[i-1], next_track_id}
   end
 end
 
