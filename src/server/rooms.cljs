@@ -8,6 +8,23 @@
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce redis-client (.createClient (nodejs/require "redis")))
 
+(defn set-delete-flag [room-id callback]
+  (.set redis-client (str "room:" room-id ":deleted?") "true"
+    (fn [err reply]
+      (callback))))
+
+(defn unset-delete-flag [room-id callback]
+  (.set redis-client (str "room:" room-id ":deleted?") "true"
+    (fn [err reply]
+      (callback))))
+
+(defn get-delete-flag [room-id callback]
+  (.get redis-client (str "room:" room-id ":deleted?")
+    (fn [err reply]
+      (if (= "true" reply)
+        (callback true)
+        (callback false)))))
+
 ; taken from get-all-users fn
 ; should probably go back there
 (defn users-to-list [reply]
@@ -237,20 +254,26 @@
     (callback)))
 
 (defn next-track [room callback]
-  (.get redis-client (str "room:" room ":current-track")
-    (fn [err current-track-num]
-      (get-num-of-tracks room
-        (fn [num-of-tracks]
-          (if (>= current-track-num num-of-tracks)
-            (callback nil)
-          (.incr redis-client (str "room:" room ":current-track")
-            (fn [err track-num]
-              (get-track-id-from-position room track-num
+  (letfn [(change-to-track-num [track-num]
+             (get-track-id-from-position room track-num
                 (fn [track-id]
                   (let [sound-id (.v4 js-uuid)]
                     (.set redis-client (str "room:" room ":current-sound") sound-id
                       (fn [err reply]
-                        (callback track-id sound-id))))))))))))))
+                        (callback track-id sound-id)))))))]
+    (.get redis-client (str "room:" room ":current-track")
+      (fn [err current-track-num]
+        (get-delete-flag room
+          (fn [delete-flag?]
+            (if delete-flag?
+              (change-to-track-num current-track-num)
+              (get-num-of-tracks room
+                (fn [num-of-tracks]
+                  (if (>= current-track-num num-of-tracks)
+                    (callback nil)
+                  (.incr redis-client (str "room:" room ":current-track")
+                    (fn [err track-num]
+                      (change-to-track-num track-num)))))))))))))
 
 (defn get-all-music-info [room-id callback]
   (.hgetall redis-client (str "room:" room-id ":music-info")
@@ -358,3 +381,5 @@
               (fn [err next-track-id]
                 (println next-track-id)
                 (callback (nth next-track-id 0))))))))))
+
+

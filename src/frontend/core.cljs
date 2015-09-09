@@ -296,4 +296,5 @@
         (do
           (player/destroy-track (:current-sound-id @app-state))
           (swap! app-state assoc :current-track-id nil)
-          (swap! app-state assoc :current-sound-id nil))))))
+          (swap! app-state assoc :current-sound-id nil)
+          (.emit socket "track-complete"))))))

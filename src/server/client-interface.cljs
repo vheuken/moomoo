@@ -203,10 +203,10 @@
         (fn [room-id]
           (rooms/delete-track room-id track-id
             (fn [next-track-num]
-              (.emit (.to io room-id) "delete-track" track-id)
-              (if-not (nil? next-track-num)
-                (let [sound-id (.v4 js-uuid)]
-                  (change-track room-id next-track-num sound-id)))))))))
+              (rooms/set-delete-flag room-id
+                (fn []
+                  (if-not (nil? next-track-num)
+                    (.emit (.to io room-id) "delete-track" track-id))))))))))
 
   (.on socket "change-track"
     (fn [track-num sound-id]
