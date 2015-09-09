@@ -14,7 +14,7 @@
       (callback))))
 
 (defn unset-delete-flag [room-id callback]
-  (.set redis-client (str "room:" room-id ":deleted?") "true"
+  (.set redis-client (str "room:" room-id ":deleted?") "false"
     (fn [err reply]
       (callback))))
 
@@ -266,7 +266,10 @@
         (get-delete-flag room
           (fn [delete-flag?]
             (if delete-flag?
-              (change-to-track-num current-track-num)
+              (do
+                (unset-delete-flag room
+                  (fn []
+                    (change-to-track-num current-track-num))))
               (get-num-of-tracks room
                 (fn [num-of-tracks]
                   (if (>= current-track-num num-of-tracks)
