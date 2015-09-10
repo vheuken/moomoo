@@ -372,7 +372,9 @@
                       (fn [err reply]
                         (.set redis-client (str "room:" room-id ":playing?") "false"
                           (fn [err reply]
-                            (callback)))))))))))))))
+                            (.set redis-client (str "room:" room-id ":started?") "false"
+                              (fn [err reply]
+                                (callback)))))))))))))))))
 
 (defn delete-track [room-id track-id callback]
   (.hdel redis-client (str "room:" room-id ":music-info") track-id
