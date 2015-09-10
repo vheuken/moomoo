@@ -116,14 +116,14 @@
   (reify
     om/IInitState
     (init-state [_]
-      {:playing? false
-       :track-id (.-id data)})
+      {:playing? false})
     om/IWillReceiveProps
     (will-receive-props [_ _]
       (let [state (om/get-state owner)
             playing? (:playing? state)
-            track-id (:track-id state)]
-        (if (= track-id (:current-track-id @core/app-state))
+            track-id (.-id data)
+            current-track-id (:current-track-id @core/app-state)]
+        (if (= track-id current-track-id)
           (if-not playing?
             (om/set-state! owner (merge state {:playing? true})))
           (if playing?
