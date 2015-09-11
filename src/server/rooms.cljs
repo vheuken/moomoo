@@ -247,6 +247,10 @@
             (callback true)
             (callback false)))))))
 
+(defn delete-client-sync [room-id sync-command callback]
+  (.del redis-client (str "room:" room-id ":" sync-command)
+    (callback)))
+
 (defn clear-ready-to-start [room callback]
   (.del redis-client (str "room:" room ":sync-start")
     (callback)))

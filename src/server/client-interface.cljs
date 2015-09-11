@@ -185,6 +185,30 @@
                                                track-id
                                                sound-id))))))))))))))))))))
 
+  (.on socket "track-deleted"
+    (fn []
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room]
+          (rooms/client-sync room "track-deleted" (.-id socket)
+            (fn [synced?]
+              (if synced?
+                (rooms/track-complete room
+                  (fn []
+                    (rooms/delete-client-sync room "track-deleted"
+                      (fn []
+                        (rooms/clear-ready-to-start room
+                          (fn []
+                            (rooms/clear-track-complete room
+                              (fn []
+                                (rooms/next-track room
+                                  (fn [track-id sound-id]
+                                    (if-not (nil? track-id)
+                                      (.emit (.to io room)
+                                             "track-change"
+                                             track-id
+                                             sound-id)))))))))))))))))))
+
+
   (.on socket "clear-songs"
     (fn []
       (println "Clearing songs!")
