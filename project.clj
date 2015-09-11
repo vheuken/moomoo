@@ -8,7 +8,7 @@
                  [org.omcljs/om "0.9.0"]
                  [com.cognitect/transit-cljs "0.8.220"]]
 
-  :node-dependencies [[source-map-support "0.3.2"]
+  :npm {:dependencies [[source-map-support "0.3.2"]
                       [socket.io "1.3.6"]
                       [redis "1.0.0"]
                       [socket.io-stream "0.8.0"]
@@ -18,10 +18,10 @@
                       [id3js "1.1.3"]
                       [base64-arraybuffer "0.1.2"]
                       [redis-scripto "0.1.3"]
-                      [ws "0.8.0"]]
+                      [ws "0.8.0"]]}
 
   :plugins [[lein-cljsbuild "1.1.0"]
-            [lein-npm "0.4.0"]
+            [lein-npm "0.6.1"]
             [com.cemerick/clojurescript.test "0.3.3"]
             [lein-cljfmt "0.3.0"]
             [lein-figwheel "0.3.9"]]
