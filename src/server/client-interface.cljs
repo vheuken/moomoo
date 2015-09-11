@@ -162,30 +162,28 @@
       (println "Received track-complete signal")
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (rooms/get-num-of-users room
-            (fn [num-users]
-              (rooms/user-track-complete (.-id socket)
-                (fn [num-users-track-complete]
-                  (if (= num-users num-users-track-complete)
-                    (rooms/track-complete room
+          (rooms/client-sync room "track-complete" (.-id socket)
+            (fn [synced?]
+              (if synced?
+                (rooms/track-complete room
+                  (fn []
+                    (rooms/clear-ready-to-start room
                       (fn []
-                        (rooms/clear-ready-to-start room
+                        (rooms/clear-track-complete room
                           (fn []
-                            (rooms/clear-track-complete room
-                              (fn []
-                                (rooms/is-looping? room
-                                  (fn [looping?]
-                                    (if looping?
-                                      (rooms/set-current-track-position room 0
-                                        (fn []
-                                          (.emit (.to io room) "position-change" 0)))
-                                      (rooms/next-track room
-                                        (fn [track-id sound-id]
-                                          (if-not (nil? track-id)
-                                            (.emit (.to io room)
-                                                   "track-change"
-                                                   track-id
-                                                   sound-id))))))))))))))))))))))
+                            (rooms/is-looping? room
+                              (fn [looping?]
+                                (if looping?
+                                  (rooms/set-current-track-position room 0
+                                    (fn []
+                                      (.emit (.to io room) "position-change" 0)))
+                                  (rooms/next-track room
+                                    (fn [track-id sound-id]
+                                      (if-not (nil? track-id)
+                                        (.emit (.to io room)
+                                               "track-change"
+                                               track-id
+                                               sound-id))))))))))))))))))))
 
   (.on socket "clear-songs"
     (fn []

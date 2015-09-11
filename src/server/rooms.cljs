@@ -245,6 +245,15 @@
         (fn [err reply]
           (callback reply))))))
 
+(defn client-sync [room-id sync-command socket-id callback]
+  (get-num-of-users room-id
+    (fn [num-users]
+      (.lpush redis-client (str "room:" room-id ":" sync-command) socket-id
+        (fn [err length]
+          (if (= length num-users)
+            (callback true)
+            (callback false)))))))
+
 (defn clear-ready-to-start [room callback]
   (.del redis-client (str "room:" room ":sync-start")
     (callback)))
@@ -386,5 +395,4 @@
               (fn [err next-track-id]
                 (println next-track-id)
                 (callback (nth next-track-id 0))))))))))
-
 
