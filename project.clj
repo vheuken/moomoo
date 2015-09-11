@@ -15,7 +15,7 @@
                        [uuid "2.0.1"]
                        [express "4.13"]
                        [jade "1.11"]
-                       [id3js "1.1.3"]
+                       [musicmetadata "2.0"]
                        [base64-arraybuffer "0.1.2"]
                        [redis-scripto "0.1.3"]
                        [ws "0.8.0"]]}

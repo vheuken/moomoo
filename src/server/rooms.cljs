@@ -3,7 +3,8 @@
             [cognitect.transit :as transit]
             [clojure.string :as string]))
 
-(defonce id3 (nodejs/require "id3js"))
+(defonce fs (nodejs/require "fs"))
+(defonce mm (nodejs/require "musicmetadata"))
 (defonce base64-arraybuffer (nodejs/require "base64-arraybuffer"))
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce redis-client (.createClient (nodejs/require "redis")))
@@ -168,8 +169,7 @@
                       original-file-name
                       socket-id
                       callback]
-  (id3 #js {:file absolute-file-path
-            :type id3.OPEN_LOCAL}
+  (mm (.createReadStream fs absolute-file-path)
     (fn [err tags]
       (get-room-from-user-id socket-id
         (fn [room]
