@@ -1,5 +1,6 @@
 (ns moomoo.rooms
   (:require [cljs.nodejs :as nodejs]
+            [cljs.reader :as reader]
             [cognitect.transit :as transit]
             [clojure.string :as string]))
 
@@ -393,3 +394,15 @@
                 (println next-track-id)
                 (callback (nth next-track-id 0))))))))))
 
+(defn get-track-order [room-id callback]
+  (.hgetall redis-client (str "room:" room-id ":track-order")
+    (fn [err reply]
+      (let [track-order-data (js->clj reply)
+            mapped-indexed-data (map-indexed (fn [idx v] [idx v]) track-order-data)
+            keys-indexed (remove #(odd? (nth %1 0)) mapped-indexed-data)
+            vals-indexed (remove #(even? (nth %1 0)) mapped-indexed-data)
+            sorted-keys-indexed (sort #(< (reader/read-string (nth %1 1))
+                                          (reader/read-string (nth %2 1)))
+                                      keys-indexed)]
+
+        (callback #js [])))))

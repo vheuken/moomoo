@@ -17,15 +17,18 @@
   (rooms/get-all-music-info room-id
     (fn [room-music-info]
       (if-not (nil? room-music-info)
-        (rooms/get-current-track room-id
-          (fn [current-track]
-            (rooms/get-track-id-from-position room-id current-track
-              (fn [current-track-id]
-                (rooms/get-current-sound-id room-id
-                  (fn [current-sound-id]
-                    (.emit socket "hotjoin-music-info" room-music-info
-                                                       current-track-id
-                                                       current-sound-id)))))))))))
+        (rooms/get-track-order room-id
+          (fn [room-track-order]
+            (rooms/get-current-track room-id
+              (fn [current-track]
+                (rooms/get-track-id-from-position room-id current-track
+                  (fn [current-track-id]
+                    (rooms/get-current-sound-id room-id
+                      (fn [current-sound-id]
+                        (.emit socket "hotjoin-music-info" room-music-info
+                                                           room-track-order
+                                                           current-track-id
+                                                           current-sound-id)))))))))))))
 (defn change-track [room track-num sound-id]
   (rooms/add-to-change-track-list room track-num
     (fn []

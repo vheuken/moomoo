@@ -10,6 +10,7 @@
                           :message-received? false
                           :users []
                           :current-uploads-info {}
+                          :track-order []
                           :music-info []
                           :music-files {}
                           :is-file-downloading? false
@@ -140,18 +141,20 @@
 (defn resume []
   (.emit socket "resume"))
 
+(defn indices [pred coll]
+   (keep-indexed #(when (pred %2) %1) coll))
+
+(defn get-current-track-num []
+  (first (indices #(= (.-id %1) (:current-track-id @app-state))
+                  (:music-info @app-state))))
+
 (defn previous-track []
-  (let [track-num (- (.-tracknum (nth (filter #(= (.-id %1)
-                                                (:current-track-id @app-state))
-                                            (:music-info @app-state)) 0))
-                    1)]
+  (let [track-num (- (get-current-track-num) 1)]
     (if (>= track-num 0)
       (.emit socket "change-track" track-num (.v4 js/uuid)))))
 
 (defn next-track []
-  (let [track-num (+ 1 (.-tracknum (nth (filter #(= (.-id %1)
-                                                    (:current-track-id @app-state))
-                                                (:music-info @app-state)) 0)))]
+  (let [track-num (+ (get-current-track-num) 1)]
     (if (< track-num (count (:music-info @app-state)))
       (.emit socket "change-track" track-num (.v4 js/uuid)))))
 
@@ -262,12 +265,13 @@
     (player/set-position position)))
 
 (.on socket "hotjoin-music-info"
-  (fn [room-music-info current-track-id current-sound-id]
+  (fn [room-music-info track-order current-track-id current-sound-id]
     (let [sorted-music-info (.sort room-music-info #(- (.-tracknum %1)
                                                        (.-tracknum %2)))]
       (swap! app-state assoc :music-info (vec (map #(clj->js %1)
                                                 (js->clj sorted-music-info)))))
 
+    (swap! app-state assoc :track-order track-order)
     (swap! app-state assoc :current-track-id current-track-id)
     (swap! app-state assoc :current-sound-id current-sound-id)
 

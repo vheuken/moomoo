@@ -252,8 +252,7 @@
       (if (nil? (:current-track-id data))
         (dom/img #js {:className "player-button-img"
                       :src grey-out-image})
-        (if (< 0
-               (.-tracknum (core/get-music-info-from-id (:current-track-id data))))
+        (if (< 0 (core/get-current-track-num))
           (dom/img #js {:id "previous-track"
                         :className "player-button-img"
                         :src "/images/player/prev.svg"
@@ -267,11 +266,12 @@
   (reify
     om/IRender
     (render [this]
+      (println (core/get-current-track-num))
       (if (nil? (:current-track-id data))
         (dom/img #js {:className "player-button-img"
                       :src grey-out-image})
         (if (> (- (count (:music-info data)) 1)
-               (.-tracknum (core/get-music-info-from-id (:current-track-id data))))
+               (core/get-current-track-num))
           (dom/img #js {:id "next-track"
                         :className "player-button-img"
                         :src "/images/player/next.svg"
