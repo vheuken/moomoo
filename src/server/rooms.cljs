@@ -398,11 +398,15 @@
   (.hgetall redis-client (str "room:" room-id ":track-order")
     (fn [err reply]
       (let [track-order-data (js->clj reply)
-            mapped-indexed-data (map-indexed (fn [idx v] [idx v]) track-order-data)
-            keys-indexed (remove #(odd? (nth %1 0)) mapped-indexed-data)
-            vals-indexed (remove #(even? (nth %1 0)) mapped-indexed-data)
-            sorted-keys-indexed (sort #(< (reader/read-string (nth %1 1))
-                                          (reader/read-string (nth %2 1)))
-                                      keys-indexed)]
+            indexed-data (map-indexed (fn [idx v] [idx v]) track-order-data)
+            keys-indexed (map (fn [e] [(first e) (first (last e))]) indexed-data)
+            vals-indexed (map (fn [e] [(first e) (last (last e))]) indexed-data)
+            sorted-keys-indexed (sort #(< (reader/read-string (last %1))
+                                          (reader/read-string (last %2)))
+                                      keys-indexed)
+            track-order (map (fn [e]
+                               (last (first (filter #(= (first e) (first %1))
+                                                    vals-indexed))))
+                             keys-indexed)]
 
-        (callback #js [])))))
+        (callback track-order)))))
