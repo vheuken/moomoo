@@ -409,4 +409,4 @@
                                                     vals-indexed))))
                              keys-indexed)]
 
-        (callback track-order)))))
+        (callback (clj->js track-order))))))

@@ -33,6 +33,14 @@
           (swap! app-state assoc :tracks-to-delete
             (vec (remove #(= (.-id sound) %) (:tracks-to-delete @app-state)))))))))
 
+(defn pause []
+  (.pause (:current-sound @app-state))
+  (swap! app-state assoc :paused? true))
+
+(defn resume []
+  (.resume (:current-sound @app-state))
+  (swap! app-state assoc :paused? false))
+
 (defn play-track [sound-blob sound-id position on-finish]
   (swap! app-state assoc :on-finish on-finish)
   (swap! app-state assoc :current-sound-id sound-id)
@@ -54,7 +62,9 @@
                #js {:whileplaying while-playing
                     :onfinish on-finish
                     :onplay #(.setPosition (:current-sound @app-state)
-                                           position)})))))
+                                           position)})
+        (if (:paused? @app-state)
+          (pause))))))
 
 ; TODO: probably should go into a different module...but which?
 (defn destroy-track [sound-id]
@@ -74,14 +84,6 @@
 
 (defn get-position []
   (.-position (:current-sound @app-state)))
-
-(defn pause []
-  (.pause (:current-sound @app-state))
-  (swap! app-state assoc :paused? true))
-
-(defn resume []
-  (.resume (:current-sound @app-state))
-  (swap! app-state assoc :paused? false))
 
 (defn get-duration []
   (.-duration (:current-sound @app-state)))
