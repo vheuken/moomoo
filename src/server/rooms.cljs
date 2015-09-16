@@ -279,11 +279,11 @@
                     (change-to-track-num current-track-num))))
               (get-num-of-tracks room
                 (fn [num-of-tracks]
-                  (if (>= current-track-num num-of-tracks)
-                    (callback nil)
-                  (.incr redis-client (str "room:" room ":current-track")
-                    (fn [err track-num]
-                      (change-to-track-num track-num)))))))))))))
+                  (if (>= current-track-num (- num-of-tracks 1))
+                    (callback nil nil)
+                    (.incr redis-client (str "room:" room ":current-track")
+                      (fn [err track-num]
+                        (change-to-track-num track-num)))))))))))))
 
 (defn get-all-music-info [room-id callback]
   (.hgetall redis-client (str "room:" room-id ":music-info")
