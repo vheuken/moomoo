@@ -71,8 +71,8 @@
   (let [sound (.getSoundById js/soundManager sound-id)]
     (if (or (undefined? sound)
             (> 3 (.-readyState sound)))
-      (swap! app-state assoc :tracks-to-delete (conj (:tracks-to-delete @app-state) sound-id)))
-      (.destruct sound)))
+      (swap! app-state assoc :tracks-to-delete (conj (:tracks-to-delete @app-state) sound-id))
+      (.destruct sound))))
 
 (defn set-position [position]
   (if (= 0 (.-playState (:current-sound @app-state)))
