@@ -23,7 +23,8 @@
                           :download-slots default-download-slots
                           :num-of-uploads 0
                           :num-of-downloads 0
-                          :download-progress {}}))
+                          :download-progress {}
+                          :download-status {}}))
 
 (enable-console-print!)
 
@@ -114,6 +115,8 @@
 (defn request-file-download [track-id]
   (if (nil? (get (:music-files @app-state) track-id))
     (do
+      (swap! app-state assoc :download-status (merge (:download-status @app-state)
+                                                     {track-id :in-progress}))
       (swap! app-state assoc :music-files (merge (:music-files @app-state)
                                                  {track-id (new js/Blob)}))
       (swap! app-state assoc :num-of-downloads (inc (:num-of-downloads @app-state)))
@@ -124,8 +127,11 @@
 (defn indices [pred coll]
   (keep-indexed #(when (pred %2) %1) coll))
 
+(defn is-track-downloading? [track-id]
+  (= :in-progress (get (:download-status @app-state) track-id)))
+
 (defn is-track-downloaded? [track-id]
-  (not (nil? (get (:music-files @app-state) track-id))))
+  (= :complete (get (:download-status @app-state) track-id)))
 
 (defn get-next-track-to-download []
   (let [track-order (:track-order @app-state)
@@ -133,7 +139,8 @@
                                           track-order))
         not-downloaded-tracks (filter #(not (nil? %1))
                                       (map (fn [id]
-                                             (if-not (is-track-downloaded? id)
+                                             (if-not (or (is-track-downloading? id)
+                                                         (is-track-downloaded? id))
                                                id))
                                            track-order))
         nearest-tracks (sort (fn [a b]
@@ -234,6 +241,9 @@
     (.on stream "end"
       (fn []
         (println "Download complete!")
+        (swap! app-state assoc :download-status (merge (:download-status @app-state)
+                                                       {track-id :complete}))
+
         (swap! app-state assoc :num-of-downloads (dec (:num-of-downloads @app-state)))
         (swap! app-state assoc :download-progress (dissoc (:download-progress @app-state) track-id))
 
@@ -263,7 +273,8 @@
 
       (if-not (is-track-downloaded? track-id)
         (request-file-download track-id)
-        (.emit socket "ready-to-start" sound-id))))
+        (if-not (is-track-downloading? track-id)
+          (.emit socket "ready-to-start" sound-id)))))
 
 
 (.on socket "pause"
