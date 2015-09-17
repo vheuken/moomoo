@@ -121,6 +121,9 @@
       (println (str "Num of file downloads: " (:num-of-downloads @app-state))))
     (println "WARNING: Attempted to request download that has already been requested")))
 
+(defn indices [pred coll]
+  (keep-indexed #(when (pred %2) %1) coll))
+
 ; TODO: reimplement this
 (defn get-next-track-to-download []
   nil)
@@ -136,9 +139,6 @@
 
 (defn resume []
   (.emit socket "resume"))
-
-(defn indices [pred coll]
-  (keep-indexed #(when (pred %2) %1) coll))
 
 (defn get-current-track-num []
   (first (indices #(= (.-id %1) (:current-track-id @app-state))
@@ -259,12 +259,15 @@
 
 (.on socket "hotjoin-music-info"
   (fn [room-music-info track-order current-track-id current-sound-id]
-    (let [sorted-music-info (.sort room-music-info #(- (.-tracknum %1)
-                                                       (.-tracknum %2)))]
+    (let [track-order (js->clj track-order)
+          sorted-music-info (.sort room-music-info (fn [a b]
+                                                     (- (indices #(= %1 (.-id a)) track-order)
+                                                        (indices #(= %1 (.-id b)) track-order))))]
+
+      (swap! app-state assoc :track-order track-order)
       (swap! app-state assoc :music-info (vec (map #(clj->js %1)
                                                 (js->clj sorted-music-info)))))
 
-    (swap! app-state assoc :track-order track-order)
     (swap! app-state assoc :current-track-id current-track-id)
     (swap! app-state assoc :current-sound-id current-sound-id)
 
