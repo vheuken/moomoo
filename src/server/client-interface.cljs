@@ -35,23 +35,25 @@
       (rooms/start-changing-track room
         (fn [reply]
           (if-not (nil? reply)
-            (rooms/clear-ready-to-start room
+            (rooms/track-complete room
               (fn []
-                (rooms/get-num-of-tracks room
-                  (fn [num-of-tracks]
-                    (if (and (>= track-num 0) (< track-num num-of-tracks))
-                      (rooms/clear-track-complete room
-                        (fn []
-                          (rooms/change-track room track-num sound-id
-                            (fn [track-id]
-                              (rooms/set-current-track-position room 0
-                                (fn []
-                                  (rooms/track-complete room
+                (rooms/clear-ready-to-start room
+                  (fn []
+                    (rooms/get-num-of-tracks room
+                      (fn [num-of-tracks]
+                        (if (and (>= track-num 0) (< track-num num-of-tracks))
+                          (rooms/clear-track-complete room
+                            (fn []
+                              (rooms/change-track room track-num sound-id
+                                (fn [track-id]
+                                  (rooms/set-current-track-position room 0
                                     (fn []
-                                      (.emit (.to io room)
-                                             "track-change"
-                                             track-id
-                                             sound-id))))))))))))))))))))
+                                      (rooms/track-complete room
+                                        (fn []
+                                          (.emit (.to io room)
+                                                 "track-change"
+                                                 track-id
+                                                 sound-id))))))))))))))))))))))
 
 
 (defn connection [socket]
@@ -168,25 +170,21 @@
           (rooms/client-sync room "track-complete" (.-id socket)
             (fn [synced?]
               (if synced?
-                (rooms/track-complete room
+                (rooms/clear-track-complete room
                   (fn []
-                    (rooms/clear-ready-to-start room
-                      (fn []
-                        (rooms/clear-track-complete room
-                          (fn []
-                            (rooms/is-looping? room
-                              (fn [looping?]
-                                (if looping?
-                                  (rooms/set-current-track-position room 0
-                                    (fn []
-                                      (.emit (.to io room) "position-change" 0)))
-                                  (rooms/next-track room
-                                    (fn [track-id sound-id]
-                                      (if-not (nil? track-id)
-                                        (.emit (.to io room)
-                                               "track-change"
-                                               track-id
-                                               sound-id))))))))))))))))))))
+                    (rooms/is-looping? room
+                      (fn [looping?]
+                        (if looping?
+                          (rooms/set-current-track-position room 0
+                            (fn []
+                              (.emit (.to io room) "position-change" 0)))
+                          (rooms/next-track room
+                            (fn [track-id sound-id]
+                              (if-not (nil? track-id)
+                                (.emit (.to io room)
+                                       "track-change"
+                                       track-id
+                                       sound-id))))))))))))))))
 
   (.on socket "track-deleted"
     (fn []

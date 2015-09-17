@@ -250,10 +250,11 @@
 
 (.on socket "start-track"
   (fn [position]
-     (player/play-track (get (:music-files @app-state) (:current-track-id @app-state))
-                        (:current-sound-id @app-state)
-                        position
-                        on-finish)))
+    (println "STARTING TRACK")
+    (player/play-track (get (:music-files @app-state) (:current-track-id @app-state))
+                       (:current-sound-id @app-state)
+                       position
+                       on-finish)))
 
 (.on socket "track-change"
   (fn [track-id sound-id]
