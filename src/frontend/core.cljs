@@ -127,14 +127,30 @@
 (defn is-track-downloaded? [track-id]
   (not (nil? (get (:music-files @app-state) track-id))))
 
-; TODO: reimplement this
 (defn get-next-track-to-download []
-  )
+  (let [track-order (:track-order @app-state)
+        current-track-pos (first (indices #(= %1 (:current-track-id @app-state))
+                                          track-order))
+        not-downloaded-tracks (filter #(not (nil? %1))
+                                      (map (fn [id]
+                                             (if-not (is-track-downloaded? id)
+                                               id))
+                                           track-order))
+        nearest-tracks (sort (fn [a b]
+                               (< (Math/abs (- current-track-pos (first (indices #(= %1 a) track-order))))
+                                  (Math/abs (- current-track-pos (first (indices #(= %1 b) track-order))))))
+                             not-downloaded-tracks)]
+    (println track-order)
+    (println not-downloaded-tracks)
+    (println nearest-tracks)
+    (first nearest-tracks)))
 
 (defn request-new-track []
   (let [track-id (get-next-track-to-download)]
     (if-not (nil? track-id)
-      (request-file-download track-id))))
+      (do
+        (println (str "NEXT TRACK TO DL " track-id))
+        (request-file-download track-id)))))
 
 (defn pause []
   (player/pause)
@@ -188,9 +204,11 @@
           {(.-id file-upload-info) file-upload-info})))))
 
 (.on socket "upload-complete"
-  (fn [music-info]
+  (fn [music-info track-order]
     (swap! app-state assoc :music-info
       (conj (:music-info @app-state) music-info))
+
+    (swap! app-state assoc :track-order (js->clj track-order))
 
     (if (> (:download-slots @app-state) (:num-of-downloads @app-state))
       (request-new-track))))
@@ -198,7 +216,6 @@
 (.on (new js/ss socket) "file-download"
   (fn [stream track-id file-size]
     (println "Download starting!")
-
 
     (.on stream "data"
       (fn [data-chunk]

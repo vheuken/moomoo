@@ -272,7 +272,9 @@
               (fn [music-info]
                 (rooms/get-room-from-user-id (.-id socket)
                   (fn [room]
-                    (.emit (.to io room) "upload-complete" (clj->js music-info))
+                    (rooms/get-track-order room
+                      (fn [track-order]
+                        (.emit (.to io room) "upload-complete" (clj->js music-info) track-order)))
                     (rooms/has-track-started? room
                       (fn [started?]
                         (if-not started?
