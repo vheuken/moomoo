@@ -181,10 +181,14 @@
                           (rooms/next-track room
                             (fn [track-id sound-id]
                               (if-not (nil? track-id)
-                                (.emit (.to io room)
-                                       "track-change"
-                                       track-id
-                                       sound-id))))))))))))))))
+                                (rooms/track-complete room
+                                  (fn []
+                                    (rooms/clear-ready-to-start room
+                                      (fn []
+                                        (.emit (.to io room)
+                                               "track-change"
+                                               track-id
+                                               sound-id))))))))))))))))))))
 
   (.on socket "track-deleted"
     (fn []
