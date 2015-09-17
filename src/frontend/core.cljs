@@ -147,17 +147,12 @@
                                (< (Math/abs (- current-track-pos (first (indices #(= %1 a) track-order))))
                                   (Math/abs (- current-track-pos (first (indices #(= %1 b) track-order))))))
                              not-downloaded-tracks)]
-    (println track-order)
-    (println not-downloaded-tracks)
-    (println nearest-tracks)
     (first nearest-tracks)))
 
 (defn request-new-track []
   (let [track-id (get-next-track-to-download)]
     (if-not (nil? track-id)
-      (do
-        (println (str "NEXT TRACK TO DL " track-id))
-        (request-file-download track-id)))))
+      (request-file-download track-id))))
 
 (defn pause []
   (player/pause)
