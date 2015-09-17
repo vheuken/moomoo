@@ -261,7 +261,7 @@
       (if-not (nil? last-current-sound-id)
         (player/destroy-track last-current-sound-id)))
 
-      (if (nil? (get (:music-files @app-state) track-id))
+      (if-not (is-track-downloaded? track-id)
         (request-file-download track-id)
         (.emit socket "ready-to-start" sound-id))))
 
