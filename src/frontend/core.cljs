@@ -259,6 +259,7 @@
 
 (.on socket "hotjoin-music-info"
   (fn [room-music-info track-order current-track-id current-sound-id]
+    ; TODO: should probably convert room-music-info to clojure object before manipulating
     (let [track-order (js->clj track-order)
           sorted-music-info (.sort room-music-info (fn [a b]
                                                      (- (indices #(= %1 (.-id a)) track-order)
