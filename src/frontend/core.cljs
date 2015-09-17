@@ -124,9 +124,12 @@
 (defn indices [pred coll]
   (keep-indexed #(when (pred %2) %1) coll))
 
+(defn is-track-downloaded? [track-id]
+  (not (nil? (get (:music-files @app-state) track-id))))
+
 ; TODO: reimplement this
 (defn get-next-track-to-download []
-  nil)
+  )
 
 (defn request-new-track []
   (let [track-id (get-next-track-to-download)]
@@ -262,8 +265,8 @@
     ; TODO: should probably convert room-music-info to clojure object before manipulating
     (let [track-order (js->clj track-order)
           sorted-music-info (.sort room-music-info (fn [a b]
-                                                     (- (indices #(= %1 (.-id a)) track-order)
-                                                        (indices #(= %1 (.-id b)) track-order))))]
+                                                     (- (first (indices #(= %1 (.-id a)) track-order))
+                                                        (first (indices #(= %1 (.-id b)) track-order)))))]
 
       (swap! app-state assoc :track-order track-order)
       (swap! app-state assoc :music-info (vec (map #(clj->js %1)
