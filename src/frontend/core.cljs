@@ -118,7 +118,8 @@
                                                  {track-id (new js/Blob)}))
       (swap! app-state assoc :num-of-downloads (inc (:num-of-downloads @app-state)))
       (.emit socket "file-download-request" track-id)
-      (println (str "Num of file downloads: " (:num-of-downloads @app-state))))))
+      (println (str "Num of file downloads: " (:num-of-downloads @app-state))))
+    (println "WARNING: Attempted to request download that has already been requested")))
 
 ; TODO: reimplement this
 (defn get-next-track-to-download []
