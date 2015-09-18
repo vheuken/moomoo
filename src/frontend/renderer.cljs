@@ -87,9 +87,14 @@
         (let [music-info (core/get-music-info-from-id (:current-track-id data))
               tags (.-tags music-info)]
           (dom/div nil
-            (dom/div nil (.-title tags))
-            (dom/div nil (.-album tags))
-            (dom/div nil (.-artist tags))))))))
+            (dom/img #js {:src grey-out-image
+                          :style #js {:float "left"
+                                      :width "35%"
+                                      :height "35%"}})
+            (dom/div nil
+              (dom/div nil (.-title tags))
+              (dom/div nil (.-album tags))
+              (dom/div nil (.-artist tags)))))))))
 
 (defn download-progress [data owner]
   (reify
