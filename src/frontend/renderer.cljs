@@ -113,21 +113,26 @@
 (om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
 (defn track-view [data owner]
+  (defn update-state []
+    (let [state (om/get-state owner)
+          playing? (:playing? state)
+          track-id (.-id data)
+          current-track-id (:current-track-id @core/app-state)]
+      (if (= track-id current-track-id)
+        (if-not playing?
+          (om/set-state! owner (merge state {:playing? true})))
+        (if playing?
+          (om/set-state! owner (merge state {:playing? false}))))))
   (reify
     om/IInitState
     (init-state [_]
       {:playing? false})
     om/IWillReceiveProps
     (will-receive-props [_ _]
-      (let [state (om/get-state owner)
-            playing? (:playing? state)
-            track-id (.-id data)
-            current-track-id (:current-track-id @core/app-state)]
-        (if (= track-id current-track-id)
-          (if-not playing?
-            (om/set-state! owner (merge state {:playing? true})))
-          (if playing?
-            (om/set-state! owner (merge state {:playing? false}))))))
+      (update-state))
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (update-state))
     om/IRenderState
     (render-state [_ state]
       (let [tags (.-tags data)
