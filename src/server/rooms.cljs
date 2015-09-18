@@ -150,13 +150,35 @@
                 (fn []
                   (callback))))))))))
 
+(defn has-track-started? [room callback]
+  (.get redis-client (str "room:" room ":started?")
+    (fn [err reply]
+      (println reply)
+      (if (= "true" reply)
+        (callback true)
+        (callback false)))))
+
+(defn start-current-track [room callback]
+  (println "STARTING!")
+  (.set redis-client (str "room:" room ":started?") "true"
+    (fn []
+      (set-current-track-position room 0
+        (fn [track-position-info]
+          (callback track-position-info))))))
+
 (defn change-current-track-position [room position callback]
-  (let [writer (transit/writer :json)]
-    (.set redis-client (str "room:" room ":track-position")
-                       (transit/write writer {:position position
-                                              :start-time (.now js/Date)})
-      (fn []
-        (callback)))))
+  (letfn [(change-pos []
+            (let [writer (transit/writer :json)]
+              (.set redis-client (str "room:" room ":track-position")
+                                 (transit/write writer {:position position
+                                                        :start-time (.now js/Date)})
+                (fn []
+                  (callback)))))]
+    (has-track-started? room
+      (fn [started?]
+        (if started?
+          (change-pos)
+          (.set redis-client (str "room:" room ":started?") "true" change-pos))))))
 
 (defn get-num-of-tracks [room callback]
   (println "Calling get-num-of-tracks")
@@ -294,22 +316,6 @@
         (if (empty? info-to-send)
           (callback nil)
           (callback  (clj->js info-to-send)))))))
-
-(defn has-track-started? [room callback]
-  (.get redis-client (str "room:" room ":started?")
-    (fn [err reply]
-      (println reply)
-      (if (= "true" reply)
-        (callback true)
-        (callback false)))))
-
-(defn start-current-track [room callback]
-  (println "STARTING!")
-  (.set redis-client (str "room:" room ":started?") "true"
-    (fn []
-      (set-current-track-position room 0
-        (fn [track-position-info]
-          (callback track-position-info))))))
 
 (defn track-complete [room callback]
   (.set redis-client (str "room:" room ":started?") "false"

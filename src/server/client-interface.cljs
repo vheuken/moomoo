@@ -180,9 +180,9 @@
                               (.emit (.to io room) "position-change" 0)))
                           (rooms/next-track room
                             (fn [track-id sound-id]
-                              (if-not (nil? track-id)
-                                (rooms/track-complete room
-                                  (fn []
+                              (rooms/track-complete room
+                                (fn []
+                                  (if-not (nil? track-id)
                                     (rooms/clear-ready-to-start room
                                       (fn []
                                         (.emit (.to io room)
