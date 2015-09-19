@@ -81,16 +81,31 @@
 
 (defn current-track-tags-view [data owner]
   (reify
-    om/IRender
-    (render [this]
+    om/IWillUpdate
+    (will-update [_ _ _]
+      (let [prev-state (om/get-state owner)]
+        (if-not (or (= (:track-id prev-state) (:current-track-id data))
+                    (nil? (:current-track-id data)))
+          (let [picture-data (first
+                               (.-picture
+                                 (.-tags
+                                   (core/get-music-info-from-id (:current-track-id data)))))
+                picture-format (.-format picture-data)
+                picture-buffer (.-data picture-data)
+                base64-data (js/base64ArrayBuffer picture-buffer)
+                data-uri (str "data:" "image/jpeg" ";base64," base64-data)]
+            (println "WOO")
+            (om/set-state! owner {:cover-image data-uri
+                                  :track-id (:current-track-id data)})))))
+    om/IRenderState
+    (render-state [this state]
       (if-not (nil? (:current-track-id data))
         (let [music-info (core/get-music-info-from-id (:current-track-id data))
               tags (.-tags music-info)]
+
           (dom/div nil
-            (dom/img #js {:src grey-out-image
-                          :style #js {:float "left"
-                                      :width "35%"
-                                      :height "35%"}})
+            (dom/img #js {:src (:cover-image state) ;grey-out-image
+                          :style #js {:float "left"}})
             (dom/div nil
               (dom/div nil (.-title tags))
               (dom/div nil (.-album tags))
