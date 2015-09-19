@@ -179,7 +179,7 @@
                             (fn []
                               (.emit (.to io room) "position-change" 0)))
                           (rooms/next-track room
-                            (fn [track-id sound-id]
+                            (fn [track-id sound-id position]
                               (rooms/track-complete room
                                 (fn []
                                   (if-not (nil? track-id)
@@ -188,7 +188,8 @@
                                         (.emit (.to io room)
                                                "track-change"
                                                track-id
-                                               sound-id))))))))))))))))))))
+                                               sound-id
+                                               position))))))))))))))))))))
 
   (.on socket "track-deleted"
     (fn []
@@ -206,12 +207,13 @@
                             (rooms/clear-track-complete room
                               (fn []
                                 (rooms/next-track room
-                                  (fn [track-id sound-id]
+                                  (fn [track-id sound-id position]
                                     (if-not (nil? track-id)
                                       (.emit (.to io room)
                                              "track-change"
                                              track-id
-                                             sound-id)))))))))))))))))))
+                                             sound-id
+                                             position)))))))))))))))))))
 
 
   (.on socket "clear-songs"
