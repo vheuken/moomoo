@@ -104,8 +104,12 @@
               tags (.-tags music-info)]
 
           (dom/div nil
-            (dom/img #js {:src (:cover-image state) ;grey-out-image
-                          :style #js {:float "left"}})
+            (dom/div #js {:style #js {:float "left"
+                                      :width "10%"
+                                      :height "10%"}}
+              (dom/img #js {:src (:cover-image state)
+                            :style #js {:width "100%"
+                                        :height "100%"}}))
             (dom/div nil
               (dom/div nil (.-title tags))
               (dom/div nil (.-album tags))
