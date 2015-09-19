@@ -81,11 +81,10 @@
 
 (defn current-track-tags-view [data owner]
   (reify
-    om/IWillUpdate
-    (will-update [_ _ _]
+    om/IDidUpdate
+    (did-update [_ _ _]
       (let [prev-state (om/get-state owner)]
-        (if-not (or (= (:track-id prev-state) (:current-track-id data))
-                    (nil? (:current-track-id data)))
+        (if (not= (:track-id prev-state) (:current-track-id data))
           (let [picture-data (first
                                (.-picture
                                  (.-tags
