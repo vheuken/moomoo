@@ -93,7 +93,6 @@
                 picture-buffer (.-data picture-data)
                 base64-data (js/base64ArrayBuffer picture-buffer)
                 data-uri (str "data:" "image/jpeg" ";base64," base64-data)]
-            (println "WOO")
             (om/set-state! owner {:cover-image data-uri
                                   :track-id (:current-track-id data)})))))
     om/IRenderState
