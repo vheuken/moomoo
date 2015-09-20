@@ -96,7 +96,7 @@
       (letfn [(convert-position [track-position-info]
                 (println "POSITION!!" (:position track-position-info))
                 (if (= -1 (:position track-position-info))
-                  (do (println "NEGATIVE ONE!") nil)
+                  nil
                   (+ (:position track-position-info)
                     (- (.now js/Date)
                        (:start-time track-position-info)))))

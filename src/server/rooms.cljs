@@ -314,7 +314,9 @@
               (get-num-of-tracks room
                 (fn [num-of-tracks]
                   (if (>= current-track-num (- num-of-tracks 1))
-                    (callback nil nil)
+                    (set-current-track-position room -1
+                      (fn []
+                        (callback nil nil)))
                     (.incr redis-client (str "room:" room ":current-track")
                       (fn [err track-num]
                         (change-to-track-num track-num)))))))))))))
