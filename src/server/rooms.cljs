@@ -283,13 +283,13 @@
     (callback)))
 
 (defn next-track [room callback]
-  (letfn [(change-to-track-num [track-num position]
+  (letfn [(change-to-track-num [track-num]
              (get-track-id-from-position room track-num
                 (fn [track-id]
                   (let [sound-id (.v4 js-uuid)]
                     (.set redis-client (str "room:" room ":current-sound") sound-id
                       (fn [err reply]
-                        (callback track-id sound-id position)))))))]
+                        (callback track-id sound-id)))))))]
     (.get redis-client (str "room:" room ":current-track")
       (fn [err current-track-num]
         (get-delete-flag room
@@ -303,16 +303,16 @@
                         (if (>= current-track-num (- num-of-tracks 1))
                           (.decr redis-client (str "room:" room ":current-track")
                             (fn [err track-num]
-                              (println track-num)
-                              (change-to-track-num track-num 100)))
-                          (change-to-track-num current-track-num 0)))))))
+                              ; TODO: set flag to mark that track should not start
+                              (change-to-track-num track-num)))
+                          (change-to-track-num current-track-num)))))))
               (get-num-of-tracks room
                 (fn [num-of-tracks]
                   (if (>= current-track-num (- num-of-tracks 1))
-                    (callback nil nil nil)
+                    (callback nil nil)
                     (.incr redis-client (str "room:" room ":current-track")
                       (fn [err track-num]
-                        (change-to-track-num track-num 0)))))))))))))
+                        (change-to-track-num track-num)))))))))))))
 
 (defn get-all-music-info [room-id callback]
   (.hgetall redis-client (str "room:" room-id ":music-info")
