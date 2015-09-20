@@ -94,9 +94,12 @@
   (.on socket "ready-to-start"
     (fn [sound-id]
       (letfn [(convert-position [track-position-info]
-                (+ (:position track-position-info)
-                   (- (.now js/Date)
-                      (:start-time track-position-info))))
+                (println "POSITION!!" (:position track-position-info))
+                (if (= -1 (:position track-position-info))
+                  (do (println "NEGATIVE ONE!") nil)
+                  (+ (:position track-position-info)
+                    (- (.now js/Date)
+                       (:start-time track-position-info)))))
               (start-track [room track-position-info]
                 (if (nil? track-position-info)
                   (rooms/get-current-track-position room

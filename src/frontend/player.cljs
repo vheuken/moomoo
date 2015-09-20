@@ -45,6 +45,21 @@
   (swap! app-state assoc :on-finish on-finish)
   (swap! app-state assoc :current-sound-id sound-id)
 
+  (defn on-load []
+    (if (nil? position)
+      (let [duration (.-duration (:current-sound @app-state))]
+        (println "DURATION! " duration)
+        (.play (:current-sound @app-state)
+               #js {:whileplaying while-playing
+                    :onfinish on-finish
+                    :onplay #(.setPosition (:current-sound @app-state)
+                                           duration)}))
+      (.play (:current-sound @app-state)
+             #js {:whileplaying while-playing
+                  :onfinish on-finish
+                  :onplay #(.setPosition (:current-sound @app-state)
+                                        position)})))
+
   (let [reader (new js/FileReader)]
     (.readAsDataURL reader sound-blob)
     (set! (.-onloadend reader)
@@ -55,14 +70,8 @@
                                              :url (.-result reader)
                                              :autoLoad true
                                              :whileloading while-loading
-                                             :onload while-loading
+                                             :onload on-load
                                              :volume (:volume @app-state)}))
-
-        (.play (:current-sound @app-state)
-               #js {:whileplaying while-playing
-                    :onfinish on-finish
-                    :onplay #(.setPosition (:current-sound @app-state)
-                                           position)})
         (if (:paused? @app-state)
           (pause))))))
 

@@ -162,9 +162,13 @@
   (println "STARTING!")
   (.set redis-client (str "room:" room ":started?") "true"
     (fn []
-      (set-current-track-position room 0
+      (get-current-track-position room
         (fn [track-position-info]
-          (callback track-position-info))))))
+          (if (= -1 (:position track-position-info))
+            (callback track-position-info)
+            (set-current-track-position room 0
+              (fn [track-position-info]
+                (callback track-position-info)))))))))
 
 (defn change-current-track-position [room position callback]
   (letfn [(change-pos []
@@ -303,8 +307,9 @@
                         (if (>= current-track-num (- num-of-tracks 1))
                           (.decr redis-client (str "room:" room ":current-track")
                             (fn [err track-num]
-                              ; TODO: set flag to mark that track should not start
-                              (change-to-track-num track-num)))
+                              (set-current-track-position room -1
+                                (fn []
+                                  (change-to-track-num track-num)))))
                           (change-to-track-num current-track-num)))))))
               (get-num-of-tracks room
                 (fn [num-of-tracks]
