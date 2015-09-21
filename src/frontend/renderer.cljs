@@ -88,13 +88,16 @@
           (let [picture-data (first
                                (.-picture
                                  (.-tags
-                                   (core/get-music-info-from-id (:current-track-id data)))))
-                picture-format (.-format picture-data)
-                picture-buffer (.-data picture-data)
-                base64-data (js/base64ArrayBuffer picture-buffer)
-                data-uri (str "data:" "image/jpeg" ";base64," base64-data)]
-            (om/set-state! owner {:cover-image data-uri
-                                  :track-id (:current-track-id data)})))))
+                                   (core/get-music-info-from-id (:current-track-id data)))))]
+            (if (nil? picture-data)
+              (om/set-state! owner{:cover-image nil
+                                   :track-id (:current-track-id data)})
+              (let [picture-format (.-format picture-data)
+                    picture-buffer (.-data picture-data)
+                    base64-data (js/base64ArrayBuffer picture-buffer)
+                    data-uri (str "data:" "image/jpeg" ";base64," base64-data)]
+                (om/set-state! owner {:cover-image data-uri
+                                      :track-id (:current-track-id data)})))))))
     om/IRenderState
     (render-state [this state]
       (if-not (nil? (:current-track-id data))
@@ -105,9 +108,13 @@
             (dom/div #js {:style #js {:float "left"
                                       :width "10%"
                                       :height "10%"}}
-              (dom/img #js {:src (:cover-image state)
-                            :style #js {:width "100%"
-                                        :height "100%"}}))
+              (if (nil? (:cover-image state))
+                (dom/img #js {:src grey-out-image
+                              :style #js {:width "100%"
+                                          :height "100%"}})
+                (dom/img #js {:src (:cover-image state)
+                              :style #js {:width "100%"
+                                          :height "100%"}})))
             (dom/div nil
               (dom/div nil (.-title tags))
               (dom/div nil (.-album tags))
