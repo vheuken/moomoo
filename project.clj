@@ -9,7 +9,7 @@
                  [com.cognitect/transit-cljs "0.8.225"]]
 
   :npm {:dependencies [[source-map-support "0.3.2"]
-                       [socket.io "1.3.6"]
+                       [socket.io "1.3.7"]
                        [redis "1.0.0"]
                        [socket.io-stream "0.8.0"]
                        [uuid "2.0.1"]
