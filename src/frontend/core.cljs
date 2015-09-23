@@ -72,10 +72,9 @@
 (.change (js/$ "#file-upload")
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)]
-      (println "SHIT " (:num-of-uploads @app-state))
-        (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
-          (upload-file file)
-          (swap! app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state))))))))
+      (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
+        (upload-file file)
+        (swap! app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state))))))))
 
 (.click (js/$ "#clear-songs-button")
   (fn [e]
