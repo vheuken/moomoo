@@ -13,7 +13,7 @@
   (defonce io (.listen socketio server)))
 
 (defn handle-hotjoin [socket room-id]
-  (println "User has hotjoined")
+  (println "User " (.-id socket) " has joined room: " room-id)
   (rooms/get-all-music-info room-id
     (fn [room-music-info]
       (if-not (nil? room-music-info)
@@ -30,6 +30,8 @@
                                                            current-track-id
                                                            current-sound-id)))))))))))))
 (defn change-track [room track-num sound-id]
+  (println "Chainging track in room " room
+           "to" track-num "with sound-id" sound-id)
   (rooms/add-to-change-track-list room track-num
     (fn []
       (rooms/start-changing-track room
@@ -67,10 +69,11 @@
             (fn [users-list]
               (if-not (empty? users-list)
                 (.emit (.to io room-id) "users-list" (clj->js users-list)))))
-          (println (str (.-id socket) " has disconnected!"))))))
+          (println (str (.-id socket) " has disconnected from " room-id))))))
 
   (.on socket "sign-in"
     (fn [room-id username]
+      (println (.-id socket) "sign-in as" username "in" room-id)
       (.join socket room-id
         (fn []
           (rooms/does-room-exist? room-id
@@ -80,12 +83,15 @@
                 (handle-hotjoin socket room-id))))
           (rooms/set-username room-id (.-id socket) username
             (fn []
+              (println "Sending sign-in success signal to" (.-id socket))
               (.emit socket "sign-in-success")
               (rooms/get-all-users room-id
                 #(.emit (.to io room-id) "users-list" (clj->js %1)))))))))
 
   (.on socket "chat-message"
     (fn [room message]
+      (println "Received chat-message in " room "from" (.-id socket)
+               "containing:" message)
       (rooms/get-username room (.-id socket)
         (fn [username]
           (.emit (.to io room) "chat-message" #js {:username username
@@ -93,6 +99,8 @@
 
   (.on socket "ready-to-start"
     (fn [sound-id]
+      (println "Received ready-to-start signal for" sound-id
+               "from" (.-id socket))
       (letfn [(convert-position [track-position-info]
                 (println "POSITION!!" (:position track-position-info))
                 (if (= -1 (:position track-position-info))
@@ -106,7 +114,6 @@
                     (fn [track-position-info]
                       (.emit socket "start-track" (convert-position track-position-info))))
                   (.emit (.to io room) "start-track" (convert-position track-position-info))))]
-        (println "Received ready-to-start signal from " (.-id socket))
         (rooms/get-room-from-user-id (.-id socket)
           (fn [room]
             (rooms/get-current-sound-id room
@@ -127,6 +134,8 @@
 
   (.on socket "pause"
     (fn [position]
+      (println "Received pause signal with position" position
+               "from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
           (rooms/pause-current-track room position
@@ -135,6 +144,7 @@
 
   (.on socket "resume"
     (fn []
+      (println "Received resume signal from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
           (rooms/resume-current-track room
@@ -143,6 +153,8 @@
 
   (.on socket "position-change"
     (fn [position]
+      (println "Received position-change signal with position" position
+               "from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
           (rooms/change-current-track-position room position
@@ -151,6 +163,7 @@
 
   (.on socket "start-looping"
     (fn []
+      (println "Received start-looping signal from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
           (rooms/start-looping room
@@ -159,6 +172,7 @@
 
   (.on socket "stop-looping"
     (fn []
+      (println "Received stop-looping signal from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
           (rooms/stop-looping room
@@ -167,7 +181,7 @@
 
   (.on socket "track-complete"
     (fn []
-      (println "Received track-complete signal")
+      (println "Received track-complete signal from " (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
           (rooms/client-sync room "track-complete" (.-id socket)
@@ -195,6 +209,7 @@
 
   (.on socket "track-deleted"
     (fn []
+      (println "Received track-delete signal from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
           (rooms/client-sync room "track-deleted" (.-id socket)
@@ -219,7 +234,7 @@
 
   (.on socket "clear-songs"
     (fn []
-      (println "Clearing songs!")
+      (println "Received clear-songs signal from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room-id]
           (rooms/clear-songs room-id
@@ -228,7 +243,8 @@
 
   (.on socket "delete-track"
     (fn [track-id]
-      (println "DELETING TRACK!")
+      (println "Received delete-track signal for track-id" track-id
+               "from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room-id]
           (rooms/delete-track room-id track-id
@@ -240,21 +256,26 @@
 
   (.on socket "change-track"
     (fn [track-num sound-id]
-      (println "CHANGING TO TRACK " track-num)
+      (println "Received change-track signal to track-num" track-num
+               "with sound-id" sound-id
+               "from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
           (change-track room track-num sound-id)))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
+      (println (.-id socket) "is uploading" original-filename)
       (let [file-id (.v4 js-uuid)
             filename (subs file-id 0 7)
             absolute-file-path (str file-upload-directory "/" filename)]
-        (println (str "Saving file as " absolute-file-path))
+        (println (str "Saving" original-filename "as" absolute-file-path))
         (.pipe stream (.createWriteStream fs absolute-file-path))
 
         (.on stream "data"
           (fn [data-chunk]
+            (println "Received data chunk of" original-filename
+                     "from" (.-id socket))
             (rooms/get-room-from-user-id (.-id socket)
               (fn [room]
                 (rooms/get-username room (.-id socket)
@@ -270,6 +291,8 @@
 
         (.on stream "end"
           (fn []
+            (println "Upload of" original-filename
+                     "from" (.-id socket) "is complete!")
             (rooms/set-music-info absolute-file-path
                                   file-id
                                   original-filename
@@ -290,7 +313,8 @@
 
   (.on socket "file-download-request"
     (fn [track-id]
-      (println "Received file download request for " track-id)
+      (println "Received file download request for " track-id
+               "from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
           (rooms/get-music-file room track-id
