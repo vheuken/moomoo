@@ -10,6 +10,8 @@
 (defonce express (nodejs/require "express"))
 (defonce app (express))
 (defonce server (.Server (nodejs/require "http") app))
+(defonce redis-client (.createClient (nodejs/require "redis")))
+(defonce util (nodejs/require "util"))
 
 (client-interface/initialize! server)
 
@@ -22,6 +24,14 @@
 (.get app "/rooms/:id" #(. %2 (render "room" (clj->js {:roomid (.-id (.-params %1))}))))
 
 (defn -main []
+  (.monitor redis-client
+    (fn [err res]
+      (println "Entering redis-monitoring mode")))
+
+  (.on redis-client "monitor"
+    (fn [timestamp args]
+      (println "REDIS:" timestamp ": " (.inspect util args))))
+
   (println (str "Listening on port " port))
   (client-interface/start-listening!)
   (.listen server port))
