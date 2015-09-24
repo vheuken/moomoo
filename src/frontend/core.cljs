@@ -38,6 +38,7 @@
     false))
 
 (defn send-chat-message [message]
+  (println "Sending chat message: " message)
   (.emit socket "chat-message" room-id message))
 
 (defn keydown-message-input [event]
@@ -121,6 +122,7 @@
       (swap! app-state assoc :music-files (merge (:music-files @app-state)
                                                  {track-id (new js/Blob)}))
       (swap! app-state assoc :num-of-downloads (inc (:num-of-downloads @app-state)))
+      (println "Sending file-download-request for:" track-id)
       (.emit socket "file-download-request" track-id)
       (println (str "Num of file downloads: " (:num-of-downloads @app-state))))
     (println "WARNING: Attempted to request download that has already been requested")))
