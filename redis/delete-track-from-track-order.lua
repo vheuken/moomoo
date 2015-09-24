@@ -5,6 +5,8 @@ local next_track_id = nil
 local track_order = redis.call('hgetall', 'room:' .. room_id .. ':track-order')
 local sorted_track_order = {}
 
+redis.call('hdel', 'room:' .. room_id .. ':music-info', track_id)
+
 local p = 0
 for i=1, #track_order, 2 do
   for a=1, #track_order, 2 do
