@@ -159,7 +159,7 @@
         (callback false)))))
 
 (defn start-current-track [room callback]
-  (println "STARTING!")
+  (println "Starting current track")
   (.set redis-client (str "room:" room ":started?") "true"
     (fn []
       (get-current-track-position room

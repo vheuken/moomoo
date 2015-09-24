@@ -174,19 +174,21 @@
   (let [track-num (- (get-current-track-num) 1)
         sound-id (.v4 js/uuid)]
     (if (>= track-num 0)
-      (println "Sending change-track signal."
-               "Track num:" track-num
-               "Sound ID:"  sound-id)
-      (.emit socket "change-track" track-num sound-id))))
+      (do
+        (println "Sending change-track signal."
+                 "Track num:" track-num
+                 "Sound ID:"  sound-id)
+        (.emit socket "change-track" track-num sound-id)))))
 
 (defn next-track []
   (let [track-num (+ (get-current-track-num) 1)
         sound-id (.v4 js/uuid)]
     (if (< track-num (count (:music-info @app-state)))
-      (println "Sending change-track signal."
-               "Track num:" track-num
-               "Sound ID:"  sound-id)
-      (.emit socket "change-track" track-num sound-id))))
+      (do
+        (println "Sending change-track signal."
+                 "Track num:" track-num
+                 "Sound ID:"  sound-id)
+        (.emit socket "change-track" track-num sound-id)))))
 
 (defn restart-track []
   (println "Sending position change signal: " 0)
