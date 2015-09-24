@@ -77,6 +77,7 @@
 
 ; TODO: probably should go into a different module...but which?
 (defn destroy-track [sound-id]
+  (println "Destroying sound-id:" sound-id)
   (let [sound (.getSoundById js/soundManager sound-id)]
     (if (or (undefined? sound)
             (> 3 (.-readyState sound)))
@@ -84,6 +85,7 @@
       (.destruct sound))))
 
 (defn set-position [position]
+  (println "Setting sound position to: " position)
   (if (= 0 (.-playState (:current-sound @app-state)))
     (.play (:current-sound @app-state)
            #js {:whileplaying while-playing
@@ -101,7 +103,9 @@
   (nil? (:current-sound @app-state)))
 
 (defn set-volume [volume]
+  (println "Setting volume to: " volume)
   (swap! app-state assoc :volume volume)
 
   (if-not (nil? (:current-sound @app-state))
-    (.setVolume (:current-sound @app-state) volume)))
+    (.setVolume (:current-sound @app-state) volume)
+    (println "No current-sound to immediately apply volume to.")))
