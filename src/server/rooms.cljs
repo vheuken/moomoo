@@ -287,12 +287,13 @@
 
 (defn next-track [room callback]
   (letfn [(change-to-track-num [track-num]
-             (get-track-id-from-position room track-num
-                (fn [track-id]
-                  (let [sound-id (.v4 js-uuid)]
-                    (.set redis-client (str "room:" room ":current-sound") sound-id
-                      (fn [err reply]
-                        (callback track-id sound-id)))))))]
+            (println "track-num:" track-num)
+            (get-track-id-from-position room track-num
+              (fn [track-id]
+                (let [sound-id (.v4 js-uuid)]
+                  (.set redis-client (str "room:" room ":current-sound") sound-id
+                    (fn [err reply]
+                      (callback track-id sound-id)))))))]
     (.get redis-client (str "room:" room ":current-track")
       (fn [err current-track-num]
         (get-delete-flag room
@@ -303,7 +304,7 @@
                   (fn []
                     (get-num-of-tracks room
                       (fn [num-of-tracks]
-                        (if (>= current-track-num (- num-of-tracks 1))
+                        (if (> current-track-num (- num-of-tracks 1))
                           (.decr redis-client (str "room:" room ":current-track")
                             (fn [err track-num]
                               (set-current-track-position room -1

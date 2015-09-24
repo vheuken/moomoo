@@ -211,6 +211,7 @@
                               (fn []
                                 (rooms/next-track room
                                   (fn [track-id sound-id]
+                                    (println "next-track returned track-id:" track-id)
                                     (if-not (nil? track-id)
                                       (.emit (.to io room)
                                              "track-change"
