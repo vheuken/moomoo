@@ -343,10 +343,12 @@
 
 (.on socket "set-loop"
   (fn [looping?]
+    (println "Received set-loop signal with looping?:" looping?)
     (swap! app-state assoc :looping? looping?)))
 
 (.on socket "clear-songs"
   (fn []
+    (println "Received clear-songs signal")
     (player/destroy-track (:current-sound-id @app-state))
     (swap! app-state assoc :music-info [])
     (swap! app-state assoc :music-files {})
@@ -355,6 +357,7 @@
 
 (.on socket "delete-track"
   (fn [track-id]
+    (println "Received delete-track signal:" track-id)
     (let [new-music-files (dissoc (:music-files @app-state) track-id)
           new-music-info  (vec (remove #(= track-id (.-id %1))
                                        (:music-info @app-state)))]
