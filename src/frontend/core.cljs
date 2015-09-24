@@ -52,7 +52,8 @@
 
   (let [stream (.createStream js/ss)
         blob-stream (.createBlobReadStream js/ss file)]
-    (println "File uploading!")
+    (println "File uploading: " (.-name file))
+    (println "File size: " (.-size file))
 
     (.emit (js/ss socket) "file-upload" stream
                                         (.-name file)
@@ -61,6 +62,7 @@
 
     (.on blob-stream "end"
       (fn []
+        (println "Upload complete: " (.-name file))
         (swap! app-state assoc :num-of-uploads (- (:num-of-uploads @app-state) 1))
         (if-not (empty? (:upload-queue @app-state))
           (let [next-file (last (:upload-queue @app-state))]
@@ -155,9 +157,11 @@
 
 (defn pause []
   (player/pause)
+  (println "Sending pause signal")
   (.emit socket "pause" (player/get-position)))
 
 (defn resume []
+  (println "Sending resume signal")
   (.emit socket "resume"))
 
 (defn get-current-track-num []
@@ -165,20 +169,30 @@
                   (:music-info @app-state))))
 
 (defn previous-track []
-  (let [track-num (- (get-current-track-num) 1)]
+  (let [track-num (- (get-current-track-num) 1)
+        sound-id (.v4 js/uuid)]
     (if (>= track-num 0)
-      (.emit socket "change-track" track-num (.v4 js/uuid)))))
+      (println "Sending change-track signal."
+               "Track num:" track-num
+               "Sound ID:"  sound-id)
+      (.emit socket "change-track" track-num sound-id))))
 
 (defn next-track []
-  (let [track-num (+ (get-current-track-num) 1)]
+  (let [track-num (+ (get-current-track-num) 1)
+        sound-id (.v4 js/uuid)]
     (if (< track-num (count (:music-info @app-state)))
-      (.emit socket "change-track" track-num (.v4 js/uuid)))))
+      (println "Sending change-track signal."
+               "Track num:" track-num
+               "Sound ID:"  sound-id)
+      (.emit socket "change-track" track-num sound-id))))
 
 (defn restart-track []
+  (println "Sending position change signal: " 0)
   (.emit socket "position-change" 0))
 
 (defn on-finish []
   (println "Song has finished!")
+  (println "Sending track-complete signal")
   (.emit socket "track-complete"))
 
 (.on socket "sign-in-success"
@@ -188,15 +202,19 @@
 
 (.on socket "chat-message"
   (fn [message]
+    (println "Received chat-message signal:" message)
     (swap! app-state assoc :messages (conj (:messages @app-state) message))
     (swap! app-state assoc :message-received? true)))
 
 (.on socket "users-list"
   (fn [users]
+    (println "Received users-list signal: " users)
     (swap! app-state assoc :users users)))
 
 (.on socket "file-upload-info"
   (fn [file-upload-info]
+    (println "Received file-upload-info signal: " file-upload-info)
+
     (if (= (.-totalsize file-upload-info) (.-bytesreceived file-upload-info))
       (swap! app-state assoc :current-uploads-info
         (dissoc (:current-uploads-info @app-state) (.-id file-upload-info)))
@@ -206,6 +224,9 @@
 
 (.on socket "upload-complete"
   (fn [music-info track-order]
+    (println "Received upload-complete signal:"
+             "music-info:" music-info
+             "track-order:" track-order)
     (swap! app-state assoc :music-info
       (conj (:music-info @app-state) music-info))
 
@@ -220,6 +241,9 @@
 
     (.on stream "data"
       (fn [data-chunk]
+        (println "Received data-chunk:"
+                 "track-id:" track-id
+                 "size:" (.-length data-chunk))
         (let [data-downloaded (+ (.-length data-chunk) (:data-downloaded
                                                          (get (:download-progress @app-state)
                                                               track-id)))]
@@ -234,7 +258,7 @@
                                #js {:type "audio/mpeg"})}))))
     (.on stream "end"
       (fn []
-        (println "Download complete!")
+        (println "Download of" track-id "complete!")
         (swap! app-state assoc :download-status (merge (:download-status @app-state)
                                                        {track-id :complete}))
 
@@ -245,11 +269,14 @@
           (request-new-track))
 
         (if (= (:current-track-id @app-state) track-id)
-          (.emit socket "ready-to-start" (:current-sound-id @app-state)))))))
+          (do
+            (println "Sending ready-to-start signal"
+                     "Sound-id:" (:current-sound-id @app-state))
+            (.emit socket "ready-to-start" (:current-sound-id @app-state))))))))
 
 (.on socket "start-track"
   (fn [position]
-    (println "STARTING TRACK")
+    (println "Starting current track at position: " position)
     (player/play-track (get (:music-files @app-state) (:current-track-id @app-state))
                        (:current-sound-id @app-state)
                        position
@@ -257,7 +284,9 @@
 
 (.on socket "track-change"
   (fn [track-id sound-id]
-    (println "CHANGING TO TRACK " track-id)
+    (println "Received track-change signal:"
+             "track-id:" track-id
+             "sound-id:" sound-id)
     (let [last-current-track-id (:current-track-id @app-state)
           last-current-sound-id (:current-sound-id @app-state)]
       (swap! app-state assoc :current-track-id track-id)
@@ -269,22 +298,34 @@
       (if-not (is-track-downloaded? track-id)
         (request-file-download track-id)
         (if-not (is-track-downloading? track-id)
-          (.emit socket "ready-to-start" sound-id)))))
+          (do
+            (println "Sending ready-to-start signal with sound-id:" sound-id)
+            (.emit socket "ready-to-start" sound-id))))))
 
 
 (.on socket "pause"
   (fn [position]
+    (println "Received pause signal with position:" position)
     (player/pause)
     (player/set-position position)))
 
-(.on socket "resume" #(player/resume))
+(.on socket "resume"
+  (fn []
+    (println "Received resume signal")
+    (player/resume)))
 
 (.on socket "position-change"
   (fn [position]
+    (println "Received position-change signal: " position)
     (player/set-position position)))
 
 (.on socket "hotjoin-music-info"
   (fn [room-music-info track-order current-track-id current-sound-id]
+    (println "Received room state:"
+             "room-music-info:" room-music-info
+             "track-order:" track-order
+             "current-track-id:" current-track-id
+             "current-sound-id:" current-sound-id)
     ; TODO: should probably convert room-music-info to clojure object before manipulating
     (let [track-order (js->clj track-order)
           sorted-music-info (.sort room-music-info (fn [a b]
