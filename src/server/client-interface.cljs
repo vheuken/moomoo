@@ -43,32 +43,6 @@
                    "track-change"
                     reply
                     sound-id)))))))
-  (comment
-  (rooms/add-to-change-track-list room track-num
-    (fn []
-      (rooms/start-changing-track room
-        (fn [reply]
-          (if-not (nil? reply)
-            (rooms/track-complete room
-              (fn []
-                (rooms/clear-ready-to-start room
-                  (fn []
-                    (rooms/get-num-of-tracks room
-                      (fn [num-of-tracks]
-                        (if (and (>= track-num 0) (< track-num num-of-tracks))
-                          (rooms/clear-track-complete room
-                            (fn []
-                              (rooms/change-track room track-num sound-id
-                                (fn [track-id]
-                                  (rooms/set-current-track-position room 0
-                                    (fn []
-                                      (rooms/track-complete room
-                                        (fn []
-                                          (.emit (.to io room)
-                                                 "track-change"
-                                                 track-id
-                                                 sound-id))))))))))))))))))))))
-
 
 (defn connection [socket]
   (println (str "User " (.-id socket) " has connected!"))
