@@ -304,13 +304,16 @@
                   (fn []
                     (get-num-of-tracks room
                       (fn [num-of-tracks]
-                        (if (> current-track-num (- num-of-tracks 1))
-                          (.decr redis-client (str "room:" room ":current-track")
-                            (fn [err track-num]
-                              (set-current-track-position room -1
-                                (fn []
-                                  (change-to-track-num track-num)))))
-                          (change-to-track-num current-track-num)))))))
+                        (println "Num-of-tracks:" num-of-tracks)
+                        (if (> num-of-tracks 0)
+                          (if (> current-track-num (- num-of-tracks 1))
+                            (.decr redis-client (str "room:" room ":current-track")
+                              (fn [err track-num]
+                                (set-current-track-position room -1
+                                  (fn []
+                                    (change-to-track-num track-num)))))
+                            (change-to-track-num current-track-num))
+                          (callback nil nil)))))))
               (get-num-of-tracks room
                 (fn [num-of-tracks]
                   (if (>= current-track-num (- num-of-tracks 1))

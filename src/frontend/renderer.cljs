@@ -84,7 +84,8 @@
     om/IDidUpdate
     (did-update [_ _ _]
       (let [prev-state (om/get-state owner)]
-        (if (not= (:track-id prev-state) (:current-track-id data))
+        (if (and (not (nil? (:current-track-id data)))
+                 (not= (:track-id prev-state) (:current-track-id data)))
           (let [picture-data (first
                                (.-picture
                                  (.-tags
