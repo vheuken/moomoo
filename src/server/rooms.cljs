@@ -10,6 +10,23 @@
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce redis-client (.createClient (nodejs/require "redis")))
 
+(defn set-waiting-to-start-flag [room-id callback]
+  (.set redis-client (str "room:" room-id ":waiting-to-start?") "true"
+    (fn [err reply]
+      (callback))))
+
+(defn unset-waiting-to-start-flag [room-id callback]
+  (.set redis-client (str "room:" room-id ":waiting-to-start?") "false"
+    (fn [err reply]
+      (callback))))
+
+(defn is-waiting-to-start? [room-id callback]
+  (.get redis-client (str "room:" room-id ":waiting-to-start?")
+    (fn [err reply]
+      (if (= reply "true")
+        (callback true)
+        (callback false)))))
+
 (defn set-delete-flag [room-id callback]
   (.set redis-client (str "room:" room-id ":deleted?") "true"
     (fn [err reply]
@@ -153,7 +170,6 @@
 (defn has-track-started? [room callback]
   (.get redis-client (str "room:" room ":started?")
     (fn [err reply]
-      (println reply)
       (if (= "true" reply)
         (callback true)
         (callback false)))))

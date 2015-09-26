@@ -32,7 +32,7 @@
 (defn change-track [room track-num sound-id]
   (println "Chainging track in room " room
            "to" track-num "with sound-id" sound-id)
-  (.eval rooms/redis-client "local room_id = ARGV[1] local track_num = ARGV[2] local sound_id = ARGV[3] redis.call('set', 'room:' .. room_id .. ':started?', 'false') redis.call('del', 'room:' .. room_id .. ':sync-start') local num_tracks = redis.call('hlen', 'room:' .. room_id .. ':music-info') if (tonumber(track_num) < 0) or (tonumber(track_num) >= tonumber(num_tracks)) then return nil end redis.call('del', 'room:' .. room_id .. ':track-complete') local track_id = redis.call('hget', 'room:' .. room_id .. ':track-order', track_num) redis.call('set', 'room:' .. room_id .. ':current-track', track_num) redis.call('set', 'room:' .. room_id .. ':current-sound', sound_id) return track_id"
+  (.eval rooms/redis-client "local room_id = ARGV[1] local track_num = ARGV[2] local sound_id = ARGV[3] redis.call('set', 'room:' .. room_id .. ':started?', 'false') redis.call('del', 'room:' .. room_id .. ':sync-start') local num_tracks = redis.call('hlen', 'room:' .. room_id .. ':music-info') if (tonumber(track_num) < 0) or (tonumber(track_num) >= tonumber(num_tracks)) then return nil end redis.call('del', 'room:' .. room_id .. ':track-complete') local track_id = redis.call('hget', 'room:' .. room_id .. ':track-order', track_num) redis.call('set', 'room:' .. room_id .. ':current-track', track_num) redis.call('set', 'room:' .. room_id .. ':current-sound', sound_id) redis.call('set', 'room:' .. room_id .. ':waiting-to-start?', 'true') return track_id "
     0 room track-num sound-id
     (fn [err reply]
       (println reply)
@@ -95,11 +95,13 @@
                     (- (.now js/Date)
                        (:start-time track-position-info)))))
               (start-track [room track-position-info]
-                (if (nil? track-position-info)
-                  (rooms/get-current-track-position room
-                    (fn [track-position-info]
-                      (.emit socket "start-track" (convert-position track-position-info))))
-                  (.emit (.to io room) "start-track" (convert-position track-position-info))))]
+                (rooms/unset-waiting-to-start-flag room
+                  (fn []
+                    (if (nil? track-position-info)
+                      (rooms/get-current-track-position room
+                        (fn [track-position-info]
+                          (.emit socket "start-track" (convert-position track-position-info))))
+                      (.emit (.to io room) "start-track" (convert-position track-position-info))))))]
         (rooms/get-room-from-user-id (.-id socket)
           (fn [room]
             (rooms/get-current-sound-id room
@@ -188,10 +190,12 @@
                                   (if-not (nil? track-id)
                                     (rooms/clear-ready-to-start room
                                       (fn []
-                                        (.emit (.to io room)
-                                               "track-change"
-                                               track-id
-                                               sound-id))))))))))))))))))))
+                                        (rooms/set-waiting-to-start-flag room
+                                          (fn []
+                                            (.emit (.to io room)
+                                                   "track-change"
+                                                   track-id
+                                                   sound-id))))))))))))))))))))))
 
   (.on socket "track-deleted"
     (fn []
@@ -290,12 +294,15 @@
                     (rooms/get-track-order room
                       (fn [track-order]
                         (.emit (.to io room) "upload-complete" (clj->js music-info) track-order)))
-                    (rooms/has-track-started? room
-                      (fn [started?]
-                        (if-not started?
-                          (rooms/get-num-of-tracks room
-                            (fn [num-of-tracks]
-                              (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))
+                    (rooms/is-waiting-to-start? room
+                      (fn [waiting?]
+                        (if-not waiting?
+                          (rooms/has-track-started? room
+                            (fn [started?]
+                              (if-not started?
+                                (rooms/get-num-of-tracks room
+                                  (fn [num-of-tracks]
+                                    (change-track room (- num-of-tracks 1) (.v4 js-uuid))))))))))))))
             (println (str "Successfully uploaded " absolute-file-path)))))))
 
   (.on socket "file-download-request"

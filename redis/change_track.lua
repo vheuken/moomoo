@@ -21,4 +21,6 @@ redis.call('set', 'room:' .. room_id .. ':current-track', track_num)
 
 redis.call('set', 'room:' .. room_id .. ':current-sound', sound_id)
 
+redis.call('set', 'room:' .. room_id .. ':waiting-to-start?', 'true')
+
 return track_id
