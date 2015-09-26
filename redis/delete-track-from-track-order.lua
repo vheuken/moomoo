@@ -40,6 +40,7 @@ for i=2, #track_order, 2 do
       end
     end
 
+    redis.call('set', 'room:' .. room_id .. ':current-track', track_order[i-1])
     return {track_order[i-1], next_track_id}
   end
 end
