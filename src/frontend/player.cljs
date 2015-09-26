@@ -28,7 +28,7 @@
     (this-as sound
       (if (some #(= (.-id sound) %) (:tracks-to-delete @app-state))
         (do
-          (println "DESTROYING SOUND FROM whileloading()")
+          (println "Destroying sound from whileloading()")
           (.destruct sound)
           (swap! app-state assoc :tracks-to-delete
             (vec (remove #(= (.-id sound) %) (:tracks-to-delete @app-state)))))))))
@@ -48,7 +48,6 @@
   (defn on-load []
     (if (nil? position)
       (let [duration (.-duration (:current-sound @app-state))]
-        (println "DURATION! " duration)
         (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
                     :onfinish on-finish
@@ -82,7 +81,11 @@
     (if (or (undefined? sound)
             (> 3 (.-readyState sound)))
       (swap! app-state assoc :tracks-to-delete (conj (:tracks-to-delete @app-state) sound-id))
-      (.destruct sound))))
+      (.destruct sound)))
+
+  (if (= sound-id (.-id (:current-sound @app-state)))
+    (swap! app-state assoc :current-sound-id nil)
+    (swap! app-state assoc :current-sound nil)))
 
 (defn set-position [position]
   (println "Setting sound position to: " position)

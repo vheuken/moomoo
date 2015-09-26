@@ -310,8 +310,8 @@
 (.on socket "pause"
   (fn [position]
     (println "Received pause signal with position:" position)
-    (player/pause)
-    (player/set-position position)))
+    (player/pause)))
+    ;(player/set-position position)))
 
 (.on socket "resume"
   (fn []

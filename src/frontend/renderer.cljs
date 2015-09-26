@@ -265,6 +265,7 @@
   (reify
     om/IRender
     (render [this]
+      (println (:current-sound-id @data))
       (if (nil? (:current-sound-id @data))
         (dom/img #js {:className "player-button-img"
                       :src grey-out-image})
