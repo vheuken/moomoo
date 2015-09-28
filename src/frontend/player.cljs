@@ -34,6 +34,7 @@
             (vec (remove #(= (.-id sound) %) (:tracks-to-delete @app-state)))))))))
 
 (defn pause []
+  (println "Pausing current sound!")
   (.pause (:current-sound @app-state))
   (swap! app-state assoc :paused? true))
 
@@ -51,13 +52,19 @@
         (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
                     :onfinish on-finish
-                    :onplay #(.setPosition (:current-sound @app-state)
-                                           duration)}))
+                    :onplay (fn []
+                              (.setPosition (:current-sound @app-state)
+                                            duration)
+                              (if (:paused? @app-state)
+                                (pause)))}))
       (.play (:current-sound @app-state)
              #js {:whileplaying while-playing
                   :onfinish on-finish
-                  :onplay #(.setPosition (:current-sound @app-state)
-                                        position)})))
+                  :onplay (fn []
+                            (.setPosition (:current-sound @app-state)
+                                          position)
+                            (if (:paused? @app-state)
+                              (pause)))})))
 
   (let [reader (new js/FileReader)]
     (.readAsDataURL reader sound-blob)
@@ -71,8 +78,7 @@
                                              :whileloading while-loading
                                              :onload on-load
                                              :volume (:volume @app-state)}))
-        (if (:paused? @app-state)
-          (pause))))))
+        ))))
 
 ; TODO: probably should go into a different module...but which?
 (defn destroy-track [sound-id]
