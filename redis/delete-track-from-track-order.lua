@@ -2,6 +2,14 @@ local room_id = ARGV[1]
 local track_id = ARGV[2]
 local next_track_id = nil
 
+local current_track_num = redis.call('get', 'room:' .. room_id .. ':current-track')
+local current_track_id  = redis.call('hget', 'room:' .. room_id .. ':track-order', current_track_num)
+
+if current_track_id ~= nil and current_track_id == track_id then
+  redis.call('set', 'room:' .. room_id .. ':waiting-to-start?', 'false')
+  redis.call('set', 'room:' .. room_id .. ':started?', 'false')
+end
+
 local track_order = redis.call('hgetall', 'room:' .. room_id .. ':track-order')
 local sorted_track_order = {}
 
