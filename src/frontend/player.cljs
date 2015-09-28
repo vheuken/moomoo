@@ -77,8 +77,7 @@
                                              :autoLoad true
                                              :whileloading while-loading
                                              :onload on-load
-                                             :volume (:volume @app-state)}))
-        ))))
+                                             :volume (:volume @app-state)}))))))
 
 ; TODO: probably should go into a different module...but which?
 (defn destroy-track [sound-id]
