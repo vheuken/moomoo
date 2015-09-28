@@ -83,7 +83,8 @@
       (swap! app-state assoc :tracks-to-delete (conj (:tracks-to-delete @app-state) sound-id))
       (.destruct sound)))
 
-  (if (= sound-id (.-id (:current-sound @app-state)))
+  (if (and (not (nil? (:current-sound @app-state)))
+           (= sound-id (.-id (:current-sound @app-state))))
     (swap! app-state assoc :current-sound-id nil)
     (swap! app-state assoc :current-sound nil)))
 
