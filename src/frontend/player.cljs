@@ -52,19 +52,13 @@
         (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
                     :onfinish on-finish
-                    :onplay (fn []
-                              (.setPosition (:current-sound @app-state)
-                                            duration)
-                              (if (:paused? @app-state)
-                                (pause)))}))
+                    :onplay #(.setPosition (:current-sound @app-state)
+                                           duration)}))
       (.play (:current-sound @app-state)
              #js {:whileplaying while-playing
                   :onfinish on-finish
-                  :onplay (fn []
-                            (.setPosition (:current-sound @app-state)
-                                          position)
-                            (if (:paused? @app-state)
-                              (pause)))})))
+                  :onplay #(.setPosition (:current-sound @app-state)
+                                        position)})))
 
   (let [reader (new js/FileReader)]
     (.readAsDataURL reader sound-blob)
@@ -77,7 +71,9 @@
                                              :autoLoad true
                                              :whileloading while-loading
                                              :onload on-load
-                                             :volume (:volume @app-state)}))))))
+                                             :volume (:volume @app-state)}))
+        (if (:paused? @app-state)
+          (pause))))))
 
 ; TODO: probably should go into a different module...but which?
 (defn destroy-track [sound-id]
