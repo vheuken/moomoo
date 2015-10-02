@@ -94,13 +94,6 @@
         (delete-user socket-id #(callback reply))
         callback))))
 
-(defn image-tags-to-base64 [tags]
-  (let [image-tag (get (get tags "v2") "image")
-        image-data (get image-tag "data")]
-    (if-not (nil? image-tag)
-      (merge tags {"v2" (merge image-tag {"data" (.encode base64-arraybuffer image-data)})})
-      tags)))
-
 (defn does-room-exist? [room callback]
   (.get redis-client (str "room:" room ":current-track")
     (fn [err reply]
@@ -230,7 +223,7 @@
             (fn [username]
               (get-num-of-tracks room
                 (fn [track-num]
-                  (let [tags (image-tags-to-base64 (js->clj tags))
+                  (let [tags (js->clj tags)
                         writer (transit/writer :json)
                         music-info {:tags tags
                                     :username username
