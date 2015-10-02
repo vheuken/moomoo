@@ -383,28 +383,6 @@
         (callback true)
         (callback false)))))
 
-(defn is-track-changing? [room callback]
-  (.get redis-client (str "room:" room ":changing-track?")
-    (fn [err reply]
-      (if (= reply "true")
-        (callback true)
-        (callback false)))))
-
-(defn start-changing-track [room callback]
-  (.eval redis-client "local room_id = ARGV[1] local track = redis.call('lrange', 'room:' .. room_id .. ':change-track-list', -1, -1)[1] if track ~= nil then redis.call('del', 'room:' .. room_id .. ':change-track-list') end return track"
-        0 "room"
-    (fn [err reply]
-      (if (= "true" reply)
-        (callback true)
-        (callback false)))))
-
-(defn stop-changing-track [room]
-  (.set redis-client (str "room:" room ":changing-track?") "false"))
-
-(defn delete-room [room]
-  (let [lua-command "local keys = redis.call('keys', ARGV[1]) \n for i=1,#keys,5000 do \n redis.call('del', unpack(keys, i, math.min(i+4999, #keys))) \n end \n return keys"]
-    (.eval redis-client lua-command 0 (str "room:" room ":*"))))
-
 (defn handle-disconnect [room callback]
   (let [lua-fn (.scriptWrap redis-lua "handleDisconnect")]
     (lua-fn 0 room
