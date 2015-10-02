@@ -279,11 +279,6 @@
     (fn [err reply]
       (callback reply))))
 
-(defn add-to-change-track-list [room track-num callback]
-  (.rpush redis-client (str "room:" room ":change-track-list") track-num
-    (fn [err reply]
-      (callback))))
-
 (defn user-ready-to-start [socket-id callback]
   (get-room-from-user-id socket-id
     (fn [room]
