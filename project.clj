@@ -16,7 +16,7 @@
                        [jade "1.11"]
                        [musicmetadata "2.0"]
                        [base64-arraybuffer "0.1.2"]
-                       [redis-scripto "0.1.3"]
+                       [redis-lua-loader "1.1.0"]
                        [ws "0.8.0"]]}
 
   :plugins [[lein-cljsbuild "1.1.0"]
