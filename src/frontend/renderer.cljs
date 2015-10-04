@@ -84,21 +84,21 @@
     om/IDidUpdate
     (did-update [_ _ _]
       (let [prev-state (om/get-state owner)]
-        (if (and (not (nil? (:current-track-id data)))
-                 (not= (:track-id prev-state) (:current-track-id data)))
-          (let [picture-data (first
-                               (.-picture
-                                 (.-tags
-                                   (core/get-music-info-from-id (:current-track-id data)))))]
-            (if (nil? picture-data)
-              (om/set-state! owner{:cover-image nil
-                                   :track-id (:current-track-id data)})
-              (let [picture-format (.-format picture-data)
-                    picture-buffer (.-data picture-data)
-                    base64-data (js/base64ArrayBuffer picture-buffer)
-                    data-uri (str "data:" "image/jpeg" ";base64," base64-data)]
-                (om/set-state! owner {:cover-image data-uri
-                                      :track-id (:current-track-id data)})))))))
+        (if-not (nil? (:current-track-id data))
+          (if-not (= (:track-id prev-state) (:current-track-id data))
+            (let [picture-data (first
+                                 (.-picture
+                                   (.-tags
+                                     (core/get-music-info-from-id (:current-track-id data)))))]
+              (if (nil? picture-data)
+                (om/set-state! owner{:cover-image nil
+                                     :track-id (:current-track-id data)})
+                (let [picture-format (.-format picture-data)
+                      picture-buffer (.-data picture-data)
+                      base64-data (js/base64ArrayBuffer picture-buffer)
+                      data-uri (str "data:" "image/jpeg" ";base64," base64-data)]
+                  (om/set-state! owner {:cover-image data-uri
+                                        :track-id (:current-track-id data)}))))))))
     om/IRenderState
     (render-state [this state]
       (if-not (nil? (:current-track-id data))
@@ -150,9 +150,9 @@
           current-track-id (:current-track-id @core/app-state)]
       (if (= track-id current-track-id)
         (if-not playing?
-          (om/set-state! owner (merge state {:playing? true})))
+          (om/set-state! owner {:playing? true}))
         (if playing?
-          (om/set-state! owner (merge state {:playing? false}))))))
+          (om/set-state! owner {:playing? false})))))
   (reify
     om/IInitState
     (init-state [_]
@@ -163,6 +163,9 @@
     om/IDidUpdate
     (did-update [_ _ _]
       (update-state))
+    om/IShouldUpdate
+    (should-update [_ _ _]
+      true)
     om/IRenderState
     (render-state [_ state]
       (let [tags (.-tags data)
@@ -265,7 +268,6 @@
   (reify
     om/IRender
     (render [this]
-      (println (:current-sound-id @data))
       (if (nil? (:current-sound-id @data))
         (dom/img #js {:className "player-button-img"
                       :src grey-out-image})
