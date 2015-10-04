@@ -1,8 +1,7 @@
 (ns moomoo.rooms
   (:require [cljs.nodejs :as nodejs]
             [cljs.reader :as reader]
-            [cognitect.transit :as transit]
-            [clojure.string :as string]))
+            [cognitect.transit :as transit]))
 
 (defonce fs (nodejs/require "fs"))
 (defonce mm (nodejs/require "musicmetadata"))
@@ -10,39 +9,40 @@
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce redis-client (.createClient (nodejs/require "redis")))
 (defonce redis-lua-loader (nodejs/require "redis-lua-loader"))
-
 (defonce redis-lua (redis-lua-loader. redis-client #js {:src "./redis"}))
 
+(defn redis-room-prefix [room-id suffix]
+  (str "room:" room-id ":" suffix))
 
 (defn set-waiting-to-start-flag [room-id callback]
-  (.set redis-client (str "room:" room-id ":waiting-to-start?") "true"
+  (.set redis-client (redis-room-prefix room-id "waiting-to-start?") "true"
     (fn [err reply]
       (callback))))
 
 (defn unset-waiting-to-start-flag [room-id callback]
-  (.set redis-client (str "room:" room-id ":waiting-to-start?") "false"
+  (.set redis-client (redis-room-prefix room-id "waiting-to-start?") "false"
     (fn [err reply]
       (callback))))
 
 (defn is-waiting-to-start? [room-id callback]
-  (.get redis-client (str "room:" room-id ":waiting-to-start?")
+  (.get redis-client (redis-room-prefix room-id "waiting-to-start?")
     (fn [err reply]
       (if (= reply "true")
         (callback true)
         (callback false)))))
 
 (defn set-delete-flag [room-id callback]
-  (.set redis-client (str "room:" room-id ":deleted?") "true"
+  (.set redis-client (redis-room-prefix room-id "deleted?") "true"
     (fn [err reply]
       (callback))))
 
 (defn unset-delete-flag [room-id callback]
-  (.set redis-client (str "room:" room-id ":deleted?") "false"
+  (.set redis-client (redis-room-prefix room-id "deleted?") "false"
     (fn [err reply]
       (callback))))
 
 (defn get-delete-flag [room-id callback]
-  (.get redis-client (str "room:" room-id ":deleted?")
+  (.get redis-client (redis-room-prefix room-id "deleted?")
     (fn [err reply]
       (if (= "true" reply)
         (callback true)
@@ -55,24 +55,24 @@
     (vec (map #(val %) user-hash))))
 
 (defn set-username [room id username callback]
-  (.hset redis-client (string/join ["room:" room ":users"]) id username
+  (.hset redis-client (redis-room-prefix room "users") id username
     (fn [err reply]
-      (.set redis-client (string/join ["users:" id]) room callback))))
+      (.set redis-client (str "users:" id) room callback))))
 
 (defn get-username [room id callback]
-  (.hget redis-client (string/join ["room:" room ":users"]) id
+  (.hget redis-client (redis-room-prefix room "users") id
     (fn [err reply]
       (if-not (nil? reply)
         (callback (.toString reply))
         (callback nil)))))
 
 (defn get-all-users [room callback]
-  (.hgetall redis-client (string/join ["room:" room ":users"])
+  (.hgetall redis-client (redis-room-prefix room "users")
     (fn [err reply]
       (callback (users-to-list reply)))))
 
 (defn get-num-of-users [room callback]
-  (.hlen redis-client (str "room:" room ":users")
+  (.hlen redis-client (redis-room-prefix room "users")
     (fn [err reply]
       (callback reply))))
 
@@ -84,7 +84,7 @@
     (fn [err reply]
       (if-not (nil? reply)
         (let [room (.toString reply)]
-          (.hdel redis-client (str "room:" room ":users") id
+          (.hdel redis-client (redis-room-prefix room "users") id
             #(.del redis-client (str "users:" id) callback)))))))
 
 (defn disconnect [socket-id callback]
@@ -95,40 +95,40 @@
         callback))))
 
 (defn does-room-exist? [room callback]
-  (.get redis-client (str "room:" room ":current-track")
+  (.get redis-client (redis-room-prefix room "current-track")
     (fn [err reply]
       (if (nil? reply)
         (callback false)
         (callback true)))))
 
 (defn init-room [room callback]
-  (.set redis-client (str "room:" room ":current-track") 0
+  (.set redis-client (redis-room-prefix room "current-track") 0
     (fn []
-      (.set redis-client (str "room:" room ":playing?") "false"
+      (.set redis-client (redis-room-prefix room "playing?") "false"
         (fn []
           (callback))))))
 
 (defn get-current-track [room callback]
-  (.get redis-client (str "room:" room ":current-track")
+  (.get redis-client (redis-room-prefix room "current-track")
     (fn [err reply]
       (callback (js/parseInt reply)))))
 
 (defn get-current-track-id [room callback]
   (get-current-track room
     (fn [current-track-num]
-      (.hget redis-client (str "room:" room ":track-order") current-track-num
+      (.hget redis-client (redis-room-prefix room "track-order") current-track-num
         (fn [err track-id]
           (callback track-id))))))
 
 (defn is-playing? [room callback]
-  (.get redis-client (str "room:" room ":playing?")
+  (.get redis-client (redis-room-prefix room "playing?")
     (fn [err reply]
       (if (= "true" reply)
         (callback true)
         (callback false)))))
 
 (defn set-track-position [room track-id position callback]
-  (.hset redis-client (str "room:" room ":track-order") position track-id
+  (.hset redis-client (redis-room-prefix room "track-order") position track-id
     (fn []
       (callback))))
 
@@ -136,43 +136,43 @@
   (let [writer (transit/writer :json)
         track-position-info {:position position
                              :start-time (.now js/Date)}]
-  (.set redis-client (str "room:" room ":track-position")
+  (.set redis-client (redis-room-prefix room "track-position")
                      (transit/write writer track-position-info)
     (fn [err reply]
       (callback track-position-info)))))
 
 (defn get-current-track-position [room callback]
  (let [reader (transit/reader :json)]
-   (.get redis-client (str "room:" room ":track-position")
+   (.get redis-client (redis-room-prefix room "track-position")
      (fn [err reply]
        (callback (transit/read reader reply))))))
 
 (defn pause-current-track [room position callback]
   (let [writer (transit/writer :json)]
-    (.set redis-client (str "room:" room ":track-position")
+    (.set redis-client (redis-room-prefix room "track-position")
                        (transit/write writer {:position position
                                               :start-time (.now js/Date)})
       (fn [err reply]
-        (.set redis-client (str "room:" room ":playing?") "false"
+        (.set redis-client (redis-room-prefix room "playing?") "false"
           (fn [err reply]
             (callback)))))))
 
 (defn resume-current-track [room callback]
   (let [reader (transit/reader :json)]
-    (.get redis-client (str "room:" room ":track-position")
+    (.get redis-client (redis-room-prefix room "track-position")
       (fn [err reply]
         (let [old-track-position-info (transit/read reader reply)
               new-track-position-info (merge old-track-position-info {:start-time (.now js/Date)})
               writer (transit/writer :json)]
-          (.set redis-client (str "room:" room ":track-position")
+          (.set redis-client (redis-room-prefix room "track-position")
                              (transit/write writer new-track-position-info)
             (fn []
-              (.set redis-client (str "room:" room ":playing?") "true"
+              (.set redis-client (redis-room-prefix room "playing?") "true"
                 (fn []
                   (callback))))))))))
 
 (defn has-track-started? [room callback]
-  (.get redis-client (str "room:" room ":started?")
+  (.get redis-client (redis-room-prefix room "started?")
     (fn [err reply]
       (if (= "true" reply)
         (callback true)
@@ -180,7 +180,7 @@
 
 (defn start-current-track [room callback]
   (println "Starting current track")
-  (.set redis-client (str "room:" room ":started?") "true"
+  (.set redis-client (redis-room-prefix room "started?") "true"
     (fn []
       (get-current-track-position room
         (fn [track-position-info]
@@ -193,7 +193,7 @@
 (defn change-current-track-position [room position callback]
   (letfn [(change-pos []
             (let [writer (transit/writer :json)]
-              (.set redis-client (str "room:" room ":track-position")
+              (.set redis-client (redis-room-prefix room "track-position")
                                  (transit/write writer {:position position
                                                         :start-time (.now js/Date)})
                 (fn []
@@ -202,11 +202,11 @@
       (fn [started?]
         (if started?
           (change-pos)
-          (.set redis-client (str "room:" room ":started?") "true" change-pos))))))
+          (.set redis-client (redis-room-prefix room "started?") "true" change-pos))))))
 
 (defn get-num-of-tracks [room callback]
   (println "Calling get-num-of-tracks")
-  (.hlen redis-client (str "room:" room ":music-info")
+  (.hlen redis-client (redis-room-prefix room "music-info")
     (fn [err reply]
       (callback reply))))
 
@@ -230,11 +230,11 @@
                                     :originalfilename original-file-name
                                     :id track-id}
                         music-info-json (transit/write writer music-info)]
-                    (.hset redis-client (str "room:" room ":music-info")
+                    (.hset redis-client (redis-room-prefix room "music-info")
                                         track-id
                                         music-info-json
                       (fn []
-                        (.hset redis-client (str "room:" room ":music-files")
+                        (.hset redis-client (redis-room-prefix room "music-files")
                                             track-id
                                             absolute-file-path
                           (fn [err reply]
@@ -244,51 +244,51 @@
 
 ; TODO: Transit should translate this(?)
 (defn get-music-info [room track-id callback]
-  (.hget redis-client (str "room:" room ":music-info") track-id
+  (.hget redis-client (redis-room-prefix room "music-info") track-id
     (fn [err reply]
       (callback reply))))
 
 (defn get-music-file [room track-id callback]
-  (.hget redis-client (str "room:" room ":music-files") track-id
+  (.hget redis-client (redis-room-prefix room "music-files") track-id
     (fn [err reply]
       (callback reply))))
 
 (defn get-track-id-from-position [room position callback]
-  (.hget redis-client (str "room:" room ":track-order") position
+  (.hget redis-client (redis-room-prefix room "track-order") position
     (fn [err reply]
       (callback reply))))
 
 (defn get-current-sound-id [room callback]
-  (.get redis-client (str "room:" room ":current-sound")
+  (.get redis-client (redis-room-prefix room "current-sound")
     (fn [err reply]
       (callback reply))))
 
 (defn user-ready-to-start [socket-id callback]
   (get-room-from-user-id socket-id
     (fn [room]
-      (.lpush redis-client (str "room:" room ":sync-start") socket-id
+      (.lpush redis-client (redis-room-prefix room "sync-start") socket-id
         (fn [err reply]
           (callback reply))))))
 
 (defn client-sync [room-id sync-command socket-id callback]
   (get-num-of-users room-id
     (fn [num-users]
-      (.lpush redis-client (str "room:" room-id ":" sync-command) socket-id
+      (.lpush redis-client (redis-room-prefix room-id sync-command) socket-id
         (fn [err length]
           (if (= length num-users)
             (callback true)
             (callback false)))))))
 
 (defn delete-client-sync [room-id sync-command callback]
-  (.del redis-client (str "room:" room-id ":" sync-command)
+  (.del redis-client (redis-room-prefix room-id sync-command)
     (callback)))
 
 (defn clear-ready-to-start [room callback]
-  (.del redis-client (str "room:" room ":sync-start")
+  (.del redis-client (redis-room-prefix room "sync-start")
     (callback)))
 
 (defn clear-track-complete [room callback]
-  (.del redis-client (str "room:" room ":track-complete")
+  (.del redis-client (redis-room-prefix room "track-complete")
     (callback)))
 
 (defn next-track [room callback]
@@ -297,10 +297,10 @@
             (get-track-id-from-position room track-num
               (fn [track-id]
                 (let [sound-id (.v4 js-uuid)]
-                  (.set redis-client (str "room:" room ":current-sound") sound-id
+                  (.set redis-client (redis-room-prefix room "current-sound") sound-id
                     (fn [err reply]
                       (callback track-id sound-id)))))))]
-    (.get redis-client (str "room:" room ":current-track")
+    (.get redis-client (redis-room-prefix room "current-track")
       (fn [err current-track-num]
         (get-delete-flag room
           (fn [delete-flag?]
@@ -313,7 +313,7 @@
                         (println "Num-of-tracks:" num-of-tracks)
                         (if (> num-of-tracks 0)
                           (if (> current-track-num (- num-of-tracks 1))
-                            (.decr redis-client (str "room:" room ":current-track")
+                            (.decr redis-client (redis-room-prefix room "current-track")
                               (fn [err track-num]
                                 (set-current-track-position room -1
                                   (fn []
@@ -326,12 +326,12 @@
                     (set-current-track-position room -1
                       (fn []
                         (callback nil nil)))
-                    (.incr redis-client (str "room:" room ":current-track")
+                    (.incr redis-client (redis-room-prefix room "current-track")
                       (fn [err track-num]
                         (change-to-track-num track-num)))))))))))))
 
 (defn get-all-music-info [room-id callback]
-  (.hgetall redis-client (str "room:" room-id ":music-info")
+  (.hgetall redis-client (redis-room-prefix room-id "music-info")
     (fn [err music-info-reply]
       (let [info (vals (js->clj music-info-reply))
             reader (transit/reader :json)
@@ -341,22 +341,22 @@
           (callback  (clj->js info-to-send)))))))
 
 (defn track-complete [room callback]
-  (.set redis-client (str "room:" room ":started?") "false"
+  (.set redis-client (redis-room-prefix room "started?") "false"
     (fn [err reply]
       (callback))))
 
 (defn start-looping [room callback]
-  (.set redis-client (str "room:" room ":looping?") "true"
+  (.set redis-client (redis-room-prefix room "looping?") "true"
     (fn [err reply]
       (callback))))
 
 (defn stop-looping [room callback]
-  (.set redis-client (str "room:" room ":looping?") "false"
+  (.set redis-client (redis-room-prefix room "looping?") "false"
     (fn [err reply]
       (callback))))
 
 (defn is-looping? [room callback]
-  (.get redis-client (str "room:" room ":looping?")
+  (.get redis-client (redis-room-prefix room "looping?")
     (fn [err reply]
       (if (= reply "true")
         (callback true)
@@ -371,20 +371,20 @@
           (callback (js->clj reply)))))))
 
 (defn clear-songs [room-id callback]
-  (.del redis-client (str "room:" room-id ":music-info")
+  (.del redis-client (redis-room-prefix room-id "music-info")
     (fn [err reply]
-      (.del redis-client (str "room:" room-id ":music-files")
+      (.del redis-client (redis-room-prefix room-id "music-files")
         (fn [err reply]
-          (.del redis-client  (str "room:" room-id ":track-order")
+          (.del redis-client  (redis-room-prefix room-id "track-order")
             (fn [err reply]
-              (.del redis-client (str "room:" room-id ":current-track")
+              (.del redis-client (redis-room-prefix room-id "current-track")
                 (fn [err reply]
-                  (.del redis-client (str "room:" room-id ":current-sound")
-                    (.del redis-client (str "room:" room-id ":sync-start")
+                  (.del redis-client (redis-room-prefix room-id "current-sound")
+                    (.del redis-client (redis-room-prefix room-id "sync-start")
                       (fn [err reply]
-                        (.set redis-client (str "room:" room-id ":playing?") "false"
+                        (.set redis-client (redis-room-prefix room-id "playing?") "false"
                           (fn [err reply]
-                            (.set redis-client (str "room:" room-id ":started?") "false"
+                            (.set redis-client (redis-room-prefix room-id "started?") "false"
                               (fn [err reply]
                                 (callback)))))))))))))))))
 
@@ -396,7 +396,7 @@
         (callback (nth next-track-id 0))))))
 
 (defn get-track-order [room-id callback]
-  (.hgetall redis-client (str "room:" room-id ":track-order")
+  (.hgetall redis-client (redis-room-prefix room-id "track-order")
     (fn [err reply]
       (let [track-order-data (js->clj reply)
             indexed-data (map-indexed (fn [idx v] [idx v]) track-order-data)
