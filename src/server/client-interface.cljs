@@ -1,5 +1,6 @@
 (ns moomoo.client-interface
   (:require [cljs.nodejs :as nodejs]
+            [clojure.string :as string]
             [cognitect.transit :as transit]
             [moomoo.rooms :as rooms]))
 
@@ -252,7 +253,7 @@
       (println (.-id socket) "is uploading" original-filename)
       (let [file-id (.v4 js-uuid)
             filename (subs file-id 0 7)
-            absolute-file-path (str file-upload-directory "/" filename)]
+            absolute-file-path (str file-upload-directory "/" filename ".mp3")]
         (println (str "Saving" original-filename "as" absolute-file-path))
         (.pipe stream (.createWriteStream fs absolute-file-path))
 
@@ -305,16 +306,13 @@
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
           (rooms/get-music-file room track-id
-            (fn [file]
+            (fn [file-path]
               (let [client-socket (aget (.-connected (.-sockets io)) (.-id socket))
-                    stream (.createStream socketio-stream)
-                    read-stream (.createReadStream fs file)
-                    file-size (.-size (.statSync fs file))]
-                (.emit (socketio-stream client-socket) "file-download"
-                                                       stream
-                                                       track-id
-                                                       file-size)
-                (.pipe read-stream stream)))))))))
+                    file-url (string/replace file-path "public" "")]
+                (println file-url)
+                (.emit client-socket "file-download"
+                                     file-url
+                                     track-id)))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))

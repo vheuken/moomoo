@@ -1,5 +1,6 @@
 (ns moomoo-frontend.core
-  (:require [moomoo-frontend.player :as player]))
+  (:require [clojure.string :as string]
+            [moomoo-frontend.player :as player]))
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
@@ -120,7 +121,7 @@
       (swap! app-state assoc :download-status (merge (:download-status @app-state)
                                                      {track-id :in-progress}))
       (swap! app-state assoc :music-files (merge (:music-files @app-state)
-                                                 {track-id (new js/Blob)}))
+                                                 {track-id ""}))
       (swap! app-state assoc :num-of-downloads (inc (:num-of-downloads @app-state)))
       (println "Sending file-download-request for:" track-id)
       (.emit socket "file-download-request" track-id)
@@ -234,53 +235,31 @@
     (swap! app-state assoc :music-info
       (conj (:music-info @app-state) music-info))
 
-    (swap! app-state assoc :track-order (js->clj track-order))
+    (swap! app-state assoc :track-order (js->clj track-order))))
+    ;(if (> (:download-slots @app-state) (:num-of-downloads @app-state))
+      ;(request-new-track))))
 
-    (if (> (:download-slots @app-state) (:num-of-downloads @app-state))
-      (request-new-track))))
+(.on socket "file-download"
+  (fn [file-url track-id]
+    (println "Received file-download for" file-url)
 
-(.on (new js/ss socket) "file-download"
-  (fn [stream track-id file-size]
-    (println "Download starting!")
-
-    (.on stream "data"
-      (fn [data-chunk]
-        (println "Received data-chunk:"
-                 "track-id:" track-id
-                 "size:" (.-length data-chunk))
-        (let [data-downloaded (+ (.-length data-chunk) (:data-downloaded
-                                                         (get (:download-progress @app-state)
-                                                              track-id)))]
-          (swap! app-state assoc :download-progress (merge (:download-progress @app-state)
-                                                           {track-id {:data-downloaded data-downloaded
-                                                                      :file-size file-size}})))
-
-        (swap! app-state assoc :music-files
-          (merge (:music-files @app-state)
-                 {track-id
-                  (new js/Blob #js [(get (:music-files @app-state) track-id) data-chunk]
-                               #js {:type "audio/mpeg"})}))))
-    (.on stream "end"
-      (fn []
-        (println "Download of" track-id "complete!")
-        (swap! app-state assoc :download-status (merge (:download-status @app-state)
-                                                       {track-id :complete}))
-
-        (swap! app-state assoc :num-of-downloads (dec (:num-of-downloads @app-state)))
-        (swap! app-state assoc :download-progress (dissoc (:download-progress @app-state) track-id))
-
-        (if (> (:download-slots @app-state) (:num-of-downloads @app-state))
-          (request-new-track))
-
-        (if (= (:current-track-id @app-state) track-id)
-          (do
-            (println "Sending ready-to-start signal"
-                     "Sound-id:" (:current-sound-id @app-state))
-            (.emit socket "ready-to-start" (:current-sound-id @app-state))))))))
+    (swap! app-state assoc :music-files (merge (:music-files @app-state)
+                                               {track-id
+                                                (str (first (string/split (.-href (.-location js/window))
+                                                              #"/rooms"))
+                                                     file-url)}))
+    (println (:music-files @app-state))
+    (if (= (:current-track-id @app-state) track-id)
+      (do
+        (println "Sending ready-to-start signal"
+                 "Sound-id:" (:current-sound-id @app-state))
+        (.emit socket "ready-to-start" (:current-sound-id @app-state))))))
 
 (.on socket "start-track"
   (fn [position]
     (println "Starting current track at position: " position)
+    (println "WAT" (get (:music-files @app-state) (:current-track-id @app-state)))
+
     (player/play-track (get (:music-files @app-state) (:current-track-id @app-state))
                        (:current-sound-id @app-state)
                        position
