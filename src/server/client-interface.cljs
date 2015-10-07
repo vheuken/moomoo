@@ -5,7 +5,7 @@
 
 (defonce socketio (nodejs/require "socket.io"))
 (defonce socketio-stream (nodejs/require "socket.io-stream"))
-(defonce file-upload-directory "/tmp/moomoo-uploads")
+(defonce file-upload-directory "public/music")
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce fs (nodejs/require "fs"))
 
