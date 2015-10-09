@@ -352,3 +352,9 @@
           (swap! app-state assoc :current-track-id nil)
           (swap! app-state assoc :current-sound-id nil)
           (.emit socket "track-deleted"))))))
+
+(.onready js/soundManager
+  (fn []
+    (.createSound js/soundManager #js {
+      :id "join-sound"
+      :url "http://www.soundjay.com/button/beep-01a.mp3"})))

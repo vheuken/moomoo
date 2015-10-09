@@ -65,7 +65,6 @@
         (.createSound js/soundManager #js {:id sound-id
                                            :type "audio/mpeg"
                                            :url sound-blob
-                                           :autoLoad true
                                            :whileloading while-loading
                                            :onload on-load
                                            :onfinish on-finish

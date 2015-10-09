@@ -50,7 +50,7 @@
         (dom/div #js {:id "temp-background"}
           (dom/form #js {:id "username-input" :action ""} "Enter Name: "
             (dom/input #js {:id "username" :type "text" :autoComplete "off"})
-            (dom/button nil "Join")))))))
+            (dom/button #js {:onClick #(.play js/soundManager "join-sound")} "Join")))))))
 
 (defn message-form [data owner]
   (reify
