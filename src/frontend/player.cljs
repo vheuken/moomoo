@@ -42,8 +42,8 @@
   (.resume (:current-sound @app-state))
   (swap! app-state assoc :paused? false))
 
-(defn play-track [sound-blob sound-id position on-finish]
-  (println "SOUND BLOB" sound-blob)
+(defn play-track [sound-url sound-id position on-finish]
+  (println "Sound URL to play:" sound-url)
   (swap! app-state assoc :on-finish on-finish)
   (swap! app-state assoc :current-sound-id sound-id)
   (swap! app-state assoc :paused? false)
@@ -51,7 +51,7 @@
   (swap! app-state assoc :current-sound
     (.createSound js/soundManager #js {:id sound-id
                                        :type "audio/mpeg"
-                                       :url sound-blob
+                                       :url sound-url
                                        :whileloading while-loading
                                        :onfinish on-finish
                                        :volume (:volume @app-state)}))
