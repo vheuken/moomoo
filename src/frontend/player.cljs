@@ -48,27 +48,18 @@
   (swap! app-state assoc :current-sound-id sound-id)
   (swap! app-state assoc :paused? false)
 
-  (defn on-load []
-    (if (nil? position)
-      (let [duration (.-duration (:current-sound @app-state))]
-        (.play (:current-sound @app-state)
+  (swap! app-state assoc :current-sound
+    (.createSound js/soundManager #js {:id sound-id
+                                       :type "audio/mpeg"
+                                       :url sound-blob
+                                       :whileloading while-loading
+                                       :onfinish on-finish
+                                       :volume (:volume @app-state)}))
+
+  (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
                     :onplay #(.setPosition (:current-sound @app-state)
-                                           duration)}))
-      (.play (:current-sound @app-state)
-             #js {:whileplaying while-playing
-                  :onplay #(.setPosition (:current-sound @app-state)
-                                        position)})))
-
-
-      (swap! app-state assoc :current-sound
-        (.createSound js/soundManager #js {:id sound-id
-                                           :type "audio/mpeg"
-                                           :url sound-blob
-                                           :whileloading while-loading
-                                           :onload on-load
-                                           :onfinish on-finish
-                                           :volume (:volume @app-state)})))
+                                          position)}))
 
 ; TODO: probably should go into a different module...but which?
 (defn destroy-track [sound-id]
