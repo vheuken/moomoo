@@ -13,7 +13,6 @@
                           :current-uploads-info {}
                           :track-order []
                           :music-info []
-                          :music-files {}
                           :is-file-downloading? false
                           :current-track-id nil
                           :current-sound-id nil
@@ -115,38 +114,8 @@
          (:music-info @app-state))
     0))
 
-(defn request-file-download [track-id]
- nil)
-
 (defn indices [pred coll]
   (keep-indexed #(when (pred %2) %1) coll))
-
-(defn is-track-downloading? [track-id]
-  (= :in-progress (get (:download-status @app-state) track-id)))
-
-(defn is-track-downloaded? [track-id]
-  (= :complete (get (:download-status @app-state) track-id)))
-
-(defn get-next-track-to-download []
-  (let [track-order (:track-order @app-state)
-        current-track-pos (first (indices #(= %1 (:current-track-id @app-state))
-                                          track-order))
-        not-downloaded-tracks (filter #(not (nil? %1))
-                                      (map (fn [id]
-                                             (if-not (or (is-track-downloading? id)
-                                                         (is-track-downloaded? id))
-                                               id))
-                                           track-order))
-        nearest-tracks (sort (fn [a b]
-                               (< (Math/abs (- current-track-pos (first (indices #(= %1 a) track-order))))
-                                  (Math/abs (- current-track-pos (first (indices #(= %1 b) track-order))))))
-                             not-downloaded-tracks)]
-    (first nearest-tracks)))
-
-(defn request-new-track []
-  (let [track-id (get-next-track-to-download)]
-    (if-not (nil? track-id)
-      (request-file-download track-id))))
 
 (defn pause []
   (player/pause)
@@ -226,24 +195,7 @@
       (conj (:music-info @app-state) music-info))
 
     (swap! app-state assoc :track-order (js->clj track-order))))
-    ;(if (> (:download-slots @app-state) (:num-of-downloads @app-state))
-      ;(request-new-track))))
 
-(.on socket "file-download"
-  (fn [file-url track-id]
-    (println "Received file-download for" file-url)
-
-    (swap! app-state assoc :music-files (merge (:music-files @app-state)
-                                               {track-id
-                                                (str (first (string/split (.-href (.-location js/window))
-                                                              #"/rooms"))
-                                                     file-url)}))
-    (println (:music-files @app-state))
-    (if (= (:current-track-id @app-state) track-id)
-      (do
-        (println "Sending ready-to-start signal"
-                 "Sound-id:" (:current-sound-id @app-state))
-        (.emit socket "ready-to-start" (:current-sound-id @app-state))))))
 
 (.on socket "start-track"
   (fn [file-url position]
@@ -270,15 +222,14 @@
       (if-not (nil? last-current-sound-id)
         (player/destroy-track last-current-sound-id)))
 
-
       (.emit socket "ready-to-start" sound-id)))
 
 
 (.on socket "pause"
   (fn [position]
     (println "Received pause signal with position:" position)
-    (player/pause)))
-    ;(player/set-position position)))
+    (player/pause)
+    (player/set-position position)))
 
 (.on socket "resume"
   (fn []
@@ -308,9 +259,7 @@
                                                 (js->clj sorted-music-info)))))
 
     (swap! app-state assoc :current-track-id current-track-id)
-    (swap! app-state assoc :current-sound-id current-sound-id)
-
-    (request-file-download current-track-id)))
+    (swap! app-state assoc :current-sound-id current-sound-id)))
 
 (.on socket "set-loop"
   (fn [looping?]
@@ -322,17 +271,14 @@
     (println "Received clear-songs signal")
     (player/destroy-track (:current-sound-id @app-state))
     (swap! app-state assoc :music-info [])
-    (swap! app-state assoc :music-files {})
     (swap! app-state assoc :current-track-id nil)
     (swap! app-state assoc :current-sound-id nil)))
 
 (.on socket "delete-track"
   (fn [track-id]
     (println "Received delete-track signal:" track-id)
-    (let [new-music-files (dissoc (:music-files @app-state) track-id)
-          new-music-info  (vec (remove #(= track-id (.-id %1))
+    (let [new-music-info  (vec (remove #(= track-id (.-id %1))
                                        (:music-info @app-state)))]
-      (swap! app-state assoc :music-files new-music-files)
       (swap! app-state assoc :music-info new-music-info)
       (if (= track-id (:current-track-id @app-state))
         (do

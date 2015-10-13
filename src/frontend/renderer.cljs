@@ -121,20 +121,6 @@
               (dom/div nil (.-album tags))
               (dom/div nil (.-artist tags)))))))))
 
-(defn download-progress [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/li nil "Downloading: " (* 100 (/ (:data-downloaded data) (:file-size data))) "%"))))
-
-(defn download-progress-view [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (apply dom/div nil
-        (om/build-all download-progress (vals (:download-progress data)))))))
-
-(om/root download-progress-view core/app-state {:target (. js/document (getElementById "download-progress"))})
 (om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
 (om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})

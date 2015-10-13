@@ -304,22 +304,7 @@
                                 (rooms/get-num-of-tracks room
                                   (fn [num-of-tracks]
                                     (change-track room (- num-of-tracks 1) (.v4 js-uuid))))))))))))))
-            (println (str "Successfully uploaded " absolute-file-path)))))))
-
-  (.on socket "file-download-request"
-    (fn [track-id]
-      (println "Received file download request for " track-id
-               "from" (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room]
-          (rooms/get-music-file room track-id
-            (fn [file-path]
-              (let [client-socket (aget (.-connected (.-sockets io)) (.-id socket))
-                    file-url (string/replace file-path "public" "")]
-                (println file-url)
-                (.emit client-socket "file-download"
-                                     file-url
-                                     track-id)))))))))
+            (println (str "Successfully uploaded " absolute-file-path))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))
