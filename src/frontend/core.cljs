@@ -116,17 +116,7 @@
     0))
 
 (defn request-file-download [track-id]
-  (if (nil? (get (:music-files @app-state) track-id))
-    (do
-      (swap! app-state assoc :download-status (merge (:download-status @app-state)
-                                                     {track-id :in-progress}))
-      (swap! app-state assoc :music-files (merge (:music-files @app-state)
-                                                 {track-id ""}))
-      (swap! app-state assoc :num-of-downloads (inc (:num-of-downloads @app-state)))
-      (println "Sending file-download-request for:" track-id)
-      (.emit socket "file-download-request" track-id)
-      (println (str "Num of file downloads: " (:num-of-downloads @app-state))))
-    (println "WARNING: Attempted to request download that has already been requested")))
+ nil)
 
 (defn indices [pred coll]
   (keep-indexed #(when (pred %2) %1) coll))
@@ -256,14 +246,16 @@
         (.emit socket "ready-to-start" (:current-sound-id @app-state))))))
 
 (.on socket "start-track"
-  (fn [position]
+  (fn [file-url position]
     (println "Starting current track at position: " position)
-    (println "WAT" (get (:music-files @app-state) (:current-track-id @app-state)))
-
-    (player/play-track (get (:music-files @app-state) (:current-track-id @app-state))
-                       (:current-sound-id @app-state)
-                       position
-                       on-finish)))
+    (println "WAT" file-url)
+    (let [file-url (str (first (string/split (.-href (.-location js/window))
+                                                              #"/rooms"))
+                        file-url)]
+      (player/play-track file-url
+                         (:current-sound-id @app-state)
+                         position
+                         on-finish))))
 
 (.on socket "track-change"
   (fn [track-id sound-id]
@@ -278,12 +270,8 @@
       (if-not (nil? last-current-sound-id)
         (player/destroy-track last-current-sound-id)))
 
-      (if-not (is-track-downloaded? track-id)
-        (request-file-download track-id)
-        (if-not (is-track-downloading? track-id)
-          (do
-            (println "Sending ready-to-start signal with sound-id:" sound-id)
-            (.emit socket "ready-to-start" sound-id))))))
+
+      (.emit socket "ready-to-start" sound-id)))
 
 
 (.on socket "pause"

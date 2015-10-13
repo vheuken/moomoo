@@ -91,11 +91,18 @@
               (start-track [room track-position-info]
                 (rooms/unset-waiting-to-start-flag room
                   (fn []
-                    (if (nil? track-position-info)
-                      (rooms/get-current-track-position room
-                        (fn [track-position-info]
-                          (.emit socket "start-track" (convert-position track-position-info))))
-                      (.emit (.to io room) "start-track" (convert-position track-position-info))))))]
+                    (rooms/get-current-track-id room
+                      (fn [track-id]
+                        (rooms/get-music-file room track-id
+                          (fn [file-path]
+                            (let [file-url (string/replace file-path "public" "")]
+                              (if (nil? track-position-info)
+                                (rooms/get-current-track-position room
+                                  (fn [track-position-info]
+                                    (.emit socket "start-track" file-url
+                                                                (convert-position track-position-info))))
+                                (.emit (.to io room) "start-track" file-url
+                                                                   (convert-position track-position-info)))))))))))]
         (rooms/get-room-from-user-id (.-id socket)
           (fn [room]
             (rooms/get-current-sound-id room
