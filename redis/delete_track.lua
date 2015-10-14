@@ -8,6 +8,7 @@ local current_track_id  = redis.call('hget', 'room:' .. room_id .. ':track-order
 if current_track_id ~= nil and current_track_id == track_id then
   redis.call('set', 'room:' .. room_id .. ':waiting-to-start?', 'false')
   redis.call('set', 'room:' .. room_id .. ':started?', 'false')
+  redis.call('del', 'room:' .. room_id .. ':current-sound')
 end
 
 local track_order = redis.call('hgetall', 'room:' .. room_id .. ':track-order')
