@@ -248,15 +248,17 @@
              "track-order:" track-order
              "current-track-id:" current-track-id
              "current-sound-id:" current-sound-id)
-    ; TODO: should probably convert room-music-info to clojure object before manipulating
     (let [track-order (js->clj track-order)
-          sorted-music-info (.sort room-music-info (fn [a b]
-                                                     (- (first (indices #(= %1 (.-id a)) track-order))
-                                                        (first (indices #(= %1 (.-id b)) track-order)))))]
-
+          room-music-info (js->clj room-music-info)
+          sorted-music-info (sort (fn [a b]
+                                    (compare (first (indices #(= %1 (get a "id")) track-order))
+                                             (first (indices #(= %1 (get b "id")) track-order))))
+                                  room-music-info)]
+      (println "SORTED")
+      (println sorted-music-info)
       (swap! app-state assoc :track-order track-order)
       (swap! app-state assoc :music-info (vec (map #(clj->js %1)
-                                                (js->clj sorted-music-info)))))
+                                                   sorted-music-info))))
 
     (swap! app-state assoc :current-track-id current-track-id)
     (swap! app-state assoc :current-sound-id current-sound-id)
