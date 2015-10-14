@@ -5,13 +5,15 @@
             [moomoo.rooms :as rooms]))
 
 (defonce socketio (nodejs/require "socket.io"))
+(defonce socketio-redis (nodejs/require "socket.io-redis"))
 (defonce socketio-stream (nodejs/require "socket.io-stream"))
 (defonce file-upload-directory "public/music")
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce fs (nodejs/require "fs"))
 
 (defn initialize! [server]
-  (defonce io (.listen socketio server)))
+  (defonce io (.listen socketio server))
+  (.adapter io (socketio-redis #js {:host "localhost" :port 6379})))
 
 (defn handle-hotjoin [socket room-id]
   (println "User " (.-id socket) " has joined room: " room-id)
