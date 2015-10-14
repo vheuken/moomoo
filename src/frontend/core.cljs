@@ -259,7 +259,10 @@
                                                 (js->clj sorted-music-info)))))
 
     (swap! app-state assoc :current-track-id current-track-id)
-    (swap! app-state assoc :current-sound-id current-sound-id)))
+    (swap! app-state assoc :current-sound-id current-sound-id)
+
+    (if-not (nil? current-sound-id)
+      (.emit socket "ready-to-start" current-sound-id))))
 
 (.on socket "set-loop"
   (fn [looping?]
