@@ -146,9 +146,12 @@
                "from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (rooms/change-current-track-position room position
-            (fn []
-              (.emit (.to io room) "position-change" position)))))))
+          (rooms/get-current-sound-id room
+            (fn [sound-id]
+              (if-not (nil? sound-id)
+                (rooms/change-current-track-position room position
+                  (fn []
+                    (.emit (.to io room) "position-change" position))))))))))
 
   (.on socket "start-looping"
     (fn []
