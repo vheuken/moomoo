@@ -296,4 +296,4 @@
   (fn []
     (.createSound js/soundManager #js {
       :id "join-sound"
-      :url "http://www.soundjay.com/button/beep-01a.mp3"})))
+      :url "http://www.soundjay.com/button/beep-03.mp3"})))
