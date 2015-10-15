@@ -402,13 +402,13 @@
             indexed-data (map-indexed (fn [idx v] [idx v]) track-order-data)
             keys-indexed (map (fn [e] [(first e) (first (last e))]) indexed-data)
             vals-indexed (map (fn [e] [(first e) (last (last e))]) indexed-data)
-            sorted-keys-indexed (sort #(< (reader/read-string (last %1))
-                                          (reader/read-string (last %2)))
+            sorted-keys-indexed (sort #(compare (reader/read-string (last %1))
+                                                (reader/read-string (last %2)))
                                       keys-indexed)
             track-order (map (fn [e]
                                (last (first (filter #(= (first e) (first %1))
                                                     vals-indexed))))
-                             keys-indexed)]
+                             sorted-keys-indexed)]
 
         (callback (clj->js track-order))))))
 
