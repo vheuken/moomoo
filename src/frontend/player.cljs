@@ -56,10 +56,14 @@
                                        :onfinish on-finish
                                        :volume (:volume @app-state)}))
 
+  (defn on-play []
+    (if (nil? position)
+      (.setPosition (:current-sound @app-state) (.-MAX_SAFE_INTEGER js/Number))
+      (.setPosition (:current-sound @app-state) position)))
+
   (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
-                    :onplay #(.setPosition (:current-sound @app-state)
-                                          position)}))
+                    :onplay on-play}))
 
 ; TODO: probably should go into a different module...but which?
 (defn destroy-track [sound-id]
