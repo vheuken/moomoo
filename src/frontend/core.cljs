@@ -254,8 +254,7 @@
                                     (compare (first (indices #(= %1 (get a "id")) track-order))
                                              (first (indices #(= %1 (get b "id")) track-order))))
                                   room-music-info)]
-      (println "SORTED")
-      (println sorted-music-info)
+
       (swap! app-state assoc :track-order track-order)
       (swap! app-state assoc :music-info (vec (map #(clj->js %1)
                                                    sorted-music-info))))
