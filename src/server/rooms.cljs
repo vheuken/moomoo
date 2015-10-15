@@ -392,7 +392,6 @@
   (let [lua-fn (.scriptWrap redis-lua "deleteTrack")]
     (lua-fn 0 room-id track-id
       (fn [err next-track-id]
-        (println next-track-id)
         (callback (nth next-track-id 0))))))
 
 (defn get-track-order [room-id callback]

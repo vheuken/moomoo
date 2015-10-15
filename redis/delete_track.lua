@@ -33,7 +33,7 @@ track_order = sorted_track_order
 
 for i=2, #track_order, 2 do
   if track_order[i] == track_id then
-    next_track_id = track_order[i+2]
+    --next_track_id = track_order[i+2]
 
     redis.call('hdel', 'room:' .. room_id .. ':track-order', track_order[i-1])
 
@@ -49,8 +49,16 @@ for i=2, #track_order, 2 do
       end
     end
 
-    redis.call('set', 'room:' .. room_id .. ':current-track', track_order[i-1])
-    return {track_order[i-1], next_track_id}
+    local next_track_num = current_track_num
+    next_track_id = redis.call('hget', 'room:' .. room_id .. ':track-order', current_track_num)
+    if next_track_id == nil then
+      next_track_num =  tostring(tonumber(current_track_num) - 1);
+      next_track_id = redis.call('hget',
+                                 'room:' .. room_id .. ':track-order',
+                                 next_track_num)
+    end
+    redis.call('set', 'room:' .. room_id .. ':current-track', next_track_num)
+    return {next_track_num, next_track_id}
   end
 end
 
