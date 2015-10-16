@@ -322,7 +322,7 @@
                           (callback nil nil)))))))
               (get-num-of-tracks room
                 (fn [num-of-tracks]
-                  (if (> current-track-num (- num-of-tracks 1))
+                  (if (>= current-track-num (- num-of-tracks 1))
                     (set-current-track-position room -1
                       (fn []
                         (callback nil nil)))
@@ -392,6 +392,7 @@
   (let [lua-fn (.scriptWrap redis-lua "deleteTrack")]
     (lua-fn 0 room-id track-id
       (fn [err next-track-id]
+        (println "NEXT TRACK " next-track-id)
         (callback (nth next-track-id 0))))))
 
 (defn get-track-order [room-id callback]

@@ -286,6 +286,7 @@
       (swap! app-state assoc :music-info new-music-info)
       (if (= track-id (:current-track-id @app-state))
         (do
+          (print "CURRENT TRACK DELETED!")
           (player/destroy-track (:current-sound-id @app-state))
           (swap! app-state assoc :current-track-id nil)
           (swap! app-state assoc :current-sound-id nil)
