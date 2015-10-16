@@ -312,7 +312,7 @@
                       (fn [num-of-tracks]
                         (println "Num-of-tracks:" num-of-tracks)
                         (if (> num-of-tracks 0)
-                          (if (> current-track-num (- num-of-tracks 1))
+                          (if (>= current-track-num (- num-of-tracks 1))
                             (.decr redis-client (redis-room-prefix room "current-track")
                               (fn [err track-num]
                                 (set-current-track-position room -1
