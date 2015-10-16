@@ -178,8 +178,13 @@
                                      :onClick #(core/delete-track track-id)} "X"))]
         (if (:playing? state)
           (dom/div #js {:className "track-view"
+                        :onDoubleClick (fn []
+                                         (core/change-track (first (core/indices #(= %1 track-id) (:track-order @core/app-state)))))
                         :style #js {:backgroundColor "#BABAB9"}} content)
-          (dom/div #js {:className "track-view"} content))))))
+          (dom/div #js {:className "track-view"
+                        :onDoubleClick (fn []
+                                         (core/change-track (first (core/indices #(= %1 track-id) (:track-order @core/app-state)))))
+                        } content))))))
 
 (defn track-queue [data owner]
   (reify

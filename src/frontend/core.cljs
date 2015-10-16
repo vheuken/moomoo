@@ -130,6 +130,10 @@
   (first (indices #(= (.-id %1) (:current-track-id @app-state))
                   (:music-info @app-state))))
 
+
+(defn change-track [track-num]
+  (.emit socket "change-track" track-num (.v4 js/uuid)))
+
 (defn previous-track []
   (let [track-num (- (get-current-track-num) 1)
         sound-id (.v4 js/uuid)]
