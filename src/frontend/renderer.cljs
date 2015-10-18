@@ -1,5 +1,6 @@
 (ns moomoo-frontend.renderer
-  (:require [om.core :as om  :include-macros true]
+  (:require [clojure.string :as string]
+            [om.core :as om  :include-macros true]
             [om.dom  :as dom :include-macros true]
             [moomoo-frontend.core :as core]
             [moomoo-frontend.player :as player]))
@@ -81,26 +82,8 @@
 
 (defn current-track-tags-view [data owner]
   (reify
-    om/IDidUpdate
-    (did-update [_ _ _]
-      (let [prev-state (om/get-state owner)]
-        (if-not (nil? (:current-track-id data))
-          (if-not (= (:track-id prev-state) (:current-track-id data))
-            (let [picture-data (first
-                                 (.-picture
-                                   (.-tags
-                                     (core/get-music-info-from-id (:current-track-id data)))))]
-              (if (nil? picture-data)
-                (om/set-state! owner{:cover-image nil
-                                     :track-id (:current-track-id data)})
-                (let [picture-format (.-format picture-data)
-                      picture-buffer (.-data picture-data)
-                      base64-data (js/base64ArrayBuffer picture-buffer)
-                      data-uri (str "data:" "image/jpeg" ";base64," base64-data)]
-                  (om/set-state! owner {:cover-image data-uri
-                                        :track-id (:current-track-id data)}))))))))
-    om/IRenderState
-    (render-state [this state]
+    om/IRender
+    (render [this]
       (if-not (nil? (:current-track-id data))
         (let [music-info (core/get-music-info-from-id (:current-track-id data))
               tags (.-tags music-info)]
@@ -109,11 +92,12 @@
             (dom/div #js {:style #js {:float "left"
                                       :width "10%"
                                       :height "10%"}}
-              (if (nil? (:cover-image state))
+              (if (nil? (.-picture tags))
                 (dom/img #js {:src grey-out-image
                               :style #js {:width "100%"
                                           :height "100%"}})
-                (dom/img #js {:src (:cover-image state)
+                (dom/img #js {:src (str (first (string/split (.-href (.-location js/window))
+                                                             #"/rooms")) (.-picture tags))
                               :style #js {:width "100%"
                                           :height "100%"}})))
             (dom/div nil
