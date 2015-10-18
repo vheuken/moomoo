@@ -1,6 +1,7 @@
 (ns moomoo.rooms
   (:require [cljs.nodejs :as nodejs]
             [cljs.reader :as reader]
+            [clojure.string :as string]
             [cognitect.transit :as transit]))
 
 (defonce fs (nodejs/require "fs"))
@@ -10,6 +11,7 @@
 (defonce redis-client (.createClient (nodejs/require "redis")))
 (defonce redis-lua-loader (nodejs/require "redis-lua-loader"))
 (defonce redis-lua (redis-lua-loader. redis-client #js {:src "./redis"}))
+(defonce album-art-directory "public/images/albums")
 
 (defn redis-room-prefix [room-id suffix]
   (str "room:" room-id ":" suffix))
@@ -210,14 +212,19 @@
     (fn [err reply]
       (callback reply))))
 
-(defn handle-album-art [tags callback]
-  (println "PICTURE FORMAT " (get (first (get tags
-                                  "picture"))
-                                              "format"))
-  (let [picture (first (get tags "picture"))
-        picture-format (get picture "format")
-        picture-data   (get picture "data")])
-  (callback (dissoc tags "picture")))
+(defn handle-album-art [tags track-id callback]
+  (let [pictures (get tags "picture")]
+    (if (nil? pictures)
+      (callback tags)
+      (let [picture (first (get tags "picture"))
+            picture-format (get picture "format")
+            picture-data   (get picture "data")
+            filename  (subs track-id 0 7)
+            file-path (str album-art-directory "/" filename "." picture-format)]
+        (println "Saving album art to:" file-path)
+        (.writeFile fs file-path picture-data)
+        (callback (merge {"picture" (string/replace file-path "public" "")}
+                         (dissoc tags "picture")))))))
 
 (defn set-music-info [absolute-file-path
                       track-id
@@ -226,7 +233,7 @@
                       callback]
   (mm (.createReadStream fs absolute-file-path)
     (fn [err tags]
-      (handle-album-art (js->clj tags)
+      (handle-album-art (js->clj tags) track-id
         (fn [tags-without-album-art]
           (get-room-from-user-id socket-id
             (fn [room]
@@ -423,7 +430,7 @@
         (callback (clj->js track-order))))))
 
 (defn change-track [room track-num sound-id callback]
-  (println "Chainging track in room " room
+  (println "Changing track in room " room
            "to" track-num "with sound-id" sound-id)
   ((.scriptWrap redis-lua "changeTrack")
     0 room track-num sound-id
