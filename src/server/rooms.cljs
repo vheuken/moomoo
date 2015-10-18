@@ -214,7 +214,7 @@
 
 (defn handle-album-art [tags track-id callback]
   (let [pictures (get tags "picture")]
-    (if (nil? pictures)
+    (if (empty? pictures)
       (callback tags)
       (let [picture (first (get tags "picture"))
             picture-format (get picture "format")
