@@ -210,6 +210,15 @@
     (fn [err reply]
       (callback reply))))
 
+(defn handle-album-art [tags callback]
+  (println "PICTURE FORMAT " (get (first (get tags
+                                  "picture"))
+                                              "format"))
+  (let [picture (first (get tags "picture"))
+        picture-format (get picture "format")
+        picture-data   (get picture "data")])
+  (callback (dissoc tags "picture")))
+
 (defn set-music-info [absolute-file-path
                       track-id
                       original-file-name
@@ -217,30 +226,31 @@
                       callback]
   (mm (.createReadStream fs absolute-file-path)
     (fn [err tags]
-      (get-room-from-user-id socket-id
-        (fn [room]
-          (get-username room socket-id
-            (fn [username]
-              (get-num-of-tracks room
-                (fn [track-num]
-                  (let [tags (js->clj tags)
-                        writer (transit/writer :json)
-                        music-info {:tags tags
-                                    :username username
-                                    :originalfilename original-file-name
-                                    :id track-id}
-                        music-info-json (transit/write writer music-info)]
-                    (.hset redis-client (redis-room-prefix room "music-info")
-                                        track-id
-                                        music-info-json
-                      (fn []
-                        (.hset redis-client (redis-room-prefix room "music-files")
+      (handle-album-art (js->clj tags)
+        (fn [tags-without-album-art]
+          (get-room-from-user-id socket-id
+            (fn [room]
+              (get-username room socket-id
+                (fn [username]
+                  (get-num-of-tracks room
+                    (fn [track-num]
+                      (let [writer (transit/writer :json)
+                            music-info {:tags tags-without-album-art
+                                        :username username
+                                        :originalfilename original-file-name
+                                        :id track-id}
+                            music-info-json (transit/write writer music-info)]
+                        (.hset redis-client (redis-room-prefix room "music-info")
                                             track-id
-                                            absolute-file-path
-                          (fn [err reply]
-                                (set-track-position room track-id track-num
-                                  (fn []
-                                    (callback music-info)))))))))))))))))
+                                            music-info-json
+                          (fn []
+                            (.hset redis-client (redis-room-prefix room "music-files")
+                                                track-id
+                                                absolute-file-path
+                              (fn [err reply]
+                                    (set-track-position room track-id track-num
+                                      (fn []
+                                        (callback music-info)))))))))))))))))))
 
 ; TODO: Transit should translate this(?)
 (defn get-music-info [room track-id callback]
