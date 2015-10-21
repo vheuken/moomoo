@@ -23,8 +23,7 @@
                           :download-slots default-download-slots
                           :num-of-uploads 0
                           :num-of-downloads 0
-                          :download-progress {}
-                          :download-status {}}))
+                          :file-hashes {}}))
 
 (enable-console-print!)
 
@@ -72,11 +71,18 @@
               (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
                 (upload-file next-file)))))))))
 
+(defn check-hash [file]
+  (js/md5File file
+    (fn [file-hash]
+      (swap! app-state assoc :file-hashes (merge {file-hash file}
+                                                 (:file-hashes @app-state)))
+      (.emit socket "check-hash" file-hash))))
+
 (.change (js/$ "#file-upload")
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)]
       (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
-        (upload-file file)
+        (check-hash file);(upload-file file)
         (swap! app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state))))))))
 
 (.click (js/$ "#clear-songs-button")
@@ -295,6 +301,18 @@
           (swap! app-state assoc :current-track-id nil)
           (swap! app-state assoc :current-sound-id nil)
           (.emit socket "track-deleted"))))))
+
+(.on socket "hash-found"
+  (fn [file-hash]
+    (println "File exists on server. Hash: " file-hash)
+    (swap! app-state assoc :file-hashes (dissoc (:file-hashes @app-state) file-hash))))
+
+(.on socket "hash-not-found"
+  (fn [file-hash]
+    (println "File does not exist on server. Will upload. Hash: " file-hash)
+    (let [file (get (:file-hashes @app-state) file-hash)]
+      (swap! app-state assoc :file-hashes (dissoc (:file-hashes @app-state) file-hash))
+      (upload-file file))))
 
 (.onready js/soundManager
   (fn []

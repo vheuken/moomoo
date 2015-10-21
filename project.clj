@@ -18,14 +18,14 @@
                        [musicmetadata "2.0"]
                        [base64-arraybuffer "0.1.2"]
                        [redis-lua-loader "1.1.0"]
-                       [blueimp-md5 "1.1.1"]
+                       [md5 "1.3.0"]
                        [ws "0.8.0"]]}
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-npm "0.6.1"]
             [com.cemerick/clojurescript.test "0.3.3"]
             [lein-cljfmt "0.3.0"]
-            [lein-figwheel "0.3.9"]]
+            [lein-figwheel "0.4.1"]]
 
   :source-paths ["src"]
 
