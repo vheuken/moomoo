@@ -18,7 +18,7 @@
                        [musicmetadata "2.0"]
                        [base64-arraybuffer "0.1.2"]
                        [redis-lua-loader "1.1.0"]
-                       [md5 "1.3.0"]
+                       [md5 "2.0.0"]
                        [ws "0.8.0"]]}
 
   :plugins [[lein-cljsbuild "1.1.0"]
