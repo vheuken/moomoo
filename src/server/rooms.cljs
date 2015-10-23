@@ -439,3 +439,15 @@
         (set-current-track-position room 0
           (fn []
             (callback reply)))))))
+
+(defn handle-file-hash [file-hash callback]
+  ((.scriptWrap redis-lua "handleFileHash") 0 file-hash
+    (fn [err reply]
+      (println reply)
+      (if (nil? reply)
+        (do
+          (println "File hash not found")
+          (callback false))
+        (do
+          (println "File hash found!")
+          (callback true))))))

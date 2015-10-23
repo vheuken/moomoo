@@ -265,8 +265,9 @@
       (println (.-id socket) "sent hash:" file-hash)
       (rooms/handle-file-hash file-hash
         (fn [file-exists?]
-          (if-not file-exists?
-            (.emit socket "file-not-uploaded"))))))
+          (if file-exists?
+            (.emit socket "hash-found" file-hash)
+            (.emit socket "hash-not-found" file-hash))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
