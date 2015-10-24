@@ -10,6 +10,7 @@
 (defonce file-upload-directory "public/music")
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce fs (nodejs/require "fs"))
+(defonce md5 (nodejs/require "md5"))
 
 (defn initialize! [server]
   (defonce io (.listen socketio server))
@@ -299,25 +300,29 @@
           (fn []
             (println "Upload of" original-filename
                      "from" (.-id socket) "is complete!")
-            (rooms/set-music-info absolute-file-path
-                                  file-id
-                                  original-filename
-                                  (.-id socket)
-              (fn [music-info]
-                (rooms/get-room-from-user-id (.-id socket)
-                  (fn [room]
-                    (rooms/get-track-order room
-                      (fn [track-order]
-                        (.emit (.to io room) "upload-complete" (clj->js music-info) track-order)))
-                    (rooms/is-waiting-to-start? room
-                      (fn [waiting?]
-                        (if-not waiting?
-                          (rooms/has-track-started? room
-                            (fn [started?]
-                              (if-not started?
-                                (rooms/get-num-of-tracks room
-                                  (fn [num-of-tracks]
-                                    (change-track room (- num-of-tracks 1) (.v4 js-uuid))))))))))))))
+            (.readFile fs absolute-file-path
+              (fn [err buf]
+                (let [file-hash (md5 buf)]
+                  (rooms/set-music-info absolute-file-path
+                                        file-id
+                                        file-hash
+                                        original-filename
+                                        (.-id socket)
+                    (fn [music-info]
+                      (rooms/get-room-from-user-id (.-id socket)
+                        (fn [room]
+                          (rooms/get-track-order room
+                            (fn [track-order]
+                              (.emit (.to io room) "upload-complete" (clj->js music-info) track-order)))
+                          (rooms/is-waiting-to-start? room
+                            (fn [waiting?]
+                              (if-not waiting?
+                                (rooms/has-track-started? room
+                                  (fn [started?]
+                                    (if-not started?
+                                      (rooms/get-num-of-tracks room
+                                        (fn [num-of-tracks]
+                                          (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))))
             (println (str "Successfully uploaded " absolute-file-path))))))))
 
 (defn start-listening! []
