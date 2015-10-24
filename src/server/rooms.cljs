@@ -366,15 +366,6 @@
         (if (empty? info-to-send)
           (callback nil)
           (callback (clj->js info-to-send)))))))
-(comment
-  (.hgetall redis-client (redis-room-prefix room-id "music-info")
-    (fn [err music-info-reply]
-      (let [info (vals (js->clj music-info-reply))
-            reader (transit/reader :json)
-            info-to-send (map #(transit/read reader %1) info)]
-        (if (empty? info-to-send)
-          (callback nil)
-          (callback  (clj->js info-to-send)))))))
 
 (defn track-complete [room callback]
   (.set redis-client (redis-room-prefix room "started?") "false"
