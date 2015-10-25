@@ -267,14 +267,6 @@
     (fn [room-id]
       )))
 
-; TODO: Transit should translate this(?)
-(defn get-music-info [room track-id callback]
-  (.hget redis-client (redis-room-prefix room "music-info") track-id
-    (fn [err reply]
-      (.get redis-client (str "file-hash:" reply)
-        (fn []
-          (callback reply))))))
-
 (defn get-music-file [room track-id callback]
   (.hget redis-client (redis-room-prefix room "music-files") track-id
     (fn [err reply]
