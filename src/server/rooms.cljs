@@ -212,14 +212,14 @@
     (fn [err reply]
       (callback reply))))
 
-(defn handle-album-art [tags track-id callback]
+(defn handle-album-art [tags id callback]
   (let [pictures (get tags "picture")]
     (if (empty? pictures)
       (callback (dissoc tags "picture"))
       (let [picture (first (get tags "picture"))
             picture-format (get picture "format")
             picture-data   (get picture "data")
-            filename  (subs track-id 0 7)
+            filename  (subs id 0 7)
             file-path (str album-art-directory "/" filename "." picture-format)]
         (println "Saving album art to:" file-path)
         (.writeFile fs file-path picture-data)
@@ -234,7 +234,7 @@
                       callback]
   (mm (.createReadStream fs absolute-file-path)
     (fn [err tags]
-      (handle-album-art (js->clj tags) track-id
+      (handle-album-art (js->clj tags) file-hash
         (fn [tags-without-album-art]
           (get-room-from-user-id socket-id
             (fn [room]
@@ -246,7 +246,7 @@
                             music-info {:tags tags-without-album-art
                                         :username username
                                         :originalfilename original-file-name
-                                        :id track-id}
+                                        :filehash file-hash}
                             music-info-json (transit/write writer music-info)]
                         (.hset redis-client (redis-room-prefix room "music-info")
                                             track-id
