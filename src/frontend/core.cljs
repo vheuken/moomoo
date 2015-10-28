@@ -12,6 +12,7 @@
                           :users []
                           :current-uploads-info {}
                           :track-order []
+                          :track-id-hashes {}
                           :music-info []
                           :is-file-downloading? false
                           :current-track-id nil
@@ -82,7 +83,7 @@
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)]
       (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
-        (check-hash file);(upload-file file)
+        (check-hash file)
         (swap! app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state))))))))
 
 (.click (js/$ "#clear-songs-button")
