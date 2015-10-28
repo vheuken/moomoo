@@ -283,6 +283,8 @@
   (fn []
     (println "Received clear-songs signal")
     (player/destroy-track (:current-sound-id @app-state))
+    (swap! app-state assoc :track-id-hashes {})
+    (swap! app-state assoc :track-order [])
     (swap! app-state assoc :music-info [])
     (swap! app-state assoc :current-track-id nil)
     (swap! app-state assoc :current-sound-id nil)))
