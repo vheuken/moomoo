@@ -138,7 +138,8 @@
       true)
     om/IRenderState
     (render-state [_ state]
-      (let [tags (.-tags data)
+      (let [data (core/get-music-info-from-id data)
+            tags (.-tags data)
             title (.-title tags)
             artist (.-artist tags)
             album (.-album tags)
@@ -175,7 +176,7 @@
     om/IRender
     (render [this]
       (apply dom/span nil
-        (om/build-all track-view (:music-info data))))))
+        (om/build-all track-view (:track-order data))))))
 
 (defn render-track-bar [data root-id display-bar-id progress-bar-id progress-ball-id ball-position]
   (let [height 20]

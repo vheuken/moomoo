@@ -117,7 +117,7 @@
 
 (defn get-music-info-from-id [track-id]
   (nth (filter #(= (.-id %1)
-                   track-id)
+                   (get track-id-hashes track-id))
          (:music-info @app-state))
     0))
 
@@ -253,7 +253,7 @@
     (player/set-position position)))
 
 (.on socket "hotjoin-music-info"
-  (fn [room-music-info track-order current-track-id current-sound-id]
+  (fn [room-track-id-map room-music-info track-order current-track-id current-sound-id]
     (println "Received room state:"
              "room-music-info:" room-music-info
              "track-order:" track-order
@@ -261,14 +261,12 @@
              "current-sound-id:" current-sound-id)
     (let [track-order (js->clj track-order)
           room-music-info (js->clj room-music-info)
-          sorted-music-info (sort (fn [a b]
-                                    (compare (first (indices #(= %1 (get a "id")) track-order))
-                                             (first (indices #(= %1 (get b "id")) track-order))))
-                                  room-music-info)]
+          room-track-id-map (js->clj room-track-id-map)]
 
+
+      (swap! app-state assoc :track-id-hashes room-track-id-map)
       (swap! app-state assoc :track-order track-order)
-      (swap! app-state assoc :music-info (vec (map #(clj->js %1)
-                                                   sorted-music-info))))
+      (swap! app-state assoc :music-info room-music-info))
 
     (swap! app-state assoc :current-track-id current-track-id)
     (swap! app-state assoc :current-sound-id current-sound-id)

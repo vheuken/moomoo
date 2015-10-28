@@ -19,7 +19,7 @@
 (defn handle-hotjoin [socket room-id]
   (println "User " (.-id socket) " has joined room: " room-id)
   (rooms/get-all-music-info room-id
-    (fn [room-music-info]
+    (fn [room-track-id-map room-music-info]
       (if-not (nil? room-music-info)
         (rooms/get-track-order room-id
           (fn [room-track-order]
@@ -29,7 +29,8 @@
                   (fn [current-track-id]
                     (rooms/get-current-sound-id room-id
                       (fn [current-sound-id]
-                        (.emit socket "hotjoin-music-info" room-music-info
+                        (.emit socket "hotjoin-music-info" room-track-id-map
+                                                           room-music-info
                                                            room-track-order
                                                            current-track-id
                                                            current-sound-id)))))))))))))
