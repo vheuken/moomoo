@@ -268,7 +268,16 @@
                           track-id
                           file-hash
         (fn []
-          )))))
+          (get-num-of-tracks room-id
+            (fn [track-num]
+              (set-track-position room-id track-id track-num
+                (fn []
+                  (.get redis-client (str "file-hash:" file-hash)
+                    (fn [err music-info-reply]
+                      (let [reader (transit/reader :json)
+                            music-info-json (transit/read reader music-info-reply)
+                            music-info (js->clj music-info-json)]
+                        (callback music-info)))))))))))))
 
 (defn get-music-file [room track-id callback]
   (.hget redis-client (redis-room-prefix room "music-info") track-id

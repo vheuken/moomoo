@@ -268,7 +268,22 @@
       (rooms/handle-file-hash file-hash
         (fn [file-exists?]
           (if file-exists?
-            (.emit socket "hash-found" file-hash)
+            (do
+              (.emit socket "hash-found" file-hash)
+              (rooms/set-music-info-from-hash (.v4 js-uuid)
+                                              file-hash
+                                              (.-id socket)
+                (fn [music-info]
+                  (rooms/get-room-from-user-id (.-id socket)
+                    (fn [room-id]
+                      (rooms/get-track-order room-id
+                        (fn [track-order]
+                          (rooms/get-track-id-hashes room-id
+                            (fn [track-id-hashes]
+                              (.emit (.to io room-id) "upload-complete"
+                                                      (clj->js music-info)
+                                                      track-order
+                                                      track-id-hashes))))))))))
             (.emit socket "hash-not-found" file-hash))))))
 
   (.on (new socketio-stream socket) "file-upload"
