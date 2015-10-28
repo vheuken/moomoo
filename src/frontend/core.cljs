@@ -253,12 +253,17 @@
     (player/set-position position)))
 
 (.on socket "hotjoin-music-info"
-  (fn [room-track-id-map room-music-info track-order current-track-id current-sound-id]
+  (fn [room-track-id-map
+       room-music-info
+       track-order
+       current-track-id
+       current-sound-id]
     (println "Received room state:"
              "room-music-info:" room-music-info
              "track-order:" track-order
              "current-track-id:" current-track-id
-             "current-sound-id:" current-sound-id)
+             "current-sound-id:" current-sound-id
+             "track-id-hashes:" room-track-id-map)
     (let [track-order (js->clj track-order)
           room-music-info (js->clj room-music-info)
           room-track-id-map (js->clj room-track-id-map)]
