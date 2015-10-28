@@ -314,7 +314,12 @@
                         (fn [room]
                           (rooms/get-track-order room
                             (fn [track-order]
-                              (.emit (.to io room) "upload-complete" (clj->js music-info) track-order)))
+                              (rooms/get-track-id-hashes room
+                                (fn [track-id-hashes]
+                                  (.emit (.to io room) "upload-complete"
+                                                       (clj->js music-info)
+                                                       track-order
+                                                       track-id-hashes)))))
                           (rooms/is-waiting-to-start? room
                             (fn [waiting?]
                               (if-not waiting?

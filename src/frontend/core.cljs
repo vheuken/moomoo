@@ -116,8 +116,8 @@
     (player/set-volume new-volume)))
 
 (defn get-music-info-from-id [track-id]
-  (nth (filter #(= (.-id %1)
-                   (get track-id-hashes track-id))
+  (nth (filter #(= (.-filehash %1)
+                   (get (:track-id-hashes @app-state) track-id))
          (:music-info @app-state))
     0))
 
@@ -198,15 +198,15 @@
           {(.-id file-upload-info) file-upload-info})))))
 
 (.on socket "upload-complete"
-  (fn [music-info track-order]
+  (fn [music-info track-order track-id-hashes]
     (println "Received upload-complete signal:"
              "music-info:" music-info
              "track-order:" track-order)
     (swap! app-state assoc :music-info
       (conj (:music-info @app-state) music-info))
 
+    (swap! app-state assoc :track-id-hashes (js->clj track-id-hashes))
     (swap! app-state assoc :track-order (js->clj track-order))))
-
 
 (.on socket "start-track"
   (fn [file-url position]

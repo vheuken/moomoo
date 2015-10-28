@@ -349,6 +349,11 @@
                       (fn [err track-num]
                         (change-to-track-num track-num)))))))))))))
 
+(defn get-track-id-hashes [room-id callback]
+  (.hgetall redis-client (redis-room-prefix room-id "music-info")
+    (fn [err reply]
+      (callback reply))))
+
 (defn get-all-music-info [room-id callback]
   ((.scriptWrap redis-lua "getAllMusicInfo") 0 room-id
     (fn [err music-info-reply]
@@ -359,7 +364,8 @@
         (if (empty? info-to-send)
           (callback nil nil)
           (do
-            (loop [i 0 track-id-map {}]
+            (loop [i 0
+                   track-id-map {}]
               (if (= i (count track-id-hashes))
                 (callback (clj->js track-id-map)
                           (clj->js info-to-send))
