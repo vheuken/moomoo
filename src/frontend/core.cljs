@@ -133,8 +133,8 @@
   (.emit socket "resume"))
 
 (defn get-current-track-num []
-  (first (indices #(= (.-id %1) (:current-track-id @app-state))
-                  (:music-info @app-state))))
+  (first (indices #(= %1 (:current-track-id @app-state))
+                  (:track-order @app-state))))
 
 
 (defn change-track [track-num]
