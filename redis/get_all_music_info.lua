@@ -9,4 +9,4 @@ for i=2, #track_id_hashes, 2 do
   music_info_iter = music_info_iter + 1
 end
 
-return {track_id_hashes, music_info_array}
+return music_info_array

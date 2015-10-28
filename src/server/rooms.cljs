@@ -357,7 +357,7 @@
 (defn get-all-music-info [room-id callback]
   ((.scriptWrap redis-lua "getAllMusicInfo") 0 room-id
     (fn [err music-info-reply]
-      (let [info (js->clj (last music-info-reply))
+      (let [info (js->clj music-info-reply)
             reader (transit/reader :json)
             info-to-send (map #(transit/read reader %1) info)]
         (if (empty? info-to-send)
