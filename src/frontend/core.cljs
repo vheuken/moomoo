@@ -266,7 +266,7 @@
 
     (swap! app-state assoc :track-id-hashes (js->clj room-track-id-map))
     (swap! app-state assoc :track-order (js->clj track-order))
-    (swap! app-state assoc :music-info (js->clj room-music-info))
+    (swap! app-state assoc :music-info (vec (map #(clj->js %1) (js->clj room-music-info))))
 
     (swap! app-state assoc :current-track-id current-track-id)
     (swap! app-state assoc :current-sound-id current-sound-id)
