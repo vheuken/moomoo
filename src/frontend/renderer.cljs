@@ -116,7 +116,7 @@
   (defn update-state []
     (let [state (om/get-state owner)
           playing? (:playing? state)
-          track-id (.-id data)
+          track-id data
           current-track-id (:current-track-id @core/app-state)]
       (if (= track-id current-track-id)
         (if-not playing?
