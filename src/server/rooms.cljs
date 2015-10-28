@@ -264,12 +264,12 @@
 (defn set-music-info-from-hash [track-id file-hash socket-id callback]
   (get-room-from-user-id socket-id
     (fn [room-id]
-      (.hset redis-client (redis-room-prefix room-id "music-info")
-                          track-id
-                          file-hash
-        (fn []
-          (get-num-of-tracks room-id
-            (fn [track-num]
+      (get-num-of-tracks room-id
+        (fn [track-num]
+          (.hset redis-client (redis-room-prefix room-id "music-info")
+                              track-id
+                              file-hash
+            (fn []
               (set-track-position room-id track-id track-num
                 (fn []
                   (.get redis-client (str "file-hash:" file-hash)

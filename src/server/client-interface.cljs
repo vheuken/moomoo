@@ -283,7 +283,16 @@
                               (.emit (.to io room-id) "upload-complete"
                                                       (clj->js music-info)
                                                       track-order
-                                                      track-id-hashes))))))))))
+                                                      track-id-hashes)))))
+                      (rooms/is-waiting-to-start? room-id
+                        (fn [waiting?]
+                          (if-not waiting?
+                            (rooms/has-track-started? room-id
+                              (fn [started?]
+                                (if-not started?
+                                  (rooms/get-num-of-tracks room-id
+                                    (fn [num-of-tracks]
+                                      (change-track room-id (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))
             (.emit socket "hash-not-found" file-hash))))))
 
   (.on (new socketio-stream socket) "file-upload"
