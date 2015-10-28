@@ -139,13 +139,13 @@
     om/IRenderState
     (render-state [_ state]
       (println "FOO" (core/get-music-info-from-id data))
-      (let [data (core/get-music-info-from-id data)
+      (let [track-id data
+            data (core/get-music-info-from-id track-id)
             tags (.-tags data)
             title (.-title tags)
             artist (.-artist tags)
             album (.-album tags)
             username (.-username data)
-            track-id (.-id data)
             current-track-id (:current-track-id @core/app-state)
             content (list
                       (dom/span #js {:className "track-title"

@@ -290,16 +290,16 @@
 (.on socket "delete-track"
   (fn [track-id]
     (println "Received delete-track signal:" track-id)
-    (let [new-music-info  (vec (remove #(= track-id (.-id %1))
-                                       (:music-info @app-state)))]
-      (swap! app-state assoc :music-info new-music-info)
-      (if (= track-id (:current-track-id @app-state))
-        (do
-          (print "CURRENT TRACK DELETED!")
-          (player/destroy-track (:current-sound-id @app-state))
-          (swap! app-state assoc :current-track-id nil)
-          (swap! app-state assoc :current-sound-id nil)
-          (.emit socket "track-deleted"))))))
+    (swap! app-state assoc :track-id-hashes (dissoc (:track-id-hashes @app-state) track-id))
+    (swap! app-state assoc :track-order (vec (remove #(= track-id %1) (:track-order @app-state))))
+
+    (if (= track-id (:current-track-id @app-state))
+      (do
+        (print "CURRENT TRACK DELETED!")
+        (player/destroy-track (:current-sound-id @app-state))
+        (swap! app-state assoc :current-track-id nil)
+        (swap! app-state assoc :current-sound-id nil)
+        (.emit socket "track-deleted")))))
 
 (.on socket "hash-found"
   (fn [file-hash]
