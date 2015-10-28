@@ -352,12 +352,21 @@
 (defn get-all-music-info [room-id callback]
   ((.scriptWrap redis-lua "getAllMusicInfo") 0 room-id
     (fn [err music-info-reply]
-      (let [info (js->clj music-info-reply)
+      (let [info (js->clj (last music-info-reply))
             reader (transit/reader :json)
-            info-to-send (map #(transit/read reader %1) info)]
+            info-to-send (map #(transit/read reader %1) info)
+            track-id-hashes (js->clj (first music-info-reply))]
         (if (empty? info-to-send)
-          (callback nil)
-          (callback (clj->js info-to-send)))))))
+          (callback nil nil)
+          (do
+            (loop [i 0 track-id-map {}]
+              (if (= i (count track-id-hashes))
+                (callback (clj->js track-id-map)
+                          (clj->js info-to-send))
+                (recur (+ i 2)
+                       (merge track-id-map
+                              {(nth track-id-hashes i)
+                               (nth track-id-hashes (+ 1 i))}))))))))))
 
 (defn track-complete [room callback]
   (.set redis-client (redis-room-prefix room "started?") "false"
