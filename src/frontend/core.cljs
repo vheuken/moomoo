@@ -116,10 +116,9 @@
     (player/set-volume new-volume)))
 
 (defn get-music-info-from-id [track-id]
-  (nth (filter #(= (.-filehash %1)
-                   (get (:track-id-hashes @app-state) track-id))
-         (:music-info @app-state))
-    0))
+  (first (filter #(= (.-filehash %1)
+                     (get (:track-id-hashes @app-state) track-id))
+                 (:music-info @app-state))))
 
 (defn indices [pred coll]
   (keep-indexed #(when (pred %2) %1) coll))

@@ -254,23 +254,28 @@
                           (fn []
                             (.set redis-client (str "file-hash:" file-hash) music-info-json
                               (fn []
-                                (.hset redis-client (redis-room-prefix room "music-files")
-                                                    track-id
-                                                    absolute-file-path
+                                (.set redis-client (str "file-hash:" file-hash ":file")
+                                                   absolute-file-path
                                   (fn [err reply]
-                                        (set-track-position room track-id track-num
-                                          (fn []
-                                            (callback music-info)))))))))))))))))))))
+                                    (set-track-position room track-id track-num
+                                      (fn []
+                                        (callback music-info)))))))))))))))))))))
 
-(defn set-music-info-from-hash [socket-id file-hash callback]
+(defn set-music-info-from-hash [track-id file-hash socket-id callback]
   (get-room-from-user-id socket-id
     (fn [room-id]
-      )))
+      (.hset redis-client (redis-room-prefix room-id "music-info")
+                          track-id
+                          file-hash
+        (fn []
+          )))))
 
 (defn get-music-file [room track-id callback]
-  (.hget redis-client (redis-room-prefix room "music-files") track-id
-    (fn [err reply]
-      (callback reply))))
+  (.hget redis-client (redis-room-prefix room "music-info") track-id
+    (fn [err file-hash]
+      (.get redis-client (str "file-hash:" file-hash ":file")
+        (fn [err reply]
+          (callback reply))))))
 
 (defn get-track-id-from-position [room position callback]
   (.hget redis-client (redis-room-prefix room "track-order") position

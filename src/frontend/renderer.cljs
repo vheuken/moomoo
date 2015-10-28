@@ -138,6 +138,7 @@
       true)
     om/IRenderState
     (render-state [_ state]
+      (println "FOO" (core/get-music-info-from-id data))
       (let [data (core/get-music-info-from-id data)
             tags (.-tags data)
             title (.-title tags)
