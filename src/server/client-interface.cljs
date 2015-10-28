@@ -10,7 +10,7 @@
 (defonce file-upload-directory "public/music")
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce fs (nodejs/require "fs"))
-(defonce md5 (nodejs/require "md5"))
+(defonce mhash (nodejs/require "mhash"))
 
 (defn initialize! [server]
   (defonce io (.listen socketio server))
@@ -327,7 +327,7 @@
                      "from" (.-id socket) "is complete!")
             (.readFile fs absolute-file-path
               (fn [err buf]
-                (let [file-hash (md5 buf)]
+                (let [file-hash (mhash "md5" buf)]
                   (rooms/set-music-info absolute-file-path
                                         file-id
                                         file-hash
