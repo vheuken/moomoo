@@ -364,7 +364,7 @@
           (callback nil nil)
           (get-track-id-hashes room-id
             (fn [track-id-hashes]
-              (callback track-id-hashes info-to-send))))))))
+              (callback track-id-hashes (clj->js info-to-send)))))))))
 
 (defn track-complete [room callback]
   (.set redis-client (redis-room-prefix room "started?") "false"

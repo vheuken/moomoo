@@ -258,15 +258,16 @@
        track-order
        current-track-id
        current-sound-id]
+    (println "Received room state:"
+             "room-music-info:" room-music-info
+             "track-order:" track-order
+             "current-track-id:" current-track-id
+             "current-sound-id:" current-sound-id
+             "track-id-hashes:" room-track-id-map)
 
-    (let [track-order (js->clj track-order)
-          room-music-info (js->clj room-music-info)
-          room-track-id-map (js->clj room-track-id-map)]
-
-
-      (swap! app-state assoc :track-id-hashes room-track-id-map)
-      (swap! app-state assoc :track-order track-order)
-      (swap! app-state assoc :music-info room-music-info))
+    (swap! app-state assoc :track-id-hashes (js->clj room-track-id-map))
+    (swap! app-state assoc :track-order (js->clj track-order))
+    (swap! app-state assoc :music-info (js->clj room-music-info))
 
     (swap! app-state assoc :current-track-id current-track-id)
     (swap! app-state assoc :current-sound-id current-sound-id)
