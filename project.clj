@@ -5,7 +5,11 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.145"]
                  [org.omcljs/om "0.9.0"]
-                 [com.cognitect/transit-cljs "0.8.225"]]
+                 [com.cognitect/transit-cljs "0.8.225"]
+                 [com.cemerick/piggieback "0.2.1"]
+                 [org.clojure/tools.nrepl "0.2.12"]]
+
+  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
   :npm {:dependencies [[source-map-support "0.3.2"]
                        [socket.io "1.3.7"]
@@ -29,6 +33,7 @@
 
   :source-paths ["src"]
 
+  :figwheel {:nrepl-port 7888}
   :cljsbuild {
     :builds [{:id "moomoo-server"
               :source-paths ["src/server"]
