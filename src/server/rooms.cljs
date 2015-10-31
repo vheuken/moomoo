@@ -244,7 +244,6 @@
                     (fn [track-num]
                       (let [writer (transit/writer :json)
                             music-info {:tags tags-without-album-art
-                                        :username username
                                         :originalfilename original-file-name
                                         :filehash file-hash}
                             music-info-json (transit/write writer music-info)]
@@ -252,32 +251,38 @@
                                             track-id
                                             file-hash
                           (fn []
-                            (.set redis-client (str "file-hash:" file-hash) music-info-json
+                            (.set redis-client (str "track:" track-id ":uploader") username
                               (fn []
-                                (.set redis-client (str "file-hash:" file-hash ":file")
-                                                   absolute-file-path
-                                  (fn [err reply]
-                                    (set-track-position room track-id track-num
-                                      (fn []
-                                        (callback music-info)))))))))))))))))))))
+                                (.set redis-client (str "file-hash:" file-hash) music-info-json
+                                  (fn []
+                                    (.set redis-client (str "file-hash:" file-hash ":file")
+                                                       absolute-file-path
+                                      (fn [err reply]
+                                        (set-track-position room track-id track-num
+                                          (fn []
+                                            (callback music-info)))))))))))))))))))))))
 
 (defn set-music-info-from-hash [track-id file-hash socket-id callback]
   (get-room-from-user-id socket-id
     (fn [room-id]
-      (get-num-of-tracks room-id
-        (fn [track-num]
-          (.hset redis-client (redis-room-prefix room-id "music-info")
-                              track-id
-                              file-hash
-            (fn []
-              (set-track-position room-id track-id track-num
+      (get-username room-id socket-id
+        (fn [username]
+          (get-num-of-tracks room-id
+            (fn [track-num]
+              (.hset redis-client (redis-room-prefix room-id "music-info")
+                                  track-id
+                                  file-hash
                 (fn []
-                  (.get redis-client (str "file-hash:" file-hash)
-                    (fn [err music-info-reply]
-                      (let [reader (transit/reader :json)
-                            music-info-json (transit/read reader music-info-reply)
-                            music-info (js->clj music-info-json)]
-                        (callback music-info)))))))))))))
+                  (.set redis-client (str "track:" track-id ":uploader") username
+                    (fn []
+                      (set-track-position room-id track-id track-num
+                        (fn []
+                          (.get redis-client (str "file-hash:" file-hash)
+                            (fn [err music-info-reply]
+                              (let [reader (transit/reader :json)
+                                    music-info-json (transit/read reader music-info-reply)
+                                    music-info (js->clj music-info-json)]
+                                (callback music-info)))))))))))))))))
 
 (defn get-music-file [room track-id callback]
   (.hget redis-client (redis-room-prefix room "music-info") track-id
@@ -364,9 +369,12 @@
                         (change-to-track-num track-num)))))))))))))
 
 (defn get-track-id-hashes [room-id callback]
-  (.hgetall redis-client (redis-room-prefix room-id "music-info")
+  ((.scriptWrap redis-lua "getTrackInfo") 0 room-id
     (fn [err reply]
-      (callback reply))))
+      (let [reply (js->clj reply)
+            track-id-hashes reply
+            track-id-hashes-map (apply hash-map track-id-hashes)]
+        (callback (clj->js track-id-hashes-map))))))
 
 (defn get-all-music-info [room-id callback]
   ((.scriptWrap redis-lua "getAllMusicInfo") 0 room-id

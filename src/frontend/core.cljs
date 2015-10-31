@@ -117,8 +117,11 @@
 
 (defn get-music-info-from-id [track-id]
   (first (filter #(= (.-filehash %1)
-                     (get (:track-id-hashes @app-state) track-id))
+                     (first (get (:track-id-hashes @app-state) track-id)))
                  (:music-info @app-state))))
+
+(defn get-uploader-from-id [track-id]
+  (last (get (:track-id-hashes @app-state) track-id)))
 
 (defn indices [pred coll]
   (keep-indexed #(when (pred %2) %1) coll))

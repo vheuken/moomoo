@@ -144,7 +144,7 @@
             title (.-title tags)
             artist (.-artist tags)
             album (.-album tags)
-            username (.-username data)
+            username (core/get-uploader-from-id track-id)
             current-track-id (:current-track-id @core/app-state)
             content (list
                       (dom/span #js {:className "track-title"
