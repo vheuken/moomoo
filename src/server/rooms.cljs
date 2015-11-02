@@ -482,3 +482,13 @@
         (do
           (println "File hash found!")
           (callback true))))))
+
+(defn mute-user [socket-id callback]
+  (.set redis-client (str "users:" socket-id ":muted?") "true"
+    (fn []
+      (callback))))
+
+(defn unmute-user [socket-id callback]
+  (.set redis-client (str "users:" socket-id ":muted?") "false"
+    (fn []
+      (callback))))
