@@ -50,12 +50,6 @@
         (callback true)
         (callback false)))))
 
-; taken from get-all-users fn
-; should probably go back there
-(defn users-to-list [reply]
-  (let [user-hash (js->clj reply)]
-    (vec (map #(val %) user-hash))))
-
 (defn set-username [room id username callback]
   (.hset redis-client (redis-room-prefix room "users") id username
     (fn [err reply]
@@ -69,9 +63,19 @@
         (callback nil)))))
 
 (defn get-all-users [room callback]
-  (.hgetall redis-client (redis-room-prefix room "users")
+  ((.scriptWrap redis-lua "getAllUsers") 0 room
     (fn [err reply]
-      (callback (users-to-list reply)))))
+      (let [users_socket_ids (js->clj (first reply))
+            users-muted (js->clj (last reply))
+            users-map (apply hash-map (map-indexed (fn [i item]
+                                                     (if (odd? i)
+                                                       {:name item
+                                                        :muted (if (= "true" (users-muted i))
+                                                                 true
+                                                                 false)}
+                                                       item))
+                                                   users_socket_ids))]
+        (callback users-map)))))
 
 (defn get-num-of-users [room callback]
   (.hlen redis-client (redis-room-prefix room "users")

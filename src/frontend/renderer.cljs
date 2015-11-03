@@ -12,14 +12,14 @@
   (reify
     om/IRender
     (render [this]
-      (dom/div nil user))))
+      (dom/div nil (get user "name") (if (get user "muted") " - Muted!")))))
 
 (defn users-list-view [data owner]
   (reify
     om/IRender
     (render [this]
         (apply dom/div nil
-          (om/build-all user-view (:users data))))))
+          (om/build-all user-view (vals (:users data)))))))
 
 (defn message-view [message owner]
   (reify

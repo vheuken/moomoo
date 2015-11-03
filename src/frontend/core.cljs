@@ -9,7 +9,7 @@
 (defonce app-state (atom {:signed-in? false
                           :messages []
                           :message-received? false
-                          :users []
+                          :users {}
                           :current-uploads-info {}
                           :track-order []
                           :track-id-hashes {}
@@ -203,7 +203,9 @@
 (.on socket "users-list"
   (fn [users]
     (println "Received users-list signal: " users)
-    (swap! app-state assoc :users users)))
+    (let [users (js->clj users)]
+      (println "USERS:" users)
+      (swap! app-state assoc :users users))))
 
 (.on socket "file-upload-info"
   (fn [file-upload-info]
@@ -335,6 +337,20 @@
       (swap! app-state assoc :file-hashes (dissoc (:file-hashes @app-state) file-hash))
       (upload-file file))))
 
+(.on socket "user-muted"
+  (fn [socket-id]
+    (println "Received mute-user signal for" socket-id)
+    (swap! app-state assoc :users (merge (:users @app-state)
+                                         {socket-id (merge (get (:users @app-state) socket-id)
+                                                           {"muted" true})}))))
+
+(.on socket "user-unmuted"
+  (fn [socket-id]
+
+    (println "Received umute-user signal for" socket-id)
+    (swap! app-state assoc :users (merge (:users @app-state)
+                                         {socket-id (merge (get (:users @app-state) socket-id)
+                                                           {"muted" false})}))))
 (.onready js/soundManager
   (fn []
     (.createSound js/soundManager #js {
