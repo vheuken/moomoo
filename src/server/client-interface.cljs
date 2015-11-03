@@ -175,7 +175,7 @@
             (fn []
               (.emit (.to io room) "set-loop" false)))))))
 
-  (.on socket "mute"
+  (.on socket "mute-user"
     (fn []
       (println "Socket id " (.-id socket) " is muted!")
       (rooms/mute-user (.-id socket)
@@ -184,7 +184,7 @@
             (fn [room-id]
               (.emit (.to io room-id) "user-muted" (.-id socket))))))))
 
-  (.on socket "unmute"
+  (.on socket "unmute-user"
     (fn []
       (println "Socket id " (.-id socket) " is unmuted!")
       (rooms/unmute-user (.-id socket)

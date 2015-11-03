@@ -104,3 +104,6 @@
   (if-not (nil? (:current-sound @app-state))
     (.setVolume (:current-sound @app-state) volume)
     (println "No current-sound to immediately apply volume to.")))
+
+(defn get-volume []
+  (:volume @app-state))

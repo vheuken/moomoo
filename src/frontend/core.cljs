@@ -110,10 +110,27 @@
                           (/ (.-left (.-position ui)) bar-width))]
       (.emit socket "position-change" new-position))))
 
+(defn mute []
+  (println "Muted!")
+  (.emit socket "mute-user"))
+
+(defn unmute []
+  (println "Unmuted!")
+  (.emit socket "unmute-user"))
+
 (defn on-volume-drag-stop [event ui]
   (let [bar-width (.width (js/$ "#volume-bar"))
-        new-volume (* 100 (/ (.-left (.-position ui)) bar-width))]
-    (player/set-volume new-volume)))
+        new-volume (* 100 (/ (.-left (.-position ui)) bar-width))
+        old-volume (player/get-volume)]
+    (println "old volume:" old-volume)
+    (println "new volume:" new-volume)
+
+    (player/set-volume new-volume)
+    (cond
+      (and (= 0 old-volume) (< 0 new-volume))
+        (unmute)
+      (and (= 0 new-volume) (not= 0 old-volume))
+        (mute))))
 
 (defn get-music-info-from-id [track-id]
   (first (filter #(= (.-filehash %1)
