@@ -175,6 +175,25 @@
             (fn []
               (.emit (.to io room) "set-loop" false)))))))
 
+  (.on socket "mute"
+    (fn []
+      (println "Socket id " (.-id socket) " is muted!")
+      (rooms/mute-user (.-id socket)
+        (fn []
+          (rooms/get-room-from-user-id (.-id socket)
+            (fn [room-id]
+              (.emit (.to io room-id) "user-muted" (.-id socket))))))))
+
+  (.on socket "unmute"
+    (fn []
+      (println "Socket id " (.-id socket) " is unmuted!")
+      (rooms/unmute-user (.-id socket)
+        (fn []
+          (rooms/get-room-from-user-id (.-id socket)
+            (fn [room-id]
+              (.emit (.to io room-id) "user-unmuted" (.-id socket))))))))
+
+
   (.on socket "track-complete"
     (fn []
       (println "Received track-complete signal from " (.-id socket))
