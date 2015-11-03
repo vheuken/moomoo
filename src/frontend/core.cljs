@@ -120,16 +120,16 @@
 
 (defn on-volume-drag-stop [event ui]
   (let [bar-width (.width (js/$ "#volume-bar"))
-        new-volume (* 100 (/ (.-left (.-position ui)) bar-width))
+        new-volume (Math/round (* 100 (/ (.-left (.-position ui)) bar-width)))
         old-volume (player/get-volume)]
     (println "old volume:" old-volume)
     (println "new volume:" new-volume)
 
     (player/set-volume new-volume)
     (cond
-      (and (= 0 old-volume) (< 0 new-volume))
+      (and (>= 0 old-volume) (< 0 new-volume))
         (unmute)
-      (and (= 0 new-volume) (not= 0 old-volume))
+      (and (>= 0 new-volume) (< 0 old-volume))
         (mute))))
 
 (defn get-music-info-from-id [track-id]
@@ -346,7 +346,6 @@
 
 (.on socket "user-unmuted"
   (fn [socket-id]
-
     (println "Received umute-user signal for" socket-id)
     (swap! app-state assoc :users (merge (:users @app-state)
                                          {socket-id (merge (get (:users @app-state) socket-id)
