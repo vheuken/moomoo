@@ -12,8 +12,10 @@ if next(users) == nil then
     local num_of_tracks = redis.call('decr', 'file-hash:' .. file_hash .. ':num-of-tracks')
     if num_of_tracks == 0 then
       files_to_delete[files_to_delete_iter] = redis.call('get', 'file-hash:' .. file_hash .. ':file')
-      files_to_delete_iter = files_to_delete_iter + 1
+      files_to_delete[files_to_delete_iter + 1] = redis.call('get', 'file-hash:' .. file_hash .. ':picture')
+      files_to_delete_iter = files_to_delete_iter + 2
       redis.call('del', 'file-hash:' .. file_hash .. ':file')
+      redis.call('del', 'file-hash:' .. file_hash .. ':picture')
       redis.call('del', 'file-hash:' .. file_hash .. ':num-of-tracks')
       redis.call('del', 'file-hash:' .. file_hash)
     end

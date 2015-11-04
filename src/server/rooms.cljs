@@ -216,19 +216,21 @@
     (fn [err reply]
       (callback reply))))
 
-(defn handle-album-art [tags id callback]
+(defn handle-album-art [tags file-hash callback]
   (let [pictures (get tags "picture")]
     (if (empty? pictures)
       (callback (dissoc tags "picture"))
       (let [picture (first (get tags "picture"))
             picture-format (get picture "format")
             picture-data   (get picture "data")
-            filename  (subs id 0 7)
+            filename  (subs file-hash 0 7)
             file-path (str album-art-directory "/" filename "." picture-format)]
         (println "Saving album art to:" file-path)
         (.writeFile fs file-path picture-data)
-        (callback (merge {"picture" (string/replace file-path "public" "")}
-                         (dissoc tags "picture")))))))
+        (.set redis-client (str "file-hash:" file-hash ":picture") file-path
+          (fn []
+            (callback (merge {"picture" (string/replace file-path "public" "")}
+                             (dissoc tags "picture")))))))))
 
 (defn set-music-info [absolute-file-path
                       track-id
