@@ -427,14 +427,10 @@
   (let [lua-fn (.scriptWrap redis-lua "handleDisconnect")]
     (lua-fn 0 room
       (fn [err reply]
-        (if (empty? (first reply))
-          (if-not (nil? (last reply))
-            (let [files-to-delete (js->clj (last reply))]
-              (println "Deleting files: " files-to-delete)
-              (doseq [file files-to-delete] (.unlink fs file))
-              (callback []))
-            (callback []))
-          (callback (js->clj reply)))))))
+        (let [files-to-delete (js->clj reply)]
+          (println "Deleting files: " files-to-delete)
+          (doseq [file files-to-delete] (.unlink fs file))
+          (callback))))))
 
 (defn clear-songs [room-id callback]
   (.del redis-client (redis-room-prefix room-id "music-info")

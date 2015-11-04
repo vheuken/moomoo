@@ -28,15 +28,5 @@ if next(users) == nil then
   end
 
 
-  return {{}, files_to_delete}
+  return files_to_delete
 end
-
-local newIndex = 1
-local prunedUsers = {}
-
-for i=2,#users,2 do
-  prunedUsers[newIndex] = users[i]
-  newIndex = newIndex + 1
-end
-
-return {prunedUsers, nil}
