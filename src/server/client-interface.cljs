@@ -320,10 +320,10 @@
     (fn [stream original-filename file-size]
       (println (.-id socket) "is uploading" original-filename)
       (let [file-id (.v4 js-uuid)
-            filename (subs file-id 0 7)
-            absolute-file-path (str file-upload-directory "/" filename ".mp3")]
-        (println (str "Saving" original-filename "as" absolute-file-path))
-        (.pipe stream (.createWriteStream fs absolute-file-path))
+            temp-filename (subs file-id 0 7)
+            temp-absolute-file-path (str file-upload-directory "/" temp-filename ".mp3")]
+        (println (str "Saving" original-filename "as" temp-absolute-file-path))
+        (.pipe stream (.createWriteStream fs temp-absolute-file-path))
 
         (.on stream "data"
           (fn [data-chunk]
@@ -333,7 +333,7 @@
               (fn [room]
                 (rooms/get-username room (.-id socket)
                   (fn [username]
-                    (let [bytes-received (aget (.statSync fs absolute-file-path) "size")]
+                    (let [bytes-received (aget (.statSync fs temp-absolute-file-path) "size")]
                       (.emit (.to io room)
                              "file-upload-info"
                              #js {:username      username
@@ -346,35 +346,37 @@
           (fn []
             (println "Upload of" original-filename
                      "from" (.-id socket) "is complete!")
-            (.readFile fs absolute-file-path
+            (.readFile fs temp-absolute-file-path
               (fn [err buf]
-                (let [file-hash (mhash "md5" buf)]
-                  (rooms/set-music-info absolute-file-path
-                                        file-id
-                                        file-hash
-                                        original-filename
-                                        (.-id socket)
-                    (fn [music-info]
-                      (rooms/get-room-from-user-id (.-id socket)
-                        (fn [room]
-                          (rooms/get-track-order room
-                            (fn [track-order]
-                              (rooms/get-track-id-hashes room
-                                (fn [track-id-hashes]
-                                  (.emit (.to io room) "upload-complete"
-                                                       (clj->js music-info)
-                                                       track-order
-                                                       track-id-hashes)))))
-                          (rooms/is-waiting-to-start? room
-                            (fn [waiting?]
-                              (if-not waiting?
-                                (rooms/has-track-started? room
-                                  (fn [started?]
-                                    (if-not started?
-                                      (rooms/get-num-of-tracks room
-                                        (fn [num-of-tracks]
-                                          (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))))
-            (println (str "Successfully uploaded " absolute-file-path))))))))
+                (let [file-hash (mhash "md5" buf)
+                      absolute-file-path (str file-upload-directory "/" file-hash ".mp3")]
+                  (.rename fs temp-absolute-file-path absolute-file-path
+                    (fn []
+                      (rooms/set-music-info absolute-file-path
+                                            file-id
+                                            file-hash
+                                            original-filename
+                                            (.-id socket)
+                        (fn [music-info]
+                          (rooms/get-room-from-user-id (.-id socket)
+                            (fn [room]
+                              (rooms/get-track-order room
+                                (fn [track-order]
+                                  (rooms/get-track-id-hashes room
+                                    (fn [track-id-hashes]
+                                      (.emit (.to io room) "upload-complete"
+                                                           (clj->js music-info)
+                                                           track-order
+                                                           track-id-hashes)))))
+                              (rooms/is-waiting-to-start? room
+                                (fn [waiting?]
+                                  (if-not waiting?
+                                    (rooms/has-track-started? room
+                                      (fn [started?]
+                                        (if-not started?
+                                          (rooms/get-num-of-tracks room
+                                            (fn [num-of-tracks]
+                                              (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))))))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))
