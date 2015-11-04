@@ -425,7 +425,6 @@
   (let [lua-fn (.scriptWrap redis-lua "handleDisconnect")]
     (lua-fn 0 room
       (fn [err reply]
-        (println "REPLY!" reply)
         (if (empty? (first reply))
           (if-not (nil? (last reply))
             (let [files-to-delete (js->clj (last reply))]
