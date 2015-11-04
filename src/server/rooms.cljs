@@ -262,9 +262,11 @@
                                     (.set redis-client (str "file-hash:" file-hash ":file")
                                                        absolute-file-path
                                       (fn [err reply]
-                                        (set-track-position room track-id track-num
+                                        (.incr redis-client (str "file-hash:" file-hash ":num-of-tracks")
                                           (fn []
-                                            (callback music-info)))))))))))))))))))))))
+                                            (set-track-position room track-id track-num
+                                              (fn []
+                                                (callback music-info)))))))))))))))))))))))))
 
 (defn set-music-info-from-hash [track-id file-hash socket-id callback]
   (get-room-from-user-id socket-id
@@ -279,14 +281,17 @@
                 (fn []
                   (.set redis-client (str "track:" track-id ":uploader") username
                     (fn []
-                      (set-track-position room-id track-id track-num
+
+                      (.incr redis-client (str "file-hash:" file-hash ":num-of-tracks")
                         (fn []
-                          (.get redis-client (str "file-hash:" file-hash)
-                            (fn [err music-info-reply]
-                              (let [reader (transit/reader :json)
-                                    music-info-json (transit/read reader music-info-reply)
-                                    music-info (js->clj music-info-json)]
-                                (callback music-info)))))))))))))))))
+                          (set-track-position room-id track-id track-num
+                            (fn []
+                              (.get redis-client (str "file-hash:" file-hash)
+                                (fn [err music-info-reply]
+                                  (let [reader (transit/reader :json)
+                                        music-info-json (transit/read reader music-info-reply)
+                                        music-info (js->clj music-info-json)]
+                                    (callback music-info)))))))))))))))))))
 
 (defn get-music-file [room track-id callback]
   (.hget redis-client (redis-room-prefix room "music-info") track-id
@@ -418,8 +423,14 @@
   (let [lua-fn (.scriptWrap redis-lua "handleDisconnect")]
     (lua-fn 0 room
       (fn [err reply]
-        (if (nil? reply)
-          (callback [])
+        (println "REPLY!" reply)
+        (if (empty? (first reply))
+          (if-not (nil? (last reply))
+            (let [files-to-delete (js->clj (last reply))]
+              (println "Deleting files: " files-to-delete)
+              (doseq [file files-to-delete] (.unlink fs file))
+              (callback []))
+            (callback []))
           (callback (js->clj reply)))))))
 
 (defn clear-songs [room-id callback]
