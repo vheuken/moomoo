@@ -340,8 +340,7 @@
                     (let [bytes-received (aget (.statSync fs temp-absolute-file-path) "size")]
                       (.emit (.to io room)
                              "file-upload-info"
-                             #js {:username      username
-                                  :id            file-id
+                             #js {:id            file-id
                                   :uploaderid    (.-id socket)
                                   :bytesreceived bytes-received
                                   :totalsize     file-size

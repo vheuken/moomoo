@@ -69,7 +69,7 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li nil (.-username data)
+      (dom/li nil (((:users @core/app-state) (.-uploaderid data)) "name")
                   " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
                   (.-filename data)
                   (if (= (.-uploaderid data) (.-id core/socket))
