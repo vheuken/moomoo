@@ -506,3 +506,13 @@
   (.set redis-client (str "users:" socket-id ":muted?") "false"
     (fn []
       (callback))))
+
+(defn get-uploader-id [track-id callback]
+  (.get redis-client (str "track:" track-id ":uploader")
+    (fn [err reply]
+      (callback reply))))
+
+(defn cancel-upload [track-id callback]
+  (.del redis-client (str "track:" track-id ":uploader")
+    (fn []
+      (callback))))

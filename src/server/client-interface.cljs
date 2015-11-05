@@ -11,6 +11,8 @@
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce fs (nodejs/require "fs"))
 (defonce mhash (nodejs/require "mhash"))
+(defonce redis (nodejs/require "redis"))
+(defonce redis-pub-client (.createClient redis))
 
 (defn initialize! [server]
   (defonce io (.listen socketio server))
@@ -318,16 +320,36 @@
 
   (.on socket "cancel-upload"
     (fn [id]
-      (println "Received cancel-upload signal from" (.-id socket) " for id:" id)))
+      (println "Received cancel-upload signal from" (.-id socket) " for id:" id)
+      (rooms/get-uploader-id id
+        (fn [uploader-id]
+          (if (= uploader-id (.-id socket))
+            (rooms/cancel-upload id
+              (fn []
+                (.publish redis-pub-client "cancel-upload" id)
+                (rooms/get-room-from-user-id (.-id socket)
+                  (fn [room]
+                    (.emit (.to io room) "upload-cancelled" id))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
       (println (.-id socket) "is uploading" original-filename)
       (let [file-id (.v4 js-uuid)
             temp-filename (subs file-id 0 7)
-            temp-absolute-file-path (str file-upload-directory "/" temp-filename ".mp3")]
+            temp-absolute-file-path (str file-upload-directory "/" temp-filename ".mp3")
+            redis-sub-client (.createClient redis)]
+        (.set rooms/redis-client (str "track:" file-id ":uploader") (.-id socket))
         (println (str "Saving" original-filename "as" temp-absolute-file-path))
         (.pipe stream (.createWriteStream fs temp-absolute-file-path))
+
+        (.subscribe redis-sub-client "cancel-upload")
+
+        (.on redis-sub-client "message"
+          (fn [channel message]
+            (println "CHANNEL:" channel)
+            (println "Message:" message)
+            (if (= message file-id)
+              (.unpipe stream))))
 
         (.on stream "data"
           (fn [data-chunk]
