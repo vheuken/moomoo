@@ -352,6 +352,12 @@
     (swap! app-state assoc :users (merge (:users @app-state)
                                          {socket-id (merge (get (:users @app-state) socket-id)
                                                            {"muted" false})}))))
+
+(.on socket "upload-cancelled"
+  (fn [id]
+    (swap! app-state assoc :current-uploads-info
+      (dissoc (:current-uploads-info @app-state) id))))
+
 (.onready js/soundManager
   (fn []
     (.createSound js/soundManager #js {
