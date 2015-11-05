@@ -156,6 +156,8 @@
   (first (indices #(= %1 (:current-track-id @app-state))
                   (:track-order @app-state))))
 
+(defn cancel-upload [id]
+  (.emit socket "cancel-upload" id))
 
 (defn change-track [track-num]
   (.emit socket "change-track" track-num (.v4 js/uuid)))

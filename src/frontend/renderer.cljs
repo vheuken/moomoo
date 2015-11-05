@@ -71,7 +71,9 @@
     (render [this]
       (dom/li nil (.-username data)
                   " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
-                  (.-filename data)))))
+                  (.-filename data)
+                  (if (= (.-uploaderid data) (.-id core/socket))
+                    (dom/button #js {:onClick #(core/cancel-upload (.-id data))} "CANCEL"))))))
 
 (defn users-upload-progress-view [data owner]
   (reify

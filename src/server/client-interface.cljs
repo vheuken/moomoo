@@ -316,6 +316,10 @@
                                       (change-track room-id (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))
             (.emit socket "hash-not-found" file-hash))))))
 
+  (.on socket "cancel-upload"
+    (fn [id]
+      (println "Received cancel-upload signal from" (.-id socket) " for id:" id)))
+
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size]
       (println (.-id socket) "is uploading" original-filename)
@@ -338,6 +342,7 @@
                              "file-upload-info"
                              #js {:username      username
                                   :id            file-id
+                                  :uploaderid    (.-id socket)
                                   :bytesreceived bytes-received
                                   :totalsize     file-size
                                   :filename      original-filename}))))))))
