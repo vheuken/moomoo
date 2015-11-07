@@ -349,7 +349,9 @@
             (println "CHANNEL:" channel)
             (println "Message:" message)
             (if (= message file-id)
-              (.unpipe stream))))
+              (do
+                (.unpipe stream)
+                (.unlink fs temp-absolute-file-path)))))
 
         (.on stream "data"
           (fn [data-chunk]
