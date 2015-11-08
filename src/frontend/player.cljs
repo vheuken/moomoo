@@ -50,7 +50,6 @@
 
   (swap! app-state assoc :current-sound
     (.createSound js/soundManager #js {:id sound-id
-                                       :type "audio/mpeg"
                                        :url sound-url
                                        :whileloading while-loading
                                        :onfinish on-finish

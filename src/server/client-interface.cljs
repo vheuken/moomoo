@@ -335,8 +335,9 @@
     (fn [stream original-filename file-size]
       (println (.-id socket) "is uploading" original-filename)
       (let [file-id (.v4 js-uuid)
+            file-extension (str "." (last (string/split original-filename ".")))
             temp-filename (subs file-id 0 7)
-            temp-absolute-file-path (str file-upload-directory "/" temp-filename ".mp3")
+            temp-absolute-file-path (str file-upload-directory "/" temp-filename file-extension)
             redis-sub-client (.createClient redis)]
         (.set rooms/redis-client (str "track:" file-id ":uploader") (.-id socket))
         (println (str "Saving" original-filename "as" temp-absolute-file-path))
@@ -377,7 +378,7 @@
             (.readFile fs temp-absolute-file-path
               (fn [err buf]
                 (let [file-hash (mhash "md5" buf)
-                      absolute-file-path (str file-upload-directory "/" file-hash ".mp3")]
+                      absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
                   (.rename fs temp-absolute-file-path absolute-file-path
                     (fn []
                       (rooms/set-music-info absolute-file-path
