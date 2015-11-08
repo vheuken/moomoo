@@ -164,14 +164,19 @@
                                      :title "Delete Track"
                                      :onClick #(core/delete-track track-id)} "X"))]
         (if (:playing? state)
-          (dom/div #js {:className "track-view"
+          (dom/div #js {:id track-id
+                        :className "track-view"
                         :onDoubleClick (fn []
                                          (core/change-track (first (core/indices #(= %1 track-id) (:track-order @core/app-state)))))
                         :style #js {:backgroundColor "#BABAB9"}} content)
-          (dom/div #js {:className "track-view"
+          (dom/div #js {:id track-id
+                        :className "track-view"
                         :onDoubleClick (fn []
                                          (core/change-track (first (core/indices #(= %1 track-id) (:track-order @core/app-state)))))
-                        } content))))))
+                        } content))))
+    om/IDidMount
+    (did-mount [this]
+      (.draggable (js/$ (str "#" data)) #js {:axis "y"}))))
 
 (defn track-queue [data owner]
   (reify
