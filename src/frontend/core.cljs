@@ -117,7 +117,7 @@
                          (:track-order @app-state))
         destination (ffirst (filter #(not (last %1)) (map-indexed vector (map #(>= offset-top %1) top-offsets))))]
     (if (nil? destination)
-      (count (:track-order @app-state))
+      (- (count (:track-order @app-state)) 1)
       destination)))
 
 (defn on-track-drag-stop [event ui]
