@@ -520,6 +520,7 @@
 (defn change-track-order [room-id track-id destination-track-num callback]
   ((.scriptWrap redis-lua "changeTrackOrder") 0 room-id track-id destination-track-num
      (fn [err reply]
+       (println "REPLY" reply)
        (get-track-order room-id
          (fn [track-order]
            (callback track-order))))))

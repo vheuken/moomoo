@@ -278,6 +278,8 @@
 
   (.on socket "track-order-change"
     (fn [track-id destination-track-num]
+      (println "Track order change of track-id:" track-id
+               "to track-num:" destination-track-num)
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room-id]
           (rooms/change-track-order room-id track-id destination-track-num
