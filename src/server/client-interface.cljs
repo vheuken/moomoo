@@ -138,18 +138,24 @@
                "from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (rooms/pause-current-track room position
-            (fn []
-              (.emit (.to io room) "pause" position)))))))
+          (rooms/cooldown room "play-pause"
+            (fn [ok?]
+              (if ok?
+                (rooms/pause-current-track room position
+                  (fn []
+                    (.emit (.to io room) "pause" position))))))))))
 
   (.on socket "resume"
     (fn []
       (println "Received resume signal from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (rooms/resume-current-track room
-            (fn []
-              (.emit (.to io room) "resume")))))))
+          (rooms/cooldown room "play-pause"
+            (fn [ok?]
+              (if ok?
+                (rooms/resume-current-track room
+                  (fn []
+                    (.emit (.to io room) "resume"))))))))))
 
   (.on socket "position-change"
     (fn [position]
@@ -157,30 +163,40 @@
                "from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (rooms/get-current-sound-id room
-            (fn [sound-id]
-              (if-not (nil? sound-id)
-                (rooms/change-current-track-position room position
-                  (fn []
-                    (.emit (.to io room) "position-change" position))))))))))
+          (rooms/cooldown room "position-change"
+            (fn [ok?]
+              (if ok?
+                (rooms/get-current-sound-id room
+                  (fn [sound-id]
+                    (if-not (nil? sound-id)
+                      (rooms/change-current-track-position room position
+                        (fn []
+                          (.emit (.to io room) "position-change" position)))))))))))))
 
   (.on socket "start-looping"
     (fn []
       (println "Received start-looping signal from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (rooms/start-looping room
-            (fn []
-              (.emit (.to io room) "set-loop" true)))))))
+
+          (rooms/cooldown room "looping"
+            (fn [ok?]
+              (if ok?
+                (rooms/start-looping room
+                  (fn []
+                    (.emit (.to io room) "set-loop" true))))))))))
 
   (.on socket "stop-looping"
     (fn []
       (println "Received stop-looping signal from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (rooms/stop-looping room
-            (fn []
-              (.emit (.to io room) "set-loop" false)))))))
+          (rooms/cooldown room "looping"
+            (fn [ok?]
+              (if ok?
+                (rooms/stop-looping room
+                  (fn []
+                    (.emit (.to io room) "set-loop" false))))))))))
 
   (.on socket "mute-user"
     (fn []
@@ -296,7 +312,10 @@
                "from" (.-id socket))
       (rooms/get-room-from-user-id (.-id socket)
         (fn [room]
-          (change-track room track-num sound-id)))))
+          (rooms/cooldown room "change-track"
+            (fn [ok?]
+              (if ok?
+                (change-track room track-num sound-id))))))))
 
   (.on socket "check-hash"
     (fn [file-hash]
