@@ -110,12 +110,22 @@
                           (/ (.-left (.-position ui)) bar-width))]
       (.emit socket "position-change" new-position))))
 
+(defn get-track-num-from-offset-top [offset-top]
+  (println "Offset-top:" offset-top)
+  (let [top-offsets (map (fn [id]
+                           (.-top (.offset (js/$ (str "#" id)))))
+                         (:track-order @app-state))
+        destination (ffirst (filter #(not (last %1)) (map-indexed vector (map #(>= offset-top %1) top-offsets))))]
+    (if (nil? destination)
+      (count (:track-order @app-state))
+      destination)))
+
 (defn on-track-drag-stop [event ui]
-  (println "DRAG STOP!")
   (this-as this
     (.removeAttr (js/$ this) "style")
-    (let [dragged-track-id (.attr (js/$ this) "id")]
-      (swap! app-state assoc :track-order (:track-order @app-state)))))
+    (let [dragged-track-id (.attr (js/$ this) "id")
+          destination-track-num (get-track-num-from-offset-top (.-top (.-offset ui)))]
+      (println destination-track-num))))
 
 (defn mute []
   (println "Muted!")
