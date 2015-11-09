@@ -125,7 +125,7 @@
     (.removeAttr (js/$ this) "style")
     (let [dragged-track-id (.attr (js/$ this) "id")
           destination-track-num (get-track-num-from-offset-top (.-top (.-offset ui)))]
-      (println destination-track-num))))
+      (.emit "track-order-change" dragged-track-id destination-track-num))))
 
 (defn mute []
   (println "Muted!")
@@ -374,6 +374,10 @@
   (fn [id]
     (swap! app-state assoc :current-uploads-info
       (dissoc (:current-uploads-info @app-state) id))))
+
+(.on socket "track-order-change"
+  (fn [track-order]
+    (swap! app-state assoc :track-order (js->clj track-order))))
 
 (.onready js/soundManager
   (fn []

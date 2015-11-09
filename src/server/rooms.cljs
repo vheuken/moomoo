@@ -516,3 +516,8 @@
   (.del redis-client (str "track:" track-id ":uploader")
     (fn []
       (callback))))
+
+(defn change-track-order [room-id track-id destination-track-num callback]
+  ((.scriptWrap redis-lua "changeTrackOrder") 0 room-id track-id destination-track-num
+     (fn [err track-order]
+       (callback track-order))))

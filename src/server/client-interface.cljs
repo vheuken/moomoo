@@ -276,6 +276,14 @@
                   (if-not (nil? next-track-num)
                     (.emit (.to io room-id) "delete-track" track-id))))))))))
 
+  (.on socket "track-order-change"
+    (fn [track-id destination-track-num]
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room-id]
+          (rooms/change-track-order room-id track-id destination-track-num
+            (fn [new-track-order]
+              (.emit (.to io room-id) "track-order-change" new-track-order)))))))
+
   (.on socket "change-track"
     (fn [track-num sound-id]
       (println "Received change-track signal to track-num" track-num
