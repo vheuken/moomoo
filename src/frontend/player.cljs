@@ -35,8 +35,9 @@
 
 (defn pause []
   (println "Pausing current sound!")
-  (.pause (:current-sound @app-state))
-  (swap! app-state assoc :paused? true))
+  (swap! app-state assoc :paused? true)
+  (if-not (nil? (:current-sound @app-state))
+    (.pause (:current-sound @app-state))))
 
 (defn resume []
   (.resume (:current-sound @app-state))
@@ -46,7 +47,6 @@
   (println "Sound URL to play:" sound-url)
   (swap! app-state assoc :on-finish on-finish)
   (swap! app-state assoc :current-sound-id sound-id)
-  (swap! app-state assoc :paused? false)
 
   (swap! app-state assoc :current-sound
     (.createSound js/soundManager #js {:id sound-id
@@ -62,7 +62,9 @@
 
   (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
-                    :onplay on-play}))
+                    :onplay on-play})
+  (if (:paused? @app-state)
+      (.pause (:current-sound @app-state))))
 
 ; TODO: probably should go into a different module...but which?
 (defn destroy-track [sound-id]

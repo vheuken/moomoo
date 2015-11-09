@@ -31,11 +31,14 @@
                   (fn [current-track-id]
                     (rooms/get-current-sound-id room-id
                       (fn [current-sound-id]
-                        (.emit socket "hotjoin-music-info" room-track-id-map
-                                                           room-music-info
-                                                           room-track-order
-                                                           current-track-id
-                                                           current-sound-id)))))))))))))
+                        (rooms/is-playing? room-id
+                          (fn [playing?]
+                            (.emit socket "hotjoin-music-info" room-track-id-map
+                                                               room-music-info
+                                                               room-track-order
+                                                               current-track-id
+                                                               current-sound-id
+                                                               (not playing?))))))))))))))))
 (defn change-track [room track-num sound-id]
   (rooms/change-track room track-num sound-id
     (fn [track-id]

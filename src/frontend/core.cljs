@@ -297,7 +297,8 @@
        room-music-info
        track-order
        current-track-id
-       current-sound-id]
+       current-sound-id
+       paused?]
     (println "Received room state:"
              "room-music-info:" room-music-info
              "track-order:" track-order
@@ -311,6 +312,9 @@
 
     (swap! app-state assoc :current-track-id current-track-id)
     (swap! app-state assoc :current-sound-id current-sound-id)
+
+    (if paused?
+      (player/pause))
 
     (if-not (nil? current-sound-id)
       (.emit socket "ready-to-start" current-sound-id))))
