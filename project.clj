@@ -14,7 +14,7 @@
   :npm {:dependencies [[source-map-support "0.3.2"]
                        [socket.io "1.3.7"]
                        [socket.io-redis "0.1.4"]
-                       [redis "1.0.0"]
+                       [redis "2.3.0"]
                        [socket.io-stream "0.8.0"]
                        [uuid "2.0.1"]
                        [express "4.13"]
