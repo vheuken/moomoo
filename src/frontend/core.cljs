@@ -125,7 +125,7 @@
     (.removeAttr (js/$ this) "style")
     (let [dragged-track-id (.attr (js/$ this) "id")
           destination-track-num (get-track-num-from-offset-top (.-top (.-offset ui)))]
-      (.emit "track-order-change" dragged-track-id destination-track-num))))
+      (.emit socket "track-order-change" dragged-track-id destination-track-num))))
 
 (defn mute []
   (println "Muted!")
