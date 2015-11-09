@@ -110,6 +110,13 @@
                           (/ (.-left (.-position ui)) bar-width))]
       (.emit socket "position-change" new-position))))
 
+(defn on-track-drag-stop [event ui]
+  (println "DRAG STOP!")
+  (this-as this
+    (.removeAttr (js/$ this) "style")
+    (let [dragged-track-id (.attr (js/$ this) "id")]
+      (swap! app-state assoc :track-order (:track-order @app-state)))))
+
 (defn mute []
   (println "Muted!")
   (.emit socket "mute-user"))

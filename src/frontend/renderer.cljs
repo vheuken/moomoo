@@ -176,7 +176,8 @@
                         } content))))
     om/IDidMount
     (did-mount [this]
-      (.draggable (js/$ (str "#" data)) #js {:axis "y"}))))
+      (.draggable (js/$ (str "#" data)) #js {:axis "y"
+                                             :stop core/on-track-drag-stop}))))
 
 (defn track-queue [data owner]
   (reify
