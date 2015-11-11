@@ -1,5 +1,4 @@
-(ns moomoo.rooms
-  (:require [cljs.nodejs :as nodejs]
+(ns moomoo.rooms (:require [cljs.nodejs :as nodejs]
             [cljs.reader :as reader]
             [clojure.string :as string]
             [cognitect.transit :as transit]))
@@ -112,7 +111,7 @@
 (defn init-room [room callback]
   (.set redis-client (redis-room-prefix room "current-track") 0
     (fn []
-      (.set redis-client (redis-room-prefix room "playing?") "false"
+      (.set redis-client (redis-room-prefix room "playing?") "true"
         (fn []
           (callback))))))
 
