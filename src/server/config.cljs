@@ -5,4 +5,5 @@
 (defonce fs (nodejs/require "fs"))
 
 (defn load-file! [filename]
+  (println "Loading config file:" filename)
   (def data (js->clj (.parse toml (.readFileSync fs filename)))))

@@ -26,6 +26,8 @@
 (.get app "/rooms/:id" #(. %2 (render "room" (clj->js {:roomid (.-id (.-params %1))}))))
 
 (defn -main []
+  (config/load-file! "config.toml")
+
   (.monitor redis-client
     (fn [err res]
       (println "Entering redis-monitoring mode")))
@@ -35,6 +37,7 @@
       (println "REDIS:" timestamp ": " (.inspect util args))))
 
   (println (str "Listening on port " port))
+  (watcher/watch-directories! (config/data "music-watch-dirs"))
   (client-interface/start-listening!)
   (.listen server port))
 
