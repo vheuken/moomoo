@@ -15,6 +15,6 @@
     (= change-type "delete") (delete-file file-path)))
 
 (defn watch-directories! [directories]
-  (println "HI")
+  (println "Starting watcher on the following directories:" directories)
   (.watch watchr #js {:paths (clj->js directories)
                       :listener listener}))
