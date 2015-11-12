@@ -1,10 +1,14 @@
 (ns moomoo.watcher
-  (:require [cljs.nodejs :as nodejs]))
+  (:require [cljs.nodejs :as nodejs]
+            [moomoo.file-hash :as file-hash]))
 
 (defonce watchr (nodejs/require "watchr"))
 
 (defn new-file [file-path]
-  (println "New file: " file-path))
+  (println "New file: " file-path)
+  (file-hash/handle-new-file file-path
+    (fn [file-hash music-info]
+      (println "Added file with hash:" file-hash))))
 
 (defn delete-file [file-path]
   (println "Deleted file: " file-path))
