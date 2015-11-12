@@ -232,11 +232,9 @@
                 (fn []
                   (.set redis-client (str "track:" track-id ":uploader") username
                     (fn []
-                      (.incr redis-client (str "file-hash:" file-hash ":num-of-tracks")
+                      (set-track-position room track-id track-num
                         (fn []
-                          (set-track-position room track-id track-num
-                            (fn []
-                              (callback))))))))))))))))
+                          (callback))))))))))))))
 
 (defn set-music-info-from-hash [track-id file-hash socket-id callback]
   (get-room-from-user-id socket-id

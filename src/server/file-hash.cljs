@@ -63,4 +63,6 @@
                   (.set redis-client (str "file-hash:" file-hash ":file")
                                      file-path
                     (fn []
-                      (callback file-hash music-info))))))))))))
+                      (.incr redis-client (str "file-hash:" file-hash ":num-of-tracks")
+                        (fn []
+                          (callback file-hash music-info))))))))))))))
