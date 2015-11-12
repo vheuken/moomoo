@@ -5,4 +5,4 @@
 (defonce fs (nodejs/require "fs"))
 
 (defn load-file! [filename]
-  (defonce data (js->clj (.parse toml (.readFileSync fs filename)))))
+  (def data (js->clj (.parse toml (.readFileSync fs filename)))))
