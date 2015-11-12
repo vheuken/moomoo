@@ -3,6 +3,7 @@
             [moomoo.file-hash :as file-hash]))
 
 (defonce watchr (nodejs/require "watchr"))
+(defonce fs (nodejs/require "fs"))
 
 (defn new-file [file-path]
   (println "New file: " file-path)
@@ -20,5 +21,9 @@
 
 (defn watch-directories! [directories]
   (println "Starting watcher on the following directories:" directories)
+  (doseq [directory directories]
+    (.readdir fs directory
+      (fn [err files]
+        (doseq [file files] (new-file (str directory "/" file))))))
   (.watch watchr #js {:paths (clj->js directories)
                       :listener listener}))
