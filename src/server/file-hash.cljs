@@ -19,8 +19,15 @@
           (println "File hash found!")
           (callback true))))))
 
-(defn handle-new-file [file-path callback]
-  (.readFile fs file-path
-    (fn [err buf]
-      (let [file-hash (mhash "md5" buf)]
-        (callback file-hash)))))
+(defn get-hash-from-buffer [buffer]
+  (mhash "md5" buffer))
+
+(defn handle-new-file
+  ([file-path callback]
+    (.readFile fs file-path
+      (fn [err buf]
+        (let [file-hash (get-hash-from-buffer buf)]
+          (handle-new-file file-path file-hash callback)))))
+
+  ([file-path file-hash callback]
+    (callback file-hash)))

@@ -407,16 +407,19 @@
           (fn []
             (println "Upload of" original-filename
                      "from" (.-id socket) "is complete!")
-            (file-hash/handle-new-file temp-absolute-file-path
-              (fn [file-hash]
-                (let [absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
+            (.readFile fs temp-absolute-file-path
+              (fn [err buf]
+                (let [file-hash (file-hash/get-hash-from-buffer buf)
+                      absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
                   (.rename fs temp-absolute-file-path absolute-file-path
                     (fn []
-                      (rooms/set-music-info absolute-file-path
-                                            file-id
-                                            file-hash
-                                            original-filename
-                                            (.-id socket)
+                      (file-hash/handle-new-file temp-absolute-file-path file-hash
+                        (fn [file-hash]
+                          (rooms/set-music-info absolute-file-path
+                                                file-id
+                                                file-hash
+                                                original-filename
+                                                (.-id socket)
                         (fn [music-info]
                           (rooms/get-room-from-user-id (.-id socket)
                             (fn [room]
@@ -436,7 +439,7 @@
                                         (if-not started?
                                           (rooms/get-num-of-tracks room
                                             (fn [num-of-tracks]
-                                              (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))))))))))))
+                                              (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))))))))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))
