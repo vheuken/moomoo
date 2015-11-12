@@ -9,6 +9,7 @@ pom.xml
 /node_modules/
 .lein-deps-sum
 .lein-repl-history
+.lein-failures
 .lein-plugins/
 .repl/
 .nrepl-port
