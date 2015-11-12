@@ -11,7 +11,6 @@
 (defonce file-upload-directory "public/music")
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce fs (nodejs/require "fs"))
-(defonce mhash (nodejs/require "mhash"))
 (defonce redis (nodejs/require "redis"))
 (defonce redis-pub-client (.createClient redis))
 
@@ -408,10 +407,9 @@
           (fn []
             (println "Upload of" original-filename
                      "from" (.-id socket) "is complete!")
-            (.readFile fs temp-absolute-file-path
-              (fn [err buf]
-                (let [file-hash (mhash "md5" buf)
-                      absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
+            (file-hash/handle-new-file temp-absolute-file-path
+              (fn [file-hash]
+                (let [absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
                   (.rename fs temp-absolute-file-path absolute-file-path
                     (fn []
                       (rooms/set-music-info absolute-file-path
