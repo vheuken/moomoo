@@ -2,7 +2,8 @@
   (:require [cljs.nodejs :as nodejs]
             [clojure.string :as string]
             [cognitect.transit :as transit]
-            [moomoo.rooms :as rooms]))
+            [moomoo.rooms :as rooms]
+            [moomoo.file-hash :as file-hash]))
 
 (defonce socketio (nodejs/require "socket.io"))
 (defonce socketio-redis (nodejs/require "socket.io-redis"))
@@ -320,7 +321,7 @@
   (.on socket "check-hash"
     (fn [file-hash]
       (println (.-id socket) "sent hash:" file-hash)
-      (rooms/handle-file-hash file-hash
+      (file-hash/handle-file-hash file-hash
         (fn [file-exists?]
           (if file-exists?
             (do
