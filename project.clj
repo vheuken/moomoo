@@ -25,6 +25,7 @@
                        [redis-lua-loader "1.1.0"]
                        [mhash "2.1.2"]
                        [toml "2.3.0"]
+                       [watchr "2.4.13"]
                        [ws "0.8.0"]]}
 
   :plugins [[lein-cljsbuild "1.1.1"]
