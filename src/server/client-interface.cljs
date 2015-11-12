@@ -321,7 +321,7 @@
   (.on socket "check-hash"
     (fn [file-hash]
       (println (.-id socket) "sent hash:" file-hash)
-      (file-hash/handle-file-hash file-hash
+      (file-hash/file-hash-exists? file-hash
         (fn [file-exists?]
           (if file-exists?
             (do

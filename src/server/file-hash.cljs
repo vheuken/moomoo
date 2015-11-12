@@ -5,7 +5,7 @@
 (defonce redis-lua-loader (nodejs/require "redis-lua-loader"))
 (defonce redis-lua (redis-lua-loader. redis-client #js {:src "./redis"}))
 
-(defn handle-file-hash [file-hash callback]
+(defn file-hash-exists? [file-hash callback]
   ((.scriptWrap redis-lua "handleFileHash") 0 file-hash
     (fn [err reply]
       (println reply)
@@ -16,3 +16,5 @@
         (do
           (println "File hash found!")
           (callback true))))))
+
+
