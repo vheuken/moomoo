@@ -1,6 +1,7 @@
 (ns moomoo.core
   (:require [cljs.nodejs :as nodejs]
             [moomoo.client-interface :as client-interface]
+            [moomoo.config :as config]
             [figwheel.client :as fw]))
 
 (nodejs/enable-util-print!)

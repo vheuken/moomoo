@@ -24,6 +24,7 @@
                        [base64-arraybuffer "0.1.2"]
                        [redis-lua-loader "1.1.0"]
                        [mhash "2.1.2"]
+                       [toml "2.3.0"]
                        [ws "0.8.0"]]}
 
   :plugins [[lein-cljsbuild "1.1.1"]
