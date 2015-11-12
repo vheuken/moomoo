@@ -1,16 +1,15 @@
-(ns moomoo.rooms (:require [cljs.nodejs :as nodejs]
+(ns moomoo.rooms
+  (:require [cljs.nodejs :as nodejs]
             [cljs.reader :as reader]
             [clojure.string :as string]
             [cognitect.transit :as transit]))
 
 (defonce fs (nodejs/require "fs"))
-(defonce mm (nodejs/require "musicmetadata"))
 (defonce base64-arraybuffer (nodejs/require "base64-arraybuffer"))
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce redis-client (.createClient (nodejs/require "redis")))
 (defonce redis-lua-loader (nodejs/require "redis-lua-loader"))
 (defonce redis-lua (redis-lua-loader. redis-client #js {:src "./redis"}))
-(defonce album-art-directory "public/images/albums")
 
 (defn redis-room-prefix [room-id suffix]
   (str "room:" room-id ":" suffix))
@@ -217,59 +216,27 @@
     (fn [err reply]
       (callback reply))))
 
-(defn handle-album-art [tags file-hash callback]
-  (let [pictures (get tags "picture")]
-    (if (empty? pictures)
-      (callback (dissoc tags "picture"))
-      (let [picture (first (get tags "picture"))
-            picture-format (get picture "format")
-            picture-data   (get picture "data")
-            filename  (subs file-hash 0 7)
-            file-path (str album-art-directory "/" filename "." picture-format)]
-        (println "Saving album art to:" file-path)
-        (.writeFile fs file-path picture-data)
-        (.set redis-client (str "file-hash:" file-hash ":picture") file-path
-          (fn []
-            (callback (merge {"picture" (string/replace file-path "public" "")}
-                             (dissoc tags "picture")))))))))
-
-(defn set-music-info [absolute-file-path
-                      track-id
+(defn set-music-info [track-id
                       file-hash
-                      original-file-name
                       socket-id
                       callback]
-  (mm (.createReadStream fs absolute-file-path)
-    (fn [err tags]
-      (handle-album-art (js->clj tags) file-hash
-        (fn [tags-without-album-art]
-          (get-room-from-user-id socket-id
-            (fn [room]
-              (get-username room socket-id
-                (fn [username]
-                  (get-num-of-tracks room
-                    (fn [track-num]
-                      (let [writer (transit/writer :json)
-                            music-info {:tags tags-without-album-art
-                                        :originalfilename original-file-name
-                                        :filehash file-hash}
-                            music-info-json (transit/write writer music-info)]
-                        (.hset redis-client (redis-room-prefix room "music-info")
-                                            track-id
-                                            file-hash
-                          (fn []
-                            (.set redis-client (str "track:" track-id ":uploader") username
-                              (fn []
-                                (.set redis-client (str "file-hash:" file-hash) music-info-json
-                                  (fn []
-                                    (.set redis-client (str "file-hash:" file-hash ":file")
-                                                       absolute-file-path
-                                      (fn [err reply]
-                                        (.incr redis-client (str "file-hash:" file-hash ":num-of-tracks")
-                                          (fn []
-                                            (set-track-position room track-id track-num
-                                              (fn []
-                                                (callback music-info)))))))))))))))))))))))))
+  (get-room-from-user-id socket-id
+    (fn [room]
+      (get-username room socket-id
+        (fn [username]
+          (get-num-of-tracks room
+            (fn [track-num]
+              (.hset redis-client (redis-room-prefix room "music-info")
+                                  track-id
+                                  file-hash
+                (fn []
+                  (.set redis-client (str "track:" track-id ":uploader") username
+                    (fn []
+                      (.incr redis-client (str "file-hash:" file-hash ":num-of-tracks")
+                        (fn []
+                          (set-track-position room track-id track-num
+                            (fn []
+                              (callback))))))))))))))))
 
 (defn set-music-info-from-hash [track-id file-hash socket-id callback]
   (get-room-from-user-id socket-id
@@ -483,18 +450,6 @@
         (set-current-track-position room 0
           (fn []
             (callback reply)))))))
-
-(defn handle-file-hash [file-hash callback]
-  ((.scriptWrap redis-lua "handleFileHash") 0 file-hash
-    (fn [err reply]
-      (println reply)
-      (if (nil? reply)
-        (do
-          (println "File hash not found")
-          (callback false))
-        (do
-          (println "File hash found!")
-          (callback true))))))
 
 (defn mute-user [socket-id callback]
   (.set redis-client (str "users:" socket-id ":muted?") "true"

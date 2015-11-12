@@ -413,14 +413,12 @@
                       absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
                   (.rename fs temp-absolute-file-path absolute-file-path
                     (fn []
-                      (file-hash/handle-new-file temp-absolute-file-path file-hash
-                        (fn [file-hash]
-                          (rooms/set-music-info absolute-file-path
-                                                file-id
+                      (file-hash/handle-new-file absolute-file-path file-hash
+                        (fn [file-hash music-info]
+                          (rooms/set-music-info file-id
                                                 file-hash
-                                                original-filename
                                                 (.-id socket)
-                        (fn [music-info]
+                        (fn []
                           (rooms/get-room-from-user-id (.-id socket)
                             (fn [room]
                               (rooms/get-track-order room
