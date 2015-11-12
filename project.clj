@@ -3,7 +3,7 @@
   :url "http://example.com/FIXME"
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.145"]
+                 [org.clojure/clojurescript "1.7.170"]
                  [org.omcljs/om "0.9.0"]
                  [com.cognitect/transit-cljs "0.8.225"]
                  [com.cemerick/piggieback "0.2.1"]
@@ -26,11 +26,10 @@
                        [mhash "2.1.2"]
                        [ws "0.8.0"]]}
 
-  :plugins [[lein-cljsbuild "1.1.0"]
+  :plugins [[lein-cljsbuild "1.1.1"]
             [lein-npm "0.6.1"]
-            [com.cemerick/clojurescript.test "0.3.3"]
             [lein-cljfmt "0.3.0"]
-            [lein-figwheel "0.4.1"]]
+            [lein-figwheel "0.5.0-SNAPSHOT"]]
 
   :source-paths ["src"]
 
