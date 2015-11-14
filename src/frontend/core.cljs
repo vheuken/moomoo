@@ -185,7 +185,9 @@
 (defn pause-upload [client-id]
   (println "Pausing:" client-id)
   (let [blob-stream ((:uploads @app-state) client-id)]
-    (.pause blob-stream)))
+    (if (.isPaused blob-stream)
+      (.resume blob-stream)
+      (.pause blob-stream))))
 
 (defn change-track [track-num]
   (.emit socket "change-track" track-num (.v4 js/uuid)))
