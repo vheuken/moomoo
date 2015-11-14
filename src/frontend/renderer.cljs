@@ -69,18 +69,20 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li nil (((:users @core/app-state) (.-uploaderid data)) "name")
+      (dom/li nil (if (= (.-uploaderid data) (.-id core/socket))
+                    (list
+                      (dom/button #js {:onClick #(core/cancel-upload (.-id data))}       "CANCEL")
+                      (dom/button #js {:onClick #(core/pause-upload  (.-clientid data))} "PAUSE")))
+                  (((:users @core/app-state) (.-uploaderid data)) "name")
                   " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
-                  (.-filename data)
-                  (if (= (.-uploaderid data) (.-id core/socket))
-                    (dom/button #js {:onClick #(core/cancel-upload (.-id data))} "CANCEL"))))))
+                  (.-filename data)))))
 
 (defn users-upload-progress-view [data owner]
   (reify
     om/IRender
     (render [this]
       (apply dom/div nil
-          (om/build-all user-upload-progress (vals (:current-uploads-info data)))))))
+        (om/build-all user-upload-progress (vals (:current-uploads-info data)))))))
 
 (defn current-track-tags-view [data owner]
   (reify

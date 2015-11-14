@@ -364,7 +364,7 @@
                     (.emit (.to io room) "upload-cancelled" id))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
-    (fn [stream original-filename file-size]
+    (fn [stream original-filename file-size client-id]
       (println (.-id socket) "is uploading" original-filename)
       (let [file-id (.v4 js-uuid)
             file-extension (str "." (last (string/split original-filename ".")))
@@ -401,7 +401,8 @@
                                   :uploaderid    (.-id socket)
                                   :bytesreceived bytes-received
                                   :totalsize     file-size
-                                  :filename      original-filename}))))))))
+                                  :filename      original-filename
+                                  :clientid      client-id}))))))))
 
         (.on stream "end"
           (fn []

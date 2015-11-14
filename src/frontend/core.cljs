@@ -24,7 +24,8 @@
                           :download-slots default-download-slots
                           :num-of-uploads 0
                           :num-of-downloads 0
-                          :file-hashes {}}))
+                          :file-hashes {}
+                          :uploads {}}))
 
 (enable-console-print!)
 
@@ -52,13 +53,18 @@
   (swap! app-state assoc :num-of-uploads (+ 1 (:num-of-uploads @app-state)))
 
   (let [stream (.createStream js/ss)
-        blob-stream (.createBlobReadStream js/ss file)]
+        blob-stream (.createBlobReadStream js/ss file)
+        client-id (.v4 js/uuid)]
     (println "File uploading: " (.-name file))
     (println "File size: " (.-size file))
 
+    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+                                           {client-id  blob-stream}))
+
     (.emit (js/ss socket) "file-upload" stream
                                         (.-name file)
-                                        (.-size file))
+                                        (.-size file)
+                                        client-id)
     (.pipe blob-stream stream)
 
     (.on blob-stream "end"
@@ -175,6 +181,11 @@
 
 (defn cancel-upload [id]
   (.emit socket "cancel-upload" id))
+
+(defn pause-upload [client-id]
+  (println "Pausing:" client-id)
+  (let [blob-stream ((:uploads @app-state) client-id)]
+    (.pause blob-stream)))
 
 (defn change-track [track-num]
   (.emit socket "change-track" track-num (.v4 js/uuid)))
