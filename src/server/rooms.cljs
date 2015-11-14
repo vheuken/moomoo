@@ -393,7 +393,7 @@
       (fn [err reply]
         (let [files-to-delete (js->clj reply)]
           (println "Deleting files: " files-to-delete)
-          (doseq [file files-to-delete] (.unlink fs file))
+          (doseq [file files-to-delete] (if-not (nil? file) (.unlink fs file)))
           (callback))))))
 
 (defn clear-songs [room-id callback]
