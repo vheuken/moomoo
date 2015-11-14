@@ -59,16 +59,15 @@
     (println "File size: " (.-size file))
 
     (swap! app-state assoc :uploads (merge (:uploads @app-state)
-                                           {client-id  blob-stream}))
+                                           {client-id {:blob-stream blob-stream
+                                                       :stream      stream
+                                                       :paused?     false}}))
 
     (.emit (js/ss socket) "file-upload" stream
                                         (.-name file)
                                         (.-size file)
                                         client-id)
     (.pipe blob-stream stream)
-
-    ; HACK!!!!
-    (.on blob-stream "data" #(.resume blob-stream))
 
     (.on blob-stream "end"
       (fn []
@@ -187,10 +186,21 @@
 
 (defn pause-upload [client-id]
   (println "Pausing:" client-id)
-  (let [blob-stream ((:uploads @app-state) client-id)]
-    (if (.isPaused blob-stream)
-      (.resume blob-stream)
-      (.pause blob-stream))))
+  (let [upload-info ((:uploads @app-state) client-id)
+        blob-stream (:blob-stream upload-info)
+        stream      (:stream upload-info)
+        paused?     (:paused? upload-info)]
+    (if paused?
+      (do
+        (.pipe blob-stream stream)
+        (swap! app-state assoc :uploads (merge (:uploads @app-state)
+                                               {client-id (merge upload-info
+                                                                 {:paused? false})})))
+      (do
+        (.unpipe blob-stream)
+        (swap! app-state assoc :uploads (merge (:uploads @app-state)
+                                               {client-id (merge upload-info
+                                                                 {:paused? true})}))))))
 
 (defn change-track [track-num]
   (.emit socket "change-track" track-num (.v4 js/uuid)))
