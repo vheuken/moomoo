@@ -67,6 +67,9 @@
                                         client-id)
     (.pipe blob-stream stream)
 
+    ; HACK!!!!
+    (.on blob-stream "data" #(.resume blob-stream))
+
     (.on blob-stream "end"
       (fn []
         (println "Upload complete: " (.-name file))
