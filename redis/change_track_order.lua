@@ -3,6 +3,7 @@ local track_id = ARGV[2]
 local destination_track_num = tonumber(ARGV[3])
 
 local raw_track_order = redis.call('hgetall', 'room:' .. room_id .. ':track-order')
+local current_track_num = tonumber(redis.call('get', 'room:' .. room_id .. ':current-track'))
 
 local function index_of(arr, item)
   for i=1, #arr, 1 do
@@ -25,6 +26,10 @@ if track_num > destination_track_num then
 
     if n <= track_num and n >= destination_track_num then
       raw_track_order[i] = tostring(n+1)
+
+      if n == current_track_num then
+        redis.call('set', 'room:' .. room_id .. ':current-track', tostring(n+1))
+      end
     end
   end
 else
@@ -34,6 +39,10 @@ else
 
     if n >= track_num and n <= destination_track_num then
       raw_track_order[i] = tostring(n-1)
+
+      if n == current_track_num then
+        redis.call('set', 'room:' .. room_id .. ':current-track', tostring(n-1))
+      end
     end
   end
 end
