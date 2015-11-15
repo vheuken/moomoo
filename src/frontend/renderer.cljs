@@ -367,8 +367,10 @@
   (reify
     om/IRender
     (render [this]
-      (dom/input #js {:type "number"
-                      :value (:upload-slots @core/app-state)}))))
+      (dom/span nil
+        (dom/span nil "Upload slots: " (:upload-slots data))
+        (dom/button #js {:onClick core/incr-upload-slots} "Increase")
+        (dom/button #js {:onClick core/decr-upload-slots} "Decrease")))))
 
 
 (om/root upload-slots core/app-state {:target (. js/document (getElementById "upload-slots"))})

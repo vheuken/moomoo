@@ -201,6 +201,12 @@
                                            {client-id (merge upload-info
                                                              {:paused? true})}))))
 
+(defn incr-upload-slots []
+  (println "Decrementing upload slots"))
+
+(defn decr-upload-slots []
+  (println "Decrementing upload slots"))
+
 (defn change-track [track-num]
   (.emit socket "change-track" track-num (.v4 js/uuid)))
 
