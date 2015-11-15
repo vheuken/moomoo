@@ -1,1 +1,3 @@
 music-watch-dirs = ["public/servermusic"]
+
+max-upload-slots = 4

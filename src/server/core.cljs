@@ -23,7 +23,8 @@
 (.use app (.static express "public"))
 (.get app "/" #(. %2 (sendFile "public/index.html")))
 
-(.get app "/rooms/:id" #(. %2 (render "room" (clj->js {:roomid (.-id (.-params %1))}))))
+(.get app "/rooms/:id" #(. %2 (render "room" {:roomid (.-id (.-params %1))
+                                              :maxuploadslots (config/data "max-upload-slots")})))
 
 (defn -main []
   (config/load-file! "config.toml")
