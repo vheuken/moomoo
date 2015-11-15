@@ -31,7 +31,7 @@
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-npm "0.6.1"]
             [lein-cljfmt "0.3.0"]
-            [lein-figwheel "0.5.0-SNAPSHOT"]]
+            [lein-figwheel "0.5.0-1"]]
 
   :source-paths ["src"]
 

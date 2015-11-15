@@ -184,23 +184,23 @@
 (defn cancel-upload [id]
   (.emit socket "cancel-upload" id))
 
-(defn pause-upload [client-id]
+(defn resume-upload [client-id]
   (println "Pausing:" client-id)
   (let [upload-info ((:uploads @app-state) client-id)
         blob-stream (:blob-stream upload-info)
-        stream      (:stream upload-info)
-        paused?     (:paused? upload-info)]
-    (if paused?
-      (do
-        (.pipe blob-stream stream)
-        (swap! app-state assoc :uploads (merge (:uploads @app-state)
-                                               {client-id (merge upload-info
-                                                                 {:paused? false})})))
-      (do
-        (.unpipe blob-stream)
-        (swap! app-state assoc :uploads (merge (:uploads @app-state)
-                                               {client-id (merge upload-info
-                                                                 {:paused? true})}))))))
+        stream      (:stream upload-info)]
+    (.pipe blob-stream stream)
+    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+                                           {client-id (merge upload-info
+                                                             {:paused? false})}))))
+(defn pause-upload [client-id]
+  (let [upload-info ((:uploads @app-state) client-id)
+        blob-stream (:blob-stream upload-info)
+        stream      (:stream upload-info)]
+    (.unpipe blob-stream)
+    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+                                           {client-id (merge upload-info
+                                                             {:paused? true})}))))
 
 (defn change-track [track-num]
   (.emit socket "change-track" track-num (.v4 js/uuid)))

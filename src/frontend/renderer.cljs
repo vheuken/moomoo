@@ -72,7 +72,9 @@
       (dom/li nil (if (= (.-uploaderid data) (.-id core/socket))
                     (list
                       (dom/button #js {:onClick #(core/cancel-upload (.-id data))}       "CANCEL")
-                      (dom/button #js {:onClick #(core/pause-upload  (.-clientid data))} "PAUSE")))
+                      (if (:paused? ((:uploads @core/app-state) (.-clientid data)))
+                        (dom/button #js {:onClick #(core/resume-upload  (.-clientid data))} "RESUME")
+                        (dom/button #js {:onClick #(core/pause-upload   (.-clientid data))} "PAUSE"))))
                   (((:users @core/app-state) (.-uploaderid data)) "name")
                   " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
                   (.-filename data)))))
