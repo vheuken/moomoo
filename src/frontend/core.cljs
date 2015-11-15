@@ -4,8 +4,8 @@
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
-(defonce default-upload-slots (.getAttribute (. js/document (getElementById "default-upload-slots")) "data"))
-(defonce max-upload-slots (.getAttribute (. js/document (getElementById "max-upload-slots")) "data"))
+(defonce default-upload-slots (js/Number (.getAttribute (. js/document (getElementById "default-upload-slots")) "data")))
+(defonce max-upload-slots (js/Number (.getAttribute (. js/document (getElementById "max-upload-slots")) "data")))
 (defonce app-state (atom {:signed-in? false
                           :messages []
                           :message-received? false
@@ -417,6 +417,10 @@
 (.on socket "track-order-change"
   (fn [track-order]
     (swap! app-state assoc :track-order (js->clj track-order))))
+
+(.on socket "upload-slots-change"
+  (fn [new-upload-slots]
+    (swap! app-state assoc :upload-slots new-upload-slots)))
 
 (.onready js/soundManager
   (fn []

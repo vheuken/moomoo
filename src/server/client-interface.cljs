@@ -3,6 +3,7 @@
             [clojure.string :as string]
             [cognitect.transit :as transit]
             [moomoo.rooms :as rooms]
+            [moomoo.config :as config]
             [moomoo.file-hash :as file-hash]))
 
 (defonce socketio (nodejs/require "socket.io"))
@@ -316,6 +317,14 @@
             (fn [ok?]
               (if ok?
                 (change-track room track-num sound-id))))))))
+
+  (.on socket "change-upload-slots"
+    (fn [new-upload-slots]
+      (println "Received change-upload-slots signal from" (.-id socket)
+               "with value of" new-upload-slots)
+      (if (and (> new-upload-slots 0)
+               (<= new-upload-slots (config/data "max-upload-slots")))
+        (.emit socket "upload-slots-change" new-upload-slots))))
 
   (.on socket "check-hash"
     (fn [file-hash]
