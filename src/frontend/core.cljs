@@ -202,10 +202,14 @@
                                                              {:paused? true})}))))
 
 (defn incr-upload-slots []
-  (println "Decrementing upload slots"))
+  (println "Incrementing upload slots")
+  (.emit socket "change-upload-slots" (+ (:upload-slots @app-state)
+                                         1)))
 
 (defn decr-upload-slots []
-  (println "Decrementing upload slots"))
+  (println "Decrementing upload slots")
+  (.emit socket "change-upload-slots" (- (:upload-slots @app-state)
+                                         1)))
 
 (defn change-track [track-num]
   (.emit socket "change-track" track-num (.v4 js/uuid)))
