@@ -4,8 +4,8 @@
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
-(defonce default-upload-slots 4)
-(defonce default-download-slots 4)
+(defonce default-upload-slots (.getAttribute (. js/document (getElementById "default-upload-slots")) "data"))
+(defonce max-upload-slots (.getAttribute (. js/document (getElementById "max-upload-slots")) "data"))
 (defonce app-state (atom {:signed-in? false
                           :messages []
                           :message-received? false
@@ -21,7 +21,6 @@
                           :looping? false
                           :upload-queue []
                           :upload-slots default-upload-slots
-                          :download-slots default-download-slots
                           :num-of-uploads 0
                           :num-of-downloads 0
                           :file-hashes {}

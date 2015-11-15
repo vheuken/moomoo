@@ -24,7 +24,8 @@
 (.get app "/" #(. %2 (sendFile "public/index.html")))
 
 (.get app "/rooms/:id" #(. %2 (render "room" #js {:roomid (.-id (.-params %1))
-                                                  :maxuploadslots (config/data "max-upload-slots")})))
+                                                  :maxuploadslots (config/data "max-upload-slots")
+                                                  :defaultuploadslots (config/data "default-upload-slots")})))
 
 (defn -main []
   (config/load-file! "config.toml")
