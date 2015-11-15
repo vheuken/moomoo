@@ -362,3 +362,13 @@
                                       core/on-volume-drag-stop))))
 
 (om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
+
+(defn upload-slots [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/input #js {:type "number"
+                      :value (:upload-slots @core/app-state)}))))
+
+
+(om/root upload-slots core/app-state {:target (. js/document (getElementById "upload-slots"))})
