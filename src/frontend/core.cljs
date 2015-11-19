@@ -193,6 +193,7 @@
                                            {client-id (merge upload-info
                                                              {:paused? false})}))))
 (defn pause-upload [client-id]
+  (println "Pausing upload" client-id)
   (let [upload-info ((:uploads @app-state) client-id)
         blob-stream (:blob-stream upload-info)
         stream      (:stream upload-info)]
@@ -423,10 +424,14 @@
     (let [old-upload-slots (:upload-slots @app-state)]
       (swap! app-state assoc :upload-slots new-upload-slots)
       (if (> new-upload-slots old-upload-slots)
-        (let [next-file (last (:upload-queue @app-state))]
-          (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
-          (upload-file next-file)
-        )))))
+        (let [paused-uploads (filter #(:paused? (val %)) (into [] (:uploads @app-state)))]
+          (if (empty? paused-uploads)
+            (let [next-file (last (:upload-queue @app-state))]
+              (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
+              (upload-file next-file))
+            (resume-upload (key (last paused-uploads)))))
+        (let [most-recent-upload-id (last (keys (:uploads @app-state)))]
+          (pause-upload most-recent-upload-id))))))
 
 (.onready js/soundManager
   (fn []
