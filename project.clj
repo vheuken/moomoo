@@ -26,6 +26,7 @@
                        [mhash "2.1.2"]
                        [toml "2.3.0"]
                        [watchr "2.4.13"]
+                       [mmmagic "0.4.1"]
                        [ws "0.8.0"]]}
 
   :plugins [[lein-cljsbuild "1.1.1"]

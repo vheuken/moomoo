@@ -14,6 +14,8 @@
 (defonce fs (nodejs/require "fs"))
 (defonce redis (nodejs/require "redis"))
 (defonce redis-pub-client (.createClient redis))
+(defonce mmm (nodejs/require "mmmagic"))
+(defonce Magic (.-Magic mmm))
 
 (defn initialize! [server]
   (defonce io (.listen socketio server))
@@ -429,37 +431,46 @@
                     (fn []
                       (println "Upload of" original-filename
                                "from" (.-id socket) "is complete!")
-                      (.readFile fs temp-absolute-file-path
-                        (fn [err buf]
-                          (let [file-hash (file-hash/get-hash-from-buffer buf)
-                                absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
-                            (.rename fs temp-absolute-file-path absolute-file-path
-                              (fn []
-                                (file-hash/handle-new-file absolute-file-path file-hash
-                                  (fn [file-hash music-info]
-                                    (rooms/set-music-info file-id
-                                                          file-hash
-                                                          (.-id socket)
-                                  (fn []
-                                    (rooms/get-room-from-user-id (.-id socket)
-                                      (fn [room]
-                                        (rooms/get-track-order room
-                                          (fn [track-order]
-                                            (rooms/get-track-id-hashes room
-                                              (fn [track-id-hashes]
-                                                (.emit (.to io room) "upload-complete"
-                                                                     (clj->js music-info)
-                                                                     track-order
-                                                                     track-id-hashes)))))
-                                        (rooms/is-waiting-to-start? room
-                                          (fn [waiting?]
-                                            (if-not waiting?
-                                              (rooms/has-track-started? room
-                                                (fn [started?]
-                                                  (if-not started?
-                                                    (rooms/get-num-of-tracks room
-                                                      (fn [num-of-tracks]
-                                                        (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))))))))))))))))))))
+                      (let [magic (Magic. (.-MAGIC_MIME_TYPE mmm))]
+                        (.detectFile magic temp-absolute-file-path
+                          (fn [_ mime-type]
+                            (println "\n\n\n\n\n\nMIME TYPE:" mime-type)
+                            (if (or (or (= mime-type "audio/mpeg")
+                                        (= mime-type "audio/x-wav"))
+                                    (and (= mime-type "application/octet-stream")
+                                         (or (= file-extension ".mp3")
+                                             (= file-extension ".wav"))))
+                              (.readFile fs temp-absolute-file-path
+                                (fn [err buf]
+                                  (let [file-hash (file-hash/get-hash-from-buffer buf)
+                                        absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
+                                    (.rename fs temp-absolute-file-path absolute-file-path
+                                      (fn []
+                                        (file-hash/handle-new-file absolute-file-path file-hash
+                                          (fn [file-hash music-info]
+                                            (rooms/set-music-info file-id
+                                                                  file-hash
+                                                                  (.-id socket)
+                                          (fn []
+                                            (rooms/get-room-from-user-id (.-id socket)
+                                              (fn [room]
+                                                (rooms/get-track-order room
+                                                  (fn [track-order]
+                                                    (rooms/get-track-id-hashes room
+                                                      (fn [track-id-hashes]
+                                                        (.emit (.to io room) "upload-complete"
+                                                                             (clj->js music-info)
+                                                                             track-order
+                                                                             track-id-hashes)))))
+                                                (rooms/is-waiting-to-start? room
+                                                  (fn [waiting?]
+                                                    (if-not waiting?
+                                                      (rooms/has-track-started? room
+                                                        (fn [started?]
+                                                          (if-not started?
+                                                            (rooms/get-num-of-tracks room
+                                                              (fn [num-of-tracks]
+                                                                (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))))))))))))))))))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))
