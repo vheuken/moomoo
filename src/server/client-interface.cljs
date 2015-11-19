@@ -301,11 +301,11 @@
       (println "Track order change of track-id:" track-id
                "to track-num:" destination-track-num)
 
-      (rooms/cooldown room "change-track"
-        (fn [ok?]
-          (if ok?
-            (rooms/get-room-from-user-id (.-id socket)
-              (fn [room-id]
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room-id]
+          (rooms/cooldown room-id "track-order-change"
+            (fn [ok?]
+              (if ok?
                 (rooms/change-track-order room-id track-id destination-track-num
                   (fn [new-track-order]
                     (.emit (.to io room-id) "track-order-change" new-track-order))))))))))
