@@ -420,7 +420,13 @@
 
 (.on socket "upload-slots-change"
   (fn [new-upload-slots]
-    (swap! app-state assoc :upload-slots new-upload-slots)))
+    (let [old-upload-slots (:upload-slots @app-state)]
+      (swap! app-state assoc :upload-slots new-upload-slots)
+      (if (> new-upload-slots old-upload-slots)
+        (let [next-file (last (:upload-queue @app-state))]
+          (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
+          (upload-file next-file)
+        )))))
 
 (.onready js/soundManager
   (fn []
