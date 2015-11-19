@@ -15,6 +15,7 @@
   (println "Deleted file: " file-path))
 
 (defn listener [change-type file-path file-current-stat file-previous-stat]
+  (print "FILE STAT" file-current-stat)
   (cond
     (= change-type "create") (new-file file-path)
     (= change-type "delete") (delete-file file-path)))
