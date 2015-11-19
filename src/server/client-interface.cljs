@@ -375,79 +375,87 @@
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size client-id]
       (println (.-id socket) "is uploading" original-filename)
-      (let [file-id (.v4 js-uuid)
-            file-extension (str "." (last (string/split original-filename ".")))
-            temp-filename (subs file-id 0 7)
-            temp-absolute-file-path (str file-upload-directory "/" temp-filename file-extension)
-            redis-sub-client (.createClient redis)]
-        (.set rooms/redis-client (str "track:" file-id ":uploader") (.-id socket))
-        (println (str "Saving" original-filename "as" temp-absolute-file-path))
-        (.pipe stream (.createWriteStream fs temp-absolute-file-path))
 
-        (.subscribe redis-sub-client "cancel-upload")
+      (rooms/get-room-from-user-id (.-id socket)
+        (fn [room]
+          (.incr rooms/redis-client (str "room:" room ":num-of-uploads")
+            (fn [_ upload-num]
+              (let [file-id (.v4 js-uuid)
+                    file-extension (str "." (last (string/split original-filename ".")))
+                    temp-filename (subs file-id 0 7)
+                    temp-absolute-file-path (str file-upload-directory "/" temp-filename file-extension)
+                    redis-sub-client (.createClient redis)]
+                (.set rooms/redis-client (str "track:" file-id ":uploader") (.-id socket)
+                  (fn []
 
-        (.on redis-sub-client "message"
-          (fn [channel message]
-            (println "CHANNEL:" channel)
-            (println "Message:" message)
-            (if (= message file-id)
-              (do
-                (.unpipe stream)
-                (.unlink fs temp-absolute-file-path)))))
+                    (println (str "Saving" original-filename "as" temp-absolute-file-path))
+                    (.pipe stream (.createWriteStream fs temp-absolute-file-path))
 
-        (.on stream "data"
-          (fn [data-chunk]
-            (println "Received data chunk of" original-filename
-                     "from" (.-id socket))
-            (rooms/get-room-from-user-id (.-id socket)
-              (fn [room]
-                (rooms/get-username room (.-id socket)
-                  (fn [username]
-                    (let [bytes-received (aget (.statSync fs temp-absolute-file-path) "size")]
-                      (.emit (.to io room)
-                             "file-upload-info"
-                             #js {:id            file-id
-                                  :uploaderid    (.-id socket)
-                                  :bytesreceived bytes-received
-                                  :totalsize     file-size
-                                  :filename      original-filename
-                                  :clientid      client-id}))))))))
+                    (.subscribe redis-sub-client "cancel-upload")
 
-        (.on stream "end"
-          (fn []
-            (println "Upload of" original-filename
-                     "from" (.-id socket) "is complete!")
-            (.readFile fs temp-absolute-file-path
-              (fn [err buf]
-                (let [file-hash (file-hash/get-hash-from-buffer buf)
-                      absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
-                  (.rename fs temp-absolute-file-path absolute-file-path
+                    (.on redis-sub-client "message"
+                      (fn [channel message]
+                        (println "CHANNEL:" channel)
+                        (println "Message:" message)
+                        (if (= message file-id)
+                          (do
+                            (.unpipe stream)
+                            (.unlink fs temp-absolute-file-path)))))
+
+                  (.on stream "data"
+                    (fn [data-chunk]
+                      (println "Received data chunk of" original-filename
+                               "from" (.-id socket))
+                      (rooms/get-room-from-user-id (.-id socket)
+                        (fn [room]
+                          (rooms/get-username room (.-id socket)
+                            (fn [username]
+                              (let [bytes-received (aget (.statSync fs temp-absolute-file-path) "size")]
+                                (.emit (.to io room)
+                                       "file-upload-info"
+                                       #js {:id            file-id
+                                            :num           upload-num
+                                            :uploaderid    (.-id socket)
+                                            :bytesreceived bytes-received
+                                            :totalsize     file-size
+                                            :filename      original-filename
+                                            :clientid      client-id}))))))))
+
+                  (.on stream "end"
                     (fn []
-                      (file-hash/handle-new-file absolute-file-path file-hash
-                        (fn [file-hash music-info]
-                          (rooms/set-music-info file-id
-                                                file-hash
-                                                (.-id socket)
-                        (fn []
-                          (rooms/get-room-from-user-id (.-id socket)
-                            (fn [room]
-                              (rooms/get-track-order room
-                                (fn [track-order]
-                                  (rooms/get-track-id-hashes room
-                                    (fn [track-id-hashes]
-                                      (.emit (.to io room) "upload-complete"
-                                                           (clj->js music-info)
-                                                           track-order
-                                                           track-id-hashes)))))
-                              (rooms/is-waiting-to-start? room
-                                (fn [waiting?]
-                                  (if-not waiting?
-                                    (rooms/has-track-started? room
-                                      (fn [started?]
-                                        (if-not started?
-                                          (rooms/get-num-of-tracks room
-                                            (fn [num-of-tracks]
-                                              (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))))))))))))))
+                      (println "Upload of" original-filename
+                               "from" (.-id socket) "is complete!")
+                      (.readFile fs temp-absolute-file-path
+                        (fn [err buf]
+                          (let [file-hash (file-hash/get-hash-from-buffer buf)
+                                absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
+                            (.rename fs temp-absolute-file-path absolute-file-path
+                              (fn []
+                                (file-hash/handle-new-file absolute-file-path file-hash
+                                  (fn [file-hash music-info]
+                                    (rooms/set-music-info file-id
+                                                          file-hash
+                                                          (.-id socket)
+                                  (fn []
+                                    (rooms/get-room-from-user-id (.-id socket)
+                                      (fn [room]
+                                        (rooms/get-track-order room
+                                          (fn [track-order]
+                                            (rooms/get-track-id-hashes room
+                                              (fn [track-id-hashes]
+                                                (.emit (.to io room) "upload-complete"
+                                                                     (clj->js music-info)
+                                                                     track-order
+                                                                     track-id-hashes)))))
+                                        (rooms/is-waiting-to-start? room
+                                          (fn [waiting?]
+                                            (if-not waiting?
+                                              (rooms/has-track-started? room
+                                                (fn [started?]
+                                                  (if-not started?
+                                                    (rooms/get-num-of-tracks room
+                                                      (fn [num-of-tracks]
+                                                        (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))))))))))))))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))
