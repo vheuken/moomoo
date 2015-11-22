@@ -25,10 +25,11 @@ if track_num > destination_track_num then
     local n = tonumber(raw_track_order[i])
 
     if n <= track_num and n >= destination_track_num then
-      raw_track_order[i] = tostring(n+1)
+      local new_track_num = n + 1
+      raw_track_order[i] = tostring(new_track_num)
 
       if n == current_track_num then
-        redis.call('set', 'room:' .. room_id .. ':current-track', tostring(n+1))
+        redis.call('set', 'room:' .. room_id .. ':current-track', tostring(new_track_num))
       end
     end
   end
@@ -38,10 +39,11 @@ else
     local n = tonumber(raw_track_order[i])
 
     if n >= track_num and n <= destination_track_num then
-      raw_track_order[i] = tostring(n-1)
+      local new_track_num = n - 1
+      raw_track_order[i] = tostring(new_track_num)
 
       if n == current_track_num then
-        redis.call('set', 'room:' .. room_id .. ':current-track', tostring(n-1))
+        redis.call('set', 'room:' .. room_id .. ':current-track', tostring(new_track_num))
       end
     end
   end
@@ -49,6 +51,10 @@ end
 
 -- set track_id to destination_track_num
 raw_track_order[index_of(raw_track_order, track_id)-1] = tostring(destination_track_num)
+
+if track_num == current_track_num then
+  redis.call('set', 'room:' .. room_id .. ':current-track', tostring(destination_track_num))
+end
 
 redis.call('del', 'room:' .. room_id .. ':track-order')
 
