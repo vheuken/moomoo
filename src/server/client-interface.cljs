@@ -434,12 +434,9 @@
                       (let [magic (Magic. (.-MAGIC_MIME_TYPE mmm))]
                         (.detectFile magic temp-absolute-file-path
                           (fn [_ mime-type]
-                            (println "\n\n\n\n\n\nMIME TYPE:" mime-type)
-                            (if (or (or (= mime-type "audio/mpeg")
-                                        (= mime-type "audio/x-wav"))
+                            (if (or (rooms/is-mime-type-allowed? room mime-type)
                                     (and (= mime-type "application/octet-stream")
-                                         (or (= file-extension ".mp3")
-                                             (= file-extension ".wav"))))
+                                         (rooms/is-file-extension-allowed? room file-extension)))
                               (.readFile fs temp-absolute-file-path
                                 (fn [err buf]
                                   (let [file-hash (file-hash/get-hash-from-buffer buf)

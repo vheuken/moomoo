@@ -486,3 +486,11 @@
        (if (= 1 reply)
          (callback true)
          (callback false)))))
+
+(defn is-mime-type-allowed? [room mime-type]
+  (or (= mime-type "audio/mpeg")
+      (= mime-type "audio/x-wav")))
+
+(defn is-file-extension-allowed? [room file-extension]
+  (or (= file-extension ".mp3")
+      (= file-extension ".wav")))
