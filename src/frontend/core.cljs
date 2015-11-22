@@ -48,6 +48,54 @@
       (.val (js/$ this) "")
       false)))
 
+(defn resume-upload [client-id]
+  (println "Pausing:" client-id)
+  (let [upload-info ((:uploads @app-state) client-id)
+        blob-stream (:blob-stream upload-info)
+        stream      (:stream upload-info)]
+    (.pipe blob-stream stream)
+    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+                                           {client-id (merge upload-info
+                                                             {:paused? false})}))))
+(defn pause-upload [client-id]
+  (println "Pausing upload" client-id)
+  (let [upload-info ((:uploads @app-state) client-id)
+        blob-stream (:blob-stream upload-info)
+        stream      (:stream upload-info)]
+    (.unpipe blob-stream)
+    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+                                           {client-id (merge upload-info
+                                                             {:paused? true})}))))
+
+(defn stop-upload [client-id]
+  (println "Pausing upload" client-id)
+  (let [upload-info ((:uploads @app-state) client-id)
+        blob-stream (:blob-stream upload-info)
+        stream      (:stream upload-info)]
+    (.unpipe blob-stream)
+    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+                                           {client-id (merge upload-info
+                                                             {:stopped? true})}))))
+
+(defn start-upload [client-id]
+  (println "Pausing:" client-id)
+  (let [upload-info ((:uploads @app-state) client-id)
+        blob-stream (:blob-stream upload-info)
+        stream      (:stream upload-info)]
+    (.pipe blob-stream stream)
+    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+                                           {client-id (merge upload-info
+                                                             {:stopped? false})}))))
+(defn start-next-upload! []
+  (let [stopped-uploads (filter #(:stopped? (val %)) (into [] (:uploads @app-state)))]
+    (if (empty? stopped-uploads)
+      (let [next-file (last (:upload-queue @app-state))]
+        (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
+        next-file)
+      (do
+        (start-upload (key (last stopped-uploads)))
+        nil))))
+
 (defn upload-file [file]
   (swap! app-state assoc :num-of-uploads (+ 1 (:num-of-uploads @app-state)))
 
@@ -60,7 +108,8 @@
     (swap! app-state assoc :uploads (merge (:uploads @app-state)
                                            {client-id {:blob-stream blob-stream
                                                        :stream      stream
-                                                       :paused?     false}}))
+                                                       :paused?     false
+                                                       :stopped?    false}}))
 
     (.emit (js/ss socket) "file-upload" stream
                                         (.-name file)
@@ -72,8 +121,9 @@
       (fn []
         (println "Upload complete: " (.-name file))
         (swap! app-state assoc :num-of-uploads (- (:num-of-uploads @app-state) 1))
-        (if-not (empty? (:upload-queue @app-state))
-          (let [next-file (last (:upload-queue @app-state))]
+
+        (let [next-file (start-next-upload!)]
+          (if-not (nil? next-file)
             (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
             (if-not (= next-file file)
               (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
@@ -182,25 +232,6 @@
 
 (defn cancel-upload [id]
   (.emit socket "cancel-upload" id))
-
-(defn resume-upload [client-id]
-  (println "Pausing:" client-id)
-  (let [upload-info ((:uploads @app-state) client-id)
-        blob-stream (:blob-stream upload-info)
-        stream      (:stream upload-info)]
-    (.pipe blob-stream stream)
-    (swap! app-state assoc :uploads (merge (:uploads @app-state)
-                                           {client-id (merge upload-info
-                                                             {:paused? false})}))))
-(defn pause-upload [client-id]
-  (println "Pausing upload" client-id)
-  (let [upload-info ((:uploads @app-state) client-id)
-        blob-stream (:blob-stream upload-info)
-        stream      (:stream upload-info)]
-    (.unpipe blob-stream)
-    (swap! app-state assoc :uploads (merge (:uploads @app-state)
-                                           {client-id (merge upload-info
-                                                             {:paused? true})}))))
 
 (defn incr-upload-slots []
   (println "Incrementing upload slots")
@@ -421,17 +452,16 @@
 
 (.on socket "upload-slots-change"
   (fn [new-upload-slots]
-    (let [old-upload-slots (:upload-slots @app-state)]
+    (let [old-upload-slots (:num-of-uploads @app-state)]
       (swap! app-state assoc :upload-slots new-upload-slots)
-      (if (> new-upload-slots old-upload-slots)
-        (let [paused-uploads (filter #(:paused? (val %)) (into [] (:uploads @app-state)))]
-          (if (empty? paused-uploads)
-            (let [next-file (last (:upload-queue @app-state))]
-              (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
-              (upload-file next-file))
-            (resume-upload (key (last paused-uploads)))))
-        (let [most-recent-upload-id (last (keys (:uploads @app-state)))]
-          (pause-upload most-recent-upload-id))))))
+      (cond
+        (> new-upload-slots old-upload-slots)
+          (let [next-file (start-next-upload!)]
+            (if-not (nil? next-file)
+              (upload-file next-file)))
+        (< new-upload-slots old-upload-slots)
+          (let [most-recent-upload-id (last (keys (:uploads @app-state)))]
+            (stop-upload most-recent-upload-id))))))
 
 (.onready js/soundManager
   (fn []
