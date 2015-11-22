@@ -2,6 +2,7 @@
   (:require [cljs.nodejs :as nodejs]
             [cljs.reader :as reader]
             [clojure.string :as string]
+            [moomoo.config :as config]
             [cognitect.transit :as transit]))
 
 (defonce fs (nodejs/require "fs"))
@@ -488,9 +489,13 @@
          (callback false)))))
 
 (defn is-mime-type-allowed? [room mime-type]
-  (or (= mime-type "audio/mpeg")
-      (= mime-type "audio/x-wav")))
+  (if (nil? (get ((config/data "rooms") room) "allowed-mime-types"))
+    (or (= mime-type "audio/mpeg")
+        (= mime-type "audio/x-wav"))
+    true))
 
 (defn is-file-extension-allowed? [room file-extension]
-  (or (= file-extension ".mp3")
-      (= file-extension ".wav")))
+  (if (nil? (get ((config/data "rooms") room) "allowed-file-extensions"))
+    (or (= file-extension ".mp3")
+        (= file-extension ".wav"))
+    true))

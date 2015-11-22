@@ -2,3 +2,8 @@ music-watch-dirs = ["public/servermusic"]
 
 max-upload-slots = 4
 default-upload-slots = 2
+
+[rooms]
+  [rooms.testroom]
+    allowed-file-extensions = [".mp3", ".wav", ".flac"]
+    allowed-mime-types = ["audio/mpeg", "audio/x-wav", "audio/flac"]
