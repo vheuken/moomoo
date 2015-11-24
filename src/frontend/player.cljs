@@ -43,7 +43,7 @@
   (.resume (:current-sound @app-state))
   (swap! app-state assoc :paused? false))
 
-(defn play-track [sound-url sound-id position on-finish]
+(defn play-track! [sound-url sound-id position on-finish]
   (println "Sound URL to play:" sound-url)
   (swap! app-state assoc :on-finish on-finish)
   (swap! app-state assoc :current-sound-id sound-id)

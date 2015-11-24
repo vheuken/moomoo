@@ -286,66 +286,6 @@
           (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
             (upload-file next-file)))))))
 
-(.on socket "start-track"
-  (fn [file-url position]
-    (println "Starting current track at position: " position)
-    (println "WAT" file-url)
-    (let [file-url (str (first (string/split (.-href (.-location js/window))
-                                                              #"/rooms"))
-                        file-url)]
-      (player/play-track file-url
-                         (:current-sound-id @app-state)
-                         position
-                         on-finish))))
-
-(.on socket "track-change"
-  (fn [track-id sound-id]
-    (println "Received track-change signal:"
-             "track-id:" track-id
-             "sound-id:" sound-id)
-    (let [last-current-track-id (:current-track-id @app-state)
-          last-current-sound-id (:current-sound-id @app-state)]
-      (swap! app-state assoc :current-track-id track-id)
-      (swap! app-state assoc :current-sound-id sound-id)
-
-      (if-not (nil? last-current-sound-id)
-        (player/destroy-track last-current-sound-id)))
-
-      (.emit socket "ready-to-start" sound-id)))
-
-(.on socket "hotjoin-music-info"
-  (fn [room-track-id-map
-       room-music-info
-       track-order
-       current-track-id
-       current-sound-id
-       paused?]
-    (println "Received room state:"
-             "room-music-info:" room-music-info
-             "track-order:" track-order
-             "current-track-id:" current-track-id
-             "current-sound-id:" current-sound-id
-             "track-id-hashes:" room-track-id-map)
-
-    (swap! app-state assoc :track-id-hashes (js->clj room-track-id-map))
-    (swap! app-state assoc :track-order (js->clj track-order))
-    (swap! app-state assoc :music-info (vec (map #(clj->js %1) (js->clj room-music-info))))
-
-    (swap! app-state assoc :current-track-id current-track-id)
-    (swap! app-state assoc :current-sound-id current-sound-id)
-
-    (if paused?
-      (player/pause!))
-
-    (if-not (nil? current-sound-id)
-      (.emit socket "ready-to-start" current-sound-id))))
-
-(.on socket "set-loop"
-  (fn [looping?]
-    (println "Received set-loop signal with looping?:" looping?)
-    (swap! app-state assoc :looping? looping?)))
-
-
 (defn clear-tracks! []
   (println "Clearing tracks!")
   (player/destroy-track (:current-sound-id @app-state))
@@ -355,19 +295,18 @@
   (swap! app-state assoc :current-track-id nil)
   (swap! app-state assoc :current-sound-id nil))
 
-(.on socket "delete-track"
-  (fn [track-id]
-    (println "Received delete-track signal:" track-id)
-    (swap! app-state assoc :track-id-hashes (dissoc (:track-id-hashes @app-state) track-id))
-    (swap! app-state assoc :track-order (vec (remove #(= track-id %1) (:track-order @app-state))))
+(defn delete-track! [track-id]
+  (println "Received delete-track signal:" track-id)
+  (swap! app-state assoc :track-id-hashes (dissoc (:track-id-hashes @app-state) track-id))
+  (swap! app-state assoc :track-order (vec (remove #(= track-id %1) (:track-order @app-state))))
 
-    (if (= track-id (:current-track-id @app-state))
-      (do
-        (print "CURRENT TRACK DELETED!")
-        (player/destroy-track (:current-sound-id @app-state))
-        (swap! app-state assoc :current-track-id nil)
-        (swap! app-state assoc :current-sound-id nil)
-        (.emit socket "track-deleted")))))
+  (if (= track-id (:current-track-id @app-state))
+    (do
+      (print "CURRENT TRACK DELETED!")
+      (player/destroy-track (:current-sound-id @app-state))
+      (swap! app-state assoc :current-track-id nil)
+      (swap! app-state assoc :current-sound-id nil)
+      (.emit socket "track-deleted"))))
 
 (.on socket "hash-found"
   (fn [file-hash]
