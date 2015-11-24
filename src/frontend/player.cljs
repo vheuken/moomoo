@@ -33,13 +33,13 @@
           (swap! app-state assoc :tracks-to-delete
             (vec (remove #(= (.-id sound) %) (:tracks-to-delete @app-state)))))))))
 
-(defn pause []
+(defn pause! []
   (println "Pausing current sound!")
   (swap! app-state assoc :paused? true)
   (if-not (nil? (:current-sound @app-state))
     (.pause (:current-sound @app-state))))
 
-(defn resume []
+(defn resume! []
   (.resume (:current-sound @app-state))
   (swap! app-state assoc :paused? false))
 
@@ -80,7 +80,7 @@
     (swap! app-state assoc :current-sound-id nil)
     (swap! app-state assoc :current-sound nil)))
 
-(defn set-position [position]
+(defn set-position! [position]
   (println "Setting sound position to: " position)
   (if (= 0 (.-playState (:current-sound @app-state)))
     (.play (:current-sound @app-state)

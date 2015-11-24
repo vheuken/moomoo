@@ -211,7 +211,7 @@
   (keep-indexed #(when (pred %2) %1) coll))
 
 (defn pause []
-  (player/pause)
+  (player/pause!)
   (println "Sending pause signal")
   (.emit socket "pause" (player/get-position)))
 
@@ -268,35 +268,6 @@
   (println "Sending track-complete signal")
   (.emit socket "track-complete"))
 
-(.on socket "sign-in-success"
-  (fn []
-    (println "Successfully signed in!")
-    (swap! app-state assoc :signed-in? true)))
-
-(.on socket "chat-message"
-  (fn [message]
-    (println "Received chat-message signal:" message)
-    (swap! app-state assoc :messages (conj (:messages @app-state) message))
-    (swap! app-state assoc :message-received? true)))
-
-(.on socket "users-list"
-  (fn [users]
-    (println "Received users-list signal: " users)
-    (let [users (js->clj users)]
-      (println "USERS:" users)
-      (swap! app-state assoc :users users))))
-
-(.on socket "file-upload-info"
-  (fn [file-upload-info]
-    (println "Received file-upload-info signal: " file-upload-info)
-
-    (if (= (.-totalsize file-upload-info) (.-bytesreceived file-upload-info))
-      (swap! app-state assoc :current-uploads-info
-        (dissoc (:current-uploads-info @app-state) (.-id file-upload-info)))
-      (swap! app-state assoc :current-uploads-info
-        (merge (:current-uploads-info @app-state)
-          {(.-id file-upload-info) file-upload-info})))))
-
 (.on socket "upload-complete"
   (fn [music-info track-order track-id-hashes client-id]
     (println "Received upload-complete signal:"
@@ -314,8 +285,6 @@
           (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
           (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
             (upload-file next-file)))))))
-
-
 
 (.on socket "start-track"
   (fn [file-url position]
@@ -344,23 +313,6 @@
 
       (.emit socket "ready-to-start" sound-id)))
 
-
-(.on socket "pause"
-  (fn [position]
-    (println "Received pause signal with position:" position)
-    (player/pause)
-    (player/set-position position)))
-
-(.on socket "resume"
-  (fn []
-    (println "Received resume signal")
-    (player/resume)))
-
-(.on socket "position-change"
-  (fn [position]
-    (println "Received position-change signal: " position)
-    (player/set-position position)))
-
 (.on socket "hotjoin-music-info"
   (fn [room-track-id-map
        room-music-info
@@ -383,7 +335,7 @@
     (swap! app-state assoc :current-sound-id current-sound-id)
 
     (if paused?
-      (player/pause))
+      (player/pause!))
 
     (if-not (nil? current-sound-id)
       (.emit socket "ready-to-start" current-sound-id))))
@@ -393,15 +345,15 @@
     (println "Received set-loop signal with looping?:" looping?)
     (swap! app-state assoc :looping? looping?)))
 
-(.on socket "clear-songs"
-  (fn []
-    (println "Received clear-songs signal")
-    (player/destroy-track (:current-sound-id @app-state))
-    (swap! app-state assoc :track-id-hashes {})
-    (swap! app-state assoc :track-order [])
-    (swap! app-state assoc :music-info [])
-    (swap! app-state assoc :current-track-id nil)
-    (swap! app-state assoc :current-sound-id nil)))
+
+(defn clear-tracks! []
+  (println "Clearing tracks!")
+  (player/destroy-track (:current-sound-id @app-state))
+  (swap! app-state assoc :track-id-hashes {})
+  (swap! app-state assoc :track-order [])
+  (swap! app-state assoc :music-info [])
+  (swap! app-state assoc :current-track-id nil)
+  (swap! app-state assoc :current-sound-id nil))
 
 (.on socket "delete-track"
   (fn [track-id]
