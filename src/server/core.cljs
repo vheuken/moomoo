@@ -15,7 +15,8 @@
 (defonce redis-client (.createClient (nodejs/require "redis")))
 (defonce util (nodejs/require "util"))
 
-(client-interface/initialize! server)
+(client-interface/initialize! server #js {"heartbeat interval" 5
+                                          "heartbeat timeout"  30})
 
 (.set app "views" "src/frontend/views")
 (.set app "view engine" "jade")

@@ -17,8 +17,8 @@
 (defonce mmm (nodejs/require "mmmagic"))
 (defonce Magic (.-Magic mmm))
 
-(defn initialize! [server]
-  (defonce io (.listen socketio server))
+(defn initialize! [server options]
+  (defonce io (.listen socketio server options))
   (.adapter io (socketio-redis #js {:host "localhost" :port 6379})))
 
 (defn handle-hotjoin [socket room-id]
