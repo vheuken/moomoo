@@ -458,7 +458,8 @@
                                                         (.emit (.to io room) "upload-complete"
                                                                              (clj->js music-info)
                                                                              track-order
-                                                                             track-id-hashes)))))
+                                                                             track-id-hashes
+                                                                             client-id)))))
                                                 (rooms/is-waiting-to-start? room
                                                   (fn [waiting?]
                                                     (if-not waiting?

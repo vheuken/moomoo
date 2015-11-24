@@ -120,14 +120,7 @@
     (.on blob-stream "end"
       (fn []
         (println "Upload complete: " (.-name file))
-        (swap! app-state assoc :num-of-uploads (- (:num-of-uploads @app-state) 1))
-
-        (let [next-file (start-next-upload!)]
-          (if-not (nil? next-file)
-            (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
-            (if-not (= next-file file)
-              (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
-                (upload-file next-file)))))))))
+        (swap! app-state assoc :num-of-uploads (- (:num-of-uploads @app-state) 1))))))
 
 (defn check-hash [file]
   (js/md5File file
@@ -305,7 +298,7 @@
           {(.-id file-upload-info) file-upload-info})))))
 
 (.on socket "upload-complete"
-  (fn [music-info track-order track-id-hashes]
+  (fn [music-info track-order track-id-hashes client-id]
     (println "Received upload-complete signal:"
              "music-info:" music-info
              "track-order:" track-order)
@@ -313,7 +306,16 @@
       (conj (:music-info @app-state) music-info))
 
     (swap! app-state assoc :track-id-hashes (js->clj track-id-hashes))
-    (swap! app-state assoc :track-order (js->clj track-order))))
+    (swap! app-state assoc :track-order (js->clj track-order))
+
+    (if-not (empty? (filter #{client-id} (keys (:uploads @app-state))))
+      (let [next-file (start-next-upload!)]
+        (if-not (nil? next-file)
+          (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
+          (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
+            (upload-file next-file)))))))
+
+
 
 (.on socket "start-track"
   (fn [file-url position]
