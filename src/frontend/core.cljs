@@ -1,30 +1,12 @@
 (ns moomoo-frontend.core
   (:require [clojure.string :as string]
+            [moomoo-frontend.app-state :as app-state]
             [moomoo-frontend.player :as player]))
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
 (defonce default-upload-slots (js/Number (.getAttribute (. js/document (getElementById "default-upload-slots")) "data")))
 (defonce max-upload-slots (js/Number (.getAttribute (. js/document (getElementById "max-upload-slots")) "data")))
-(defonce app-state (atom {:signed-in? false
-                          :messages []
-                          :message-received? false
-                          :users {}
-                          :current-uploads-info {}
-                          :track-order []
-                          :track-id-hashes {}
-                          :music-info []
-                          :is-file-downloading? false
-                          :current-track-id nil
-                          :current-sound-id nil
-                          :ball-being-dragged? false
-                          :looping? false
-                          :upload-queue []
-                          :upload-slots default-upload-slots
-                          :num-of-uploads 0
-                          :num-of-downloads 0
-                          :file-hashes {}
-                          :uploads {}}))
 
 (enable-console-print!)
 
@@ -50,54 +32,54 @@
 
 (defn resume-upload [client-id]
   (println "Pausing:" client-id)
-  (let [upload-info ((:uploads @app-state) client-id)
+  (let [upload-info ((:uploads @app-state/app-state) client-id)
         blob-stream (:blob-stream upload-info)
         stream      (:stream upload-info)]
     (.pipe blob-stream stream)
-    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+    (swap! app-state/app-state assoc :uploads (merge (:uploads @app-state/app-state)
                                            {client-id (merge upload-info
                                                              {:paused? false})}))))
 (defn pause-upload [client-id]
   (println "Pausing upload" client-id)
-  (let [upload-info ((:uploads @app-state) client-id)
+  (let [upload-info ((:uploads @app-state/app-state) client-id)
         blob-stream (:blob-stream upload-info)
         stream      (:stream upload-info)]
     (.unpipe blob-stream)
-    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+    (swap! app-state/app-state assoc :uploads (merge (:uploads @app-state/app-state)
                                            {client-id (merge upload-info
                                                              {:paused? true})}))))
 
 (defn stop-upload [client-id]
   (println "Pausing upload" client-id)
-  (let [upload-info ((:uploads @app-state) client-id)
+  (let [upload-info ((:uploads @app-state/app-state) client-id)
         blob-stream (:blob-stream upload-info)
         stream      (:stream upload-info)]
     (.unpipe blob-stream)
-    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+    (swap! app-state/app-state assoc :uploads (merge (:uploads @app-state/app-state)
                                            {client-id (merge upload-info
                                                              {:stopped? true})}))))
 
 (defn start-upload [client-id]
   (println "Pausing:" client-id)
-  (let [upload-info ((:uploads @app-state) client-id)
+  (let [upload-info ((:uploads @app-state/app-state) client-id)
         blob-stream (:blob-stream upload-info)
         stream      (:stream upload-info)]
     (.pipe blob-stream stream)
-    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+    (swap! app-state/app-state assoc :uploads (merge (:uploads @app-state/app-state)
                                            {client-id (merge upload-info
                                                              {:stopped? false})}))))
 (defn start-next-upload! []
-  (let [stopped-uploads (filter #(:stopped? (val %)) (into [] (:uploads @app-state)))]
+  (let [stopped-uploads (filter #(:stopped? (val %)) (into [] (:uploads @app-state/app-state)))]
     (if (empty? stopped-uploads)
-      (let [next-file (last (:upload-queue @app-state))]
-        (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
+      (let [next-file (last (:upload-queue @app-state/app-state))]
+        (swap! app-state/app-state assoc :upload-queue (pop (:upload-queue @app-state/app-state)))
         next-file)
       (do
         (start-upload (key (last stopped-uploads)))
         nil))))
 
 (defn upload-file [file]
-  (swap! app-state assoc :num-of-uploads (+ 1 (:num-of-uploads @app-state)))
+  (swap! app-state/app-state assoc :num-of-uploads (+ 1 (:num-of-uploads @app-state/app-state)))
 
   (let [stream (.createStream js/ss)
         blob-stream (.createBlobReadStream js/ss file)
@@ -105,7 +87,7 @@
     (println "File uploading: " (.-name file))
     (println "File size: " (.-size file))
 
-    (swap! app-state assoc :uploads (merge (:uploads @app-state)
+    (swap! app-state/app-state assoc :uploads (merge (:uploads @app-state/app-state)
                                            {client-id {:blob-stream blob-stream
                                                        :stream      stream
                                                        :paused?     false
@@ -120,21 +102,21 @@
     (.on blob-stream "end"
       (fn []
         (println "Upload complete: " (.-name file))
-        (swap! app-state assoc :num-of-uploads (- (:num-of-uploads @app-state) 1))))))
+        (swap! app-state/app-state assoc :num-of-uploads (- (:num-of-uploads @app-state/app-state) 1))))))
 
 (defn check-hash [file]
   (js/md5File file
     (fn [file-hash]
-      (swap! app-state assoc :file-hashes (merge {file-hash file}
-                                                 (:file-hashes @app-state)))
+      (swap! app-state/app-state assoc :file-hashes (merge {file-hash file}
+                                                 (:file-hashes @app-state/app-state)))
       (.emit socket "check-hash" file-hash))))
 
 (.change (js/$ "#file-upload")
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)]
-      (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
+      (if (> (:upload-slots @app-state/app-state) (:num-of-uploads @app-state/app-state))
         (check-hash file)
-        (swap! app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state))))))))
+        (swap! app-state/app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state/app-state))))))))
 
 (.click (js/$ "#clear-songs-button")
   (fn [e]
@@ -148,7 +130,7 @@
   (.emit socket "delete-track" track-id))
 
 (defn toggle-loop []
-  (if (:looping? @app-state)
+  (if (:looping? @app-state/app-state)
     (.emit socket "stop-looping")
     (.emit socket "start-looping")))
 
@@ -164,10 +146,10 @@
   (println "Offset-top:" offset-top)
   (let [top-offsets (map (fn [id]
                            (.-top (.offset (js/$ (str "#" id)))))
-                         (:track-order @app-state))
+                         (:track-order @app-state/app-state))
         destination (ffirst (filter #(not (last %1)) (map-indexed vector (map #(>= offset-top %1) top-offsets))))]
     (if (nil? destination)
-      (- (count (:track-order @app-state)) 1)
+      (- (count (:track-order @app-state/app-state)) 1)
       destination)))
 
 (defn on-track-drag-stop [event ui]
@@ -201,11 +183,11 @@
 
 (defn get-music-info-from-id [track-id]
   (first (filter #(= (.-filehash %1)
-                     (first (get (:track-id-hashes @app-state) track-id)))
-                 (:music-info @app-state))))
+                     (first (get (:track-id-hashes @app-state/app-state) track-id)))
+                 (:music-info @app-state/app-state))))
 
 (defn get-uploader-from-id [track-id]
-  (last (get (:track-id-hashes @app-state) track-id)))
+  (last (get (:track-id-hashes @app-state/app-state) track-id)))
 
 (defn indices [pred coll]
   (keep-indexed #(when (pred %2) %1) coll))
@@ -220,20 +202,20 @@
   (.emit socket "resume"))
 
 (defn get-current-track-num []
-  (first (indices #(= %1 (:current-track-id @app-state))
-                  (:track-order @app-state))))
+  (first (indices #(= %1 (:current-track-id @app-state/app-state))
+                  (:track-order @app-state/app-state))))
 
 (defn cancel-upload [id]
   (.emit socket "cancel-upload" id))
 
 (defn incr-upload-slots []
   (println "Incrementing upload slots")
-  (.emit socket "change-upload-slots" (+ (:upload-slots @app-state)
+  (.emit socket "change-upload-slots" (+ (:upload-slots @app-state/app-state)
                                          1)))
 
 (defn decr-upload-slots []
   (println "Decrementing upload slots")
-  (.emit socket "change-upload-slots" (- (:upload-slots @app-state)
+  (.emit socket "change-upload-slots" (- (:upload-slots @app-state/app-state)
                                          1)))
 
 (defn change-track [track-num]
@@ -252,7 +234,7 @@
 (defn next-track []
   (let [track-num (+ (get-current-track-num) 1)
         sound-id (.v4 js/uuid)]
-    (if (< track-num (count (:music-info @app-state)))
+    (if (< track-num (count (:music-info @app-state/app-state)))
       (do
         (println "Sending change-track signal."
                  "Track num:" track-num
@@ -273,87 +255,87 @@
     (println "Received upload-complete signal:"
              "music-info:" music-info
              "track-order:" track-order)
-    (swap! app-state assoc :music-info
-      (conj (:music-info @app-state) music-info))
+    (swap! app-state/app-state assoc :music-info
+      (conj (:music-info @app-state/app-state) music-info))
 
-    (swap! app-state assoc :track-id-hashes (js->clj track-id-hashes))
-    (swap! app-state assoc :track-order (js->clj track-order))
+    (swap! app-state/app-state assoc :track-id-hashes (js->clj track-id-hashes))
+    (swap! app-state/app-state assoc :track-order (js->clj track-order))
 
-    (if-not (empty? (filter #{client-id} (keys (:uploads @app-state))))
+    (if-not (empty? (filter #{client-id} (keys (:uploads @app-state/app-state))))
       (let [next-file (start-next-upload!)]
         (if-not (nil? next-file)
-          (swap! app-state assoc :upload-queue (pop (:upload-queue @app-state)))
-          (if (> (:upload-slots @app-state) (:num-of-uploads @app-state))
+          (swap! app-state/app-state assoc :upload-queue (pop (:upload-queue @app-state/app-state)))
+          (if (> (:upload-slots @app-state/app-state) (:num-of-uploads @app-state/app-state))
             (upload-file next-file)))))))
 
 (defn clear-tracks! []
   (println "Clearing tracks!")
-  (player/destroy-track (:current-sound-id @app-state))
-  (swap! app-state assoc :track-id-hashes {})
-  (swap! app-state assoc :track-order [])
-  (swap! app-state assoc :music-info [])
-  (swap! app-state assoc :current-track-id nil)
-  (swap! app-state assoc :current-sound-id nil))
+  (player/destroy-track (:current-sound-id @app-state/app-state))
+  (swap! app-state/app-state assoc :track-id-hashes {})
+  (swap! app-state/app-state assoc :track-order [])
+  (swap! app-state/app-state assoc :music-info [])
+  (swap! app-state/app-state assoc :current-track-id nil)
+  (swap! app-state/app-state assoc :current-sound-id nil))
 
 (defn delete-track! [track-id]
   (println "Received delete-track signal:" track-id)
-  (swap! app-state assoc :track-id-hashes (dissoc (:track-id-hashes @app-state) track-id))
-  (swap! app-state assoc :track-order (vec (remove #(= track-id %1) (:track-order @app-state))))
+  (swap! app-state/app-state assoc :track-id-hashes (dissoc (:track-id-hashes @app-state/app-state) track-id))
+  (swap! app-state/app-state assoc :track-order (vec (remove #(= track-id %1) (:track-order @app-state/app-state))))
 
-  (if (= track-id (:current-track-id @app-state))
+  (if (= track-id (:current-track-id @app-state/app-state))
     (do
       (print "CURRENT TRACK DELETED!")
-      (player/destroy-track (:current-sound-id @app-state))
-      (swap! app-state assoc :current-track-id nil)
-      (swap! app-state assoc :current-sound-id nil)
+      (player/destroy-track (:current-sound-id @app-state/app-state))
+      (swap! app-state/app-state assoc :current-track-id nil)
+      (swap! app-state/app-state assoc :current-sound-id nil)
       (.emit socket "track-deleted"))))
 
 (.on socket "hash-found"
   (fn [file-hash]
     (println "File exists on server. Hash: " file-hash)
-    (swap! app-state assoc :file-hashes (dissoc (:file-hashes @app-state) file-hash))))
+    (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))))
 
 (.on socket "hash-not-found"
   (fn [file-hash]
     (println "File does not exist on server. Will upload. Hash: " file-hash)
-    (let [file (get (:file-hashes @app-state) file-hash)]
-      (swap! app-state assoc :file-hashes (dissoc (:file-hashes @app-state) file-hash))
+    (let [file (get (:file-hashes @app-state/app-state) file-hash)]
+      (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))
       (upload-file file))))
 
 (.on socket "user-muted"
   (fn [socket-id]
     (println "Received mute-user signal for" socket-id)
-    (swap! app-state assoc :users (merge (:users @app-state)
-                                         {socket-id (merge (get (:users @app-state) socket-id)
+    (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
+                                         {socket-id (merge (get (:users @app-state/app-state) socket-id)
                                                            {"muted" true})}))))
 
 (.on socket "user-unmuted"
   (fn [socket-id]
     (println "Received umute-user signal for" socket-id)
-    (swap! app-state assoc :users (merge (:users @app-state)
-                                         {socket-id (merge (get (:users @app-state) socket-id)
+    (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
+                                         {socket-id (merge (get (:users @app-state/app-state) socket-id)
                                                            {"muted" false})}))))
 
 (.on socket "upload-cancelled"
   (fn [id]
-    (swap! app-state assoc :current-uploads-info
-      (dissoc (:current-uploads-info @app-state) id))))
+    (swap! app-state/app-state assoc :current-uploads-info
+      (dissoc (:current-uploads-info @app-state/app-state) id))))
 
 (.on socket "track-order-change"
   (fn [track-order]
-    (swap! app-state assoc :track-order (js->clj track-order))))
+    (swap! app-state/app-state assoc :track-order (js->clj track-order))))
 
 (.on socket "upload-slots-change"
   (fn [new-upload-slots]
-    (let [old-upload-slots (:num-of-uploads @app-state)]
-      (swap! app-state assoc :upload-slots new-upload-slots)
+    (let [old-upload-slots (:num-of-uploads @app-state/app-state)]
+      (swap! app-state/app-state assoc :upload-slots new-upload-slots)
       (cond
         (> new-upload-slots old-upload-slots)
           (let [next-file (start-next-upload!)]
             (if-not (nil? next-file)
               (upload-file next-file)))
         (< new-upload-slots old-upload-slots)
-          (let [most-recent-upload-id (last (keys (:uploads @app-state)))]
+          (let [most-recent-upload-id (last (keys (:uploads @app-state/app-state)))]
             (stop-upload most-recent-upload-id))))))
 
 (.onready js/soundManager

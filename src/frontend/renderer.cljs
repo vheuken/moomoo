@@ -3,6 +3,7 @@
             [om.core :as om  :include-macros true]
             [om.dom  :as dom :include-macros true]
             [moomoo-frontend.core :as core]
+            [moomoo-frontend.app-state :as app-state]
             [moomoo-frontend.player :as player]))
 
 ; Temporary; remove when we get correct button grey images
@@ -38,10 +39,10 @@
         (om/build-all message-view (:messages data))))
     om/IDidUpdate
     (did-update [_ _ _]
-      (if (:message-received? @core/app-state)
+      (if (:message-received? @app-state/app-state)
         (let [div (js/$ "#messages-window")]
           (.scrollTop div (.prop div "scrollHeight"))
-          (swap! core/app-state assoc :message-received? false))))))
+          (swap! app-state/app-state assoc :message-received? false))))))
 
 (defn username-form [data owner]
   (reify
@@ -72,13 +73,13 @@
       (dom/li nil (if (= (.-uploaderid data) (.-id core/socket))
                     (list
                       (dom/button #js {:onClick #(core/cancel-upload (.-id data))}       "CANCEL")
-                      (if (and (:paused? ((:uploads @core/app-state) (.-clientid data)))
-                               (not (:stopped? ((:uploads @core/app-state) (.-clientid data)))))
+                      (if (and (:paused? ((:uploads @app-state/app-state) (.-clientid data)))
+                               (not (:stopped? ((:uploads @app-state/app-state) (.-clientid data)))))
                         (dom/button #js {:onClick #(core/resume-upload  (.-clientid data))} "RESUME")
                         (dom/button #js {:onClick #(core/pause-upload   (.-clientid data))} "PAUSE"))))
-                  (if (:stopped? ((:uploads @core/app-state) (.-clientid data)))
+                  (if (:stopped? ((:uploads @app-state/app-state) (.-clientid data)))
                     "STOPPED!")
-                  (((:users @core/app-state) (.-uploaderid data)) "name")
+                  (((:users @app-state/app-state) (.-uploaderid data)) "name")
                   " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
                   (.-filename data)))))
 
@@ -117,19 +118,19 @@
               (dom/div nil (.-album tags))
               (dom/div nil (.-artist tags)))))))))
 
-(om/root users-list-view core/app-state {:target (. js/document (getElementById "userslist"))})
-(om/root messages-view core/app-state {:target (. js/document (getElementById "messages-window"))})
-(om/root users-upload-progress-view core/app-state {:target (. js/document (getElementById "users-upload-progress"))})
-(om/root username-form core/app-state {:target (. js/document (getElementById "username-form"))})
-(om/root message-form core/app-state {:target (. js/document (getElementById "message-box"))})
-(om/root current-track-tags-view core/app-state {:target (. js/document (getElementById "current-track-tags"))})
+(om/root users-list-view app-state/app-state {:target (. js/document (getElementById "userslist"))})
+(om/root messages-view app-state/app-state {:target (. js/document (getElementById "messages-window"))})
+(om/root users-upload-progress-view app-state/app-state {:target (. js/document (getElementById "users-upload-progress"))})
+(om/root username-form app-state/app-state {:target (. js/document (getElementById "username-form"))})
+(om/root message-form app-state/app-state {:target (. js/document (getElementById "message-box"))})
+(om/root current-track-tags-view app-state/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
 (defn track-view [data owner]
   (defn update-state []
     (let [state (om/get-state owner)
           playing? (:playing? state)
           track-id data
-          current-track-id (:current-track-id @core/app-state)]
+          current-track-id (:current-track-id @app-state/app-state)]
       (if (= track-id current-track-id)
         (if-not playing?
           (om/set-state! owner {:playing? true}))
@@ -157,7 +158,7 @@
             artist (.-artist tags)
             album (.-album tags)
             username (core/get-uploader-from-id track-id)
-            current-track-id (:current-track-id @core/app-state)
+            current-track-id (:current-track-id @app-state/app-state)
             content (list
                       (dom/span #js {:className "track-title"
                                      :title title}
@@ -177,12 +178,12 @@
           (dom/div #js {:id track-id
                         :className "track-view"
                         :onDoubleClick (fn []
-                                         (core/change-track (first (core/indices #(= %1 track-id) (:track-order @core/app-state)))))
+                                         (core/change-track (first (core/indices #(= %1 track-id) (:track-order @app-state/app-state)))))
                         :style #js {:backgroundColor "#BABAB9"}} content)
           (dom/div #js {:id track-id
                         :className "track-view"
                         :onDoubleClick (fn []
-                                         (core/change-track (first (core/indices #(= %1 track-id) (:track-order @core/app-state)))))
+                                         (core/change-track (first (core/indices #(= %1 track-id) (:track-order @app-state/app-state)))))
                         } content))))
     om/IDidMount
     (did-mount [this]
@@ -342,11 +343,11 @@
                         :onClick core/toggle-loop}))))))
 
 (om/root play-pause-button player/app-state {:target (. js/document (getElementById "play-pause-button"))})
-(om/root previous-track-button core/app-state {:target (. js/document (getElementById "previous-track-button"))})
-(om/root next-track-button core/app-state {:target (. js/document (getElementById "next-track-button"))})
-(om/root restart-button core/app-state {:target (. js/document (getElementById "restart-button"))})
-(om/root loop-button core/app-state {:target (. js/document (getElementById "loop-button"))})
-(om/root track-queue core/app-state {:target (. js/document (getElementById "playlist"))})
+(om/root previous-track-button app-state/app-state {:target (. js/document (getElementById "previous-track-button"))})
+(om/root next-track-button app-state/app-state {:target (. js/document (getElementById "next-track-button"))})
+(om/root restart-button app-state/app-state {:target (. js/document (getElementById "restart-button"))})
+(om/root loop-button app-state/app-state {:target (. js/document (getElementById "loop-button"))})
+(om/root track-queue app-state/app-state {:target (. js/document (getElementById "playlist"))})
 (om/root progress-track player/app-state {:target (. js/document (getElementById "progress-track"))})
 
 (defn volume [data owner]
@@ -379,4 +380,4 @@
         (dom/button #js {:onClick core/decr-upload-slots} "Decrease")))))
 
 
-(om/root upload-slots core/app-state {:target (. js/document (getElementById "upload-slots"))})
+(om/root upload-slots app-state/app-state {:target (. js/document (getElementById "upload-slots"))})
