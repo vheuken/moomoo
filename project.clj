@@ -23,7 +23,7 @@
                        [musicmetadata "2.0"]
                        [base64-arraybuffer "0.1.2"]
                        [redis-lua-loader "1.1.0"]
-                       [mhash "2.1.2"]
+                       [mhash "2.1.3"]
                        [toml "2.3.0"]
                        [watchr "2.4.13"]
                        [mmmagic "0.4.1"]
