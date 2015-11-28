@@ -1,5 +1,7 @@
 (ns moomoo-frontend.app-state)
 
+(defonce default-upload-slots (js/Number (.getAttribute (. js/document (getElementById "default-upload-slots")) "data"))
+  )
 (defonce app-state (atom {:signed-in? false
                           :messages []
                           :message-received? false

@@ -3,6 +3,7 @@
             [om.core :as om  :include-macros true]
             [om.dom  :as dom :include-macros true]
             [moomoo-frontend.core :as core]
+            [moomoo-frontend.server-interface]
             [moomoo-frontend.app-state :as app-state]
             [moomoo-frontend.player :as player]))
 

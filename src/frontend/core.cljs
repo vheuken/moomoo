@@ -5,7 +5,6 @@
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
-(defonce default-upload-slots (js/Number (.getAttribute (. js/document (getElementById "default-upload-slots")) "data")))
 (defonce max-upload-slots (js/Number (.getAttribute (. js/document (getElementById "max-upload-slots")) "data")))
 
 (enable-console-print!)
