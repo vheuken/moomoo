@@ -276,6 +276,7 @@
   (swap! app-state/app-state assoc :current-track-id nil)
   (swap! app-state/app-state assoc :current-sound-id nil))
 
+;(t/ann delete-track! [t/String -> t/Nothing])
 (defn delete-track! [track-id]
   (println "Received delete-track signal:" track-id)
   (swap! app-state/app-state assoc :track-id-hashes (dissoc (:track-id-hashes @app-state/app-state) track-id))
@@ -288,41 +289,6 @@
       (swap! app-state/app-state assoc :current-track-id nil)
       (swap! app-state/app-state assoc :current-sound-id nil)
       (.emit socket "track-deleted"))))
-
-(.on socket "hash-found"
-  (fn [file-hash]
-    (println "File exists on server. Hash: " file-hash)
-    (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))))
-
-(.on socket "hash-not-found"
-  (fn [file-hash]
-    (println "File does not exist on server. Will upload. Hash: " file-hash)
-    (let [file (get (:file-hashes @app-state/app-state) file-hash)]
-      (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))
-      (upload-file file))))
-
-(.on socket "user-muted"
-  (fn [socket-id]
-    (println "Received mute-user signal for" socket-id)
-    (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
-                                         {socket-id (merge (get (:users @app-state/app-state) socket-id)
-                                                           {"muted" true})}))))
-
-(.on socket "user-unmuted"
-  (fn [socket-id]
-    (println "Received umute-user signal for" socket-id)
-    (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
-                                         {socket-id (merge (get (:users @app-state/app-state) socket-id)
-                                                           {"muted" false})}))))
-
-(.on socket "upload-cancelled"
-  (fn [id]
-    (swap! app-state/app-state assoc :current-uploads-info
-      (dissoc (:current-uploads-info @app-state/app-state) id))))
-
-(.on socket "track-order-change"
-  (fn [track-order]
-    (swap! app-state/app-state assoc :track-order (js->clj track-order))))
 
 (.on socket "upload-slots-change"
   (fn [new-upload-slots]

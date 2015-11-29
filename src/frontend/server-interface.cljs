@@ -1,5 +1,6 @@
 (ns moomoo-frontend.server-interface
   (:require [moomoo-frontend.core :as core]
+            [moomoo-frontend.tracks :as tracks]
             [moomoo-frontend.app-state :as app-state]
             [moomoo-frontend.player :as player]
             [clojure.string :as string]))
@@ -41,7 +42,7 @@
 
 (.on core/socket "clear-songs" core/clear-tracks!)
 
-(.on core/socket "delete-track" core/delete-track!)
+(.on core/socket "delete-track" tracks/delete-track!)
 
 (.on core/socket "start-track"
   (fn [file-url position]
@@ -49,9 +50,9 @@
                                              #"/rooms"))
                         file-url)]
       (player/play-track! file-url
-                         (:current-sound-id @app-state/app-state)
-                         position
-                         core/on-finish))))
+                          (:current-sound-id @app-state/app-state)
+                          position
+                          core/on-finish))))
 
 (.on core/socket "track-change"
   (fn [track-id sound-id]
@@ -99,3 +100,38 @@
   (fn [looping?]
     (println "Received set-loop signal with looping?:" looping?)
     (swap! app-state/app-state assoc :looping? looping?)))
+
+(.oncore/socket "hash-found"
+  (fn [file-hash]
+    (println "File exists on server. Hash: " file-hash)
+    (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))))
+
+(.oncore/socket "hash-not-found"
+  (fn [file-hash]
+    (println "File does not exist on server. Will upload. Hash: " file-hash)
+    (let [file (get (:file-hashes @app-state/app-state) file-hash)]
+      (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))
+      (core/upload-file file))))
+
+(.oncore/socket "user-muted"
+  (fn [socket-id]
+    (println "Received mute-user signal for"socket-id)
+    (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
+                                         {socket-id (merge (get (:users @app-state/app-state ) socket-id)
+                                                           {"muted" true})}))))
+
+(.oncore/socket "user-unmuted"
+  (fn [socket-id]
+    (println "Received umute-user signal for"socket-id)
+    (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
+                                         {socket-id (merge (get (:users @app-state/app-state) socket-id)
+                                                           {"muted" false})}))))
+
+(.oncore/socket "upload-cancelled"
+  (fn [id]
+    (swap! app-state/app-state assoc :current-uploads-info
+      (dissoc (:current-uploads-info @app-state/app-state) id))))
+
+(.oncore/socket "track-order-change"
+  (fn [track-order]
+    (swap! app-state/app-state assoc :track-order (js->clj track-order))))

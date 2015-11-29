@@ -7,7 +7,7 @@
                  [org.omcljs/om "0.9.0"]
                  [com.cognitect/transit-cljs "0.8.225"]
                  [com.cemerick/piggieback "0.2.1"]
-                 [org.clojure/tools.nrepl "0.2.12"]]
+                 [org.clojure/tools.nrepl "0.2.12"] ]
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
@@ -32,7 +32,8 @@
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-npm "0.6.1"]
             [lein-cljfmt "0.3.0"]
-            [lein-figwheel "0.5.0-1"]]
+            [lein-figwheel "0.5.0-1"]
+            [cider/cider-nrepl "0.9.1"]]
 
   :source-paths ["src"]
 
