@@ -11,7 +11,7 @@
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
-  :npm {:dependencies [[source-map-support "0.3.2"]
+  :npm {:dependencies [[source-map-support "0.3.3"]
                        [socket.io "1.3.7"]
                        [socket.io-redis "0.1.4"]
                        [redis "2.4.2"]
