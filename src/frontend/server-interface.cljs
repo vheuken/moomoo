@@ -101,37 +101,37 @@
     (println "Received set-loop signal with looping?:" looping?)
     (swap! app-state/app-state assoc :looping? looping?)))
 
-(.oncore/socket "hash-found"
+(.on core/socket "hash-found"
   (fn [file-hash]
     (println "File exists on server. Hash: " file-hash)
     (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))))
 
-(.oncore/socket "hash-not-found"
+(.on core/socket "hash-not-found"
   (fn [file-hash]
     (println "File does not exist on server. Will upload. Hash: " file-hash)
     (let [file (get (:file-hashes @app-state/app-state) file-hash)]
       (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))
       (core/upload-file file))))
 
-(.oncore/socket "user-muted"
+(.on core/socket "user-muted"
   (fn [socket-id]
     (println "Received mute-user signal for"socket-id)
     (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
                                          {socket-id (merge (get (:users @app-state/app-state ) socket-id)
                                                            {"muted" true})}))))
 
-(.oncore/socket "user-unmuted"
+(.on core/socket "user-unmuted"
   (fn [socket-id]
     (println "Received umute-user signal for"socket-id)
     (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
                                          {socket-id (merge (get (:users @app-state/app-state) socket-id)
                                                            {"muted" false})}))))
 
-(.oncore/socket "upload-cancelled"
+(.on core/socket "upload-cancelled"
   (fn [id]
     (swap! app-state/app-state assoc :current-uploads-info
       (dissoc (:current-uploads-info @app-state/app-state) id))))
 
-(.oncore/socket "track-order-change"
+(.on core/socket "track-order-change"
   (fn [track-order]
     (swap! app-state/app-state assoc :track-order (js->clj track-order))))
