@@ -1,6 +1,6 @@
 (defproject moomoo "0.1.0-SNAPSHOT"
-  :description "FIXME: write this!"
-  :url "http://example.com/FIXME"
+  :description "Listen to music with friends."
+  :url "https://github.com/vheuken/moomoo"
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.170"]
@@ -18,7 +18,7 @@
                        [hiredis "0.4.1"]
                        [socket.io-stream "0.9.0"]
                        [uuid "2.0.1"]
-                       [express "4.13"]
+                       [express "4.13.3"]
                        [jade "1.11"]
                        [musicmetadata "2.0"]
                        [base64-arraybuffer "0.1.2"]
@@ -27,7 +27,6 @@
                        [mhash "2.1.3"]
                        [toml "2.3.0"]
                        [watchr "2.4.13"]
-                       [mmmagic "0.4.1"]
                        [ws "0.8.0"]]}
 
   :plugins [[lein-cljsbuild "1.1.1"]
