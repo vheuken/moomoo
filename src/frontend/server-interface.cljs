@@ -40,7 +40,7 @@
 
 (.on core/socket "position-change" player/set-position!)
 
-(.on core/socket "clear-songs" core/clear-tracks!)
+(.on core/socket "clear-songs" tracks/clear-tracks!)
 
 (.on core/socket "delete-track" tracks/delete-track!)
 

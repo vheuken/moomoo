@@ -3,6 +3,7 @@
             [om.core :as om  :include-macros true]
             [om.dom  :as dom :include-macros true]
             [moomoo-frontend.core :as core]
+            [moomoo-frontend.tracks :as tracks]
             [moomoo-frontend.server-interface]
             [moomoo-frontend.app-state :as app-state]
             [moomoo-frontend.player :as player]))
@@ -99,7 +100,7 @@
     om/IRender
     (render [this]
       (if-not (nil? (:current-track-id data))
-        (let [music-info (core/get-music-info-from-id (:current-track-id data))
+        (let [music-info (tracks/get-music-info-from-id (:current-track-id data))
               tags (.-tags music-info)]
 
           (dom/div nil
@@ -126,11 +127,10 @@
 (om/root message-form app-state/app-state {:target (. js/document (getElementById "message-box"))})
 (om/root current-track-tags-view app-state/app-state {:target (. js/document (getElementById "current-track-tags"))})
 
-(defn track-view [data owner]
+(defn track-view [track-id owner]
   (defn update-state []
     (let [state (om/get-state owner)
           playing? (:playing? state)
-          track-id data
           current-track-id (:current-track-id @app-state/app-state)]
       (if (= track-id current-track-id)
         (if-not playing?
@@ -152,13 +152,12 @@
       true)
     om/IRenderState
     (render-state [_ state]
-      (let [track-id data
-            data (core/get-music-info-from-id track-id)
+      (let [data (tracks/get-music-info-from-id track-id)
             tags (.-tags data)
             title (.-title tags)
             artist (.-artist tags)
             album (.-album tags)
-            username (core/get-uploader-from-id track-id)
+            username (tracks/get-uploader-from-id track-id)
             current-track-id (:current-track-id @app-state/app-state)
             content (list
                       (dom/span #js {:className "track-title"
@@ -188,8 +187,8 @@
                         } content))))
     om/IDidMount
     (did-mount [this]
-      (.draggable (js/$ (str "#" data)) #js {:axis "y"
-                                             :stop core/on-track-drag-stop}))))
+      (.draggable (js/$ (str "#" track-id)) #js {:axis "y"
+                                                 :stop core/on-track-drag-stop}))))
 
 (defn track-queue [data owner]
   (reify
