@@ -1,7 +1,8 @@
 (ns moomoo-frontend.core
   (:require [clojure.string :as string]
             [moomoo-frontend.app-state :as app-state]
-            [moomoo-frontend.player :as player]))
+            [moomoo-frontend.player :as player]
+            [figwheel.client :as fw]))
 
 (defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce socket (js/io))
@@ -246,3 +247,6 @@
     (.createSound js/soundManager #js {
       :id "join-sound"
       :url "http://www.soundjay.com/button/beep-03.mp3"})))
+
+(fw/start {:websocket-url "ws://localhost:3449/figwheel-ws"
+           :build-id "moomoo-frontend"})

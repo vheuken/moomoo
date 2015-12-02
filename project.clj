@@ -37,7 +37,8 @@
 
   :source-paths ["src"]
 
-  :figwheel {:nrepl-port 7888}
+  :figwheel {:nrepl-port 7888
+             :build-ids ["moomoo-server" "moomoo-frontend"]}
   :cljsbuild {
     :builds [{:id "moomoo-server"
               :source-paths ["src/server"]
@@ -51,6 +52,7 @@
 
              {:id "moomoo-frontend"
               :source-paths ["src/frontend"]
+              :figwheel {:websocket-host "localhost:3449"}
               :compiler {
                 :main "moomoo-frontend.renderer"
                 :asset-path "/js/out"
