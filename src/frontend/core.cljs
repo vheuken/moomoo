@@ -45,35 +45,6 @@
            :uploads
            {client-id (uploads/pause-upload upload)})))
 
-(defn stop-upload [client-id]
-  (println "Pausing upload" client-id)
-  (let [upload-info ((:uploads @app-state/app-state) client-id)
-        blob-stream (:blob-stream upload-info)
-        stream      (:stream upload-info)]
-    (.unpipe blob-stream)
-    (swap! app-state/app-state assoc :uploads (merge (:uploads @app-state/app-state)
-                                           {client-id (merge upload-info
-                                                             {:stopped? true})}))))
-
-(defn start-upload [client-id]
-  (println "Pausing:" client-id)
-  (let [upload-info ((:uploads @app-state/app-state) client-id)
-        blob-stream (:blob-stream upload-info)
-        stream      (:stream upload-info)]
-    (.pipe blob-stream stream)
-    (swap! app-state/app-state assoc :uploads (merge (:uploads @app-state/app-state)
-                                           {client-id (merge upload-info
-                                                             {:stopped? false})}))))
-(defn start-next-upload! []
-  (let [stopped-uploads (filter #(:stopped? (val %)) (into [] (:uploads @app-state/app-state)))]
-    (if (empty? stopped-uploads)
-      (let [next-file (last (:upload-queue @app-state/app-state))]
-        (swap! app-state/app-state assoc :upload-queue (pop (:upload-queue @app-state/app-state)))
-        next-file)
-      (do
-        (start-upload (key (last stopped-uploads)))
-        nil))))
-
 (defn check-hash [file]
   (js/md5File file
     (fn [file-hash]
@@ -217,29 +188,3 @@
     (.createSound js/soundManager #js {
       :id "join-sound"
       :url "http://www.soundjay.com/button/beep-03.mp3"})))
-
-(defn upload-file [file]
-  (swap! app-state/app-state assoc :num-of-uploads (+ 1 (:num-of-uploads @app-state/app-state)))
-
-  (let [stream (.createStream js/ss)
-        blob-stream (.createBlobReadStream js/ss file)
-        client-id (.v4 js/uuid)]
-    (println "File uploading: " (.-name file))
-    (println "File size: " (.-size file))
-
-    (swap! app-state/app-state assoc :uploads (merge (:uploads @app-state/app-state)
-                                           {client-id {:blob-stream blob-stream
-                                                       :stream      stream
-                                                       :paused?     false
-                                                       :stopped?    false}}))
-
-    (.emit (js/ss app-state/socket) "file-upload" stream
-                                        (.-name file)
-                                        (.-size file)
-                                        client-id)
-    (.pipe blob-stream stream)
-
-    (.on blob-stream "end"
-      (fn []
-        (println "Upload complete: " (.-name file))
-        (swap! app-state/app-state assoc :num-of-uploads (- (:num-of-uploads @app-state/app-state) 1))))))

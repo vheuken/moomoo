@@ -141,7 +141,7 @@
   (fn [track-order]
     (swap! app-state/app-state assoc :track-order (js->clj track-order))))
 
-#_(.on app-state/socket "upload-complete"
+(.on app-state/socket "upload-complete"
   (fn [music-info track-order track-id-hashes client-id]
     (println "Received upload-complete signal:"
              "music-info:" music-info
@@ -150,25 +150,9 @@
       (conj (:music-info @app-state/app-state) music-info))
 
     (swap! app-state/app-state assoc :track-id-hashes (js->clj track-id-hashes))
-    (swap! app-state/app-state assoc :track-order (js->clj track-order))
+    (swap! app-state/app-state assoc :track-order (js->clj track-order))))
 
-    (if-not (empty? (filter #{client-id} (keys (:uploads @app-state/app-state))))
-      (let [next-file (core/start-next-upload!)]
-        (if-not (nil? next-file)
-          (swap! app-state/app-state assoc :upload-queue (pop (:upload-queue @app-state/app-state)))
-          (if (> (:upload-slots @app-state/app-state) (:num-of-uploads @app-state/app-state))
-            (core/upload-file next-file)))))))
-
-
-#_(.on app-state/socket "upload-slots-change"
+(.on app-state/socket "upload-slots-change"
   (fn [new-upload-slots]
     (let [old-upload-slots (:num-of-uploads @app-state/app-state)]
-      (swap! app-state/app-state assoc :upload-slots new-upload-slots)
-      (cond
-        (> new-upload-slots old-upload-slots)
-          (let [next-file (core/start-next-upload!)]
-            (if-not (nil? next-file)
-              (core/upload-file next-file)))
-        (< new-upload-slots old-upload-slots)
-          (let [most-recent-upload-id (last (keys (:uploads @app-state/app-state)))]
-            (core/stop-upload most-recent-upload-id))))))
+      (swap! app-state/app-state assoc :upload-slots new-upload-slots))))
