@@ -69,9 +69,29 @@
                                 (.pipe blob-stream stream)
                               (= action :stopped)
                                 (do
+                                  (swap! app-state/app-state
+                                         assoc
+                                         :active-uploads
+                                         (remove #{upload-id}
+                                                 (:active-uploads @app-state/app-state)))
+                                  (swap! app-state/app-state
+                                         assoc
+                                         :inactive-uploads
+                                         (prepend-upload (:inactive-uploads @app-state/app-state)
+                                                         upload-id))
                                   (.unpipe blob-stream))
                               (= action :started)
                                 (do
+                                  (swap! app-state/app-state
+                                         assoc
+                                         :inactive-uploads
+                                         (remove #{upload-id}
+                                                 (:inactive-uploads @app-state/app-state)))
+                                  (swap! app-state/app-state
+                                         assoc
+                                         :active-uploads
+                                         (append-upload (:active-uploads @app-state/app-state)
+                                                        upload-id))
                                   (.pipe blob-stream stream)))))]
     (.on blob-stream "end"
       (fn []
