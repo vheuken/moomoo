@@ -83,11 +83,7 @@
     (add-watch app-state/app-state
                upload-id
                upload-watch-fn)
-    (swap! app-state/app-state
-           assoc
-           :uploads
-           (merge (:uploads @app-state/app-state)
-                  {upload-id new-upload}))
+
     (swap! app-state/app-state
            assoc
            :inactive-uploads
@@ -100,10 +96,11 @@
            (.-name file)
            (.-size file))
 
-    (if (< (:num-of-uploads @app-state/app-state)
-           (:upload-slots   @app-state/app-state))
       (swap! app-state/app-state
              assoc
              :uploads
              (merge (:uploads @app-state/app-state)
-                    {upload-id (start-upload new-upload)})))))
+                    (if (< (:num-of-uploads @app-state/app-state)
+                           (:upload-slots   @app-state/app-state))
+                      {upload-id (start-upload new-upload)}
+                      {upload-id new-upload})))))
