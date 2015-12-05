@@ -14,7 +14,7 @@
       (player/destroy-track (:current-sound-id @app-state/app-state))
       (swap! app-state/app-state assoc :current-track-id nil)
       (swap! app-state/app-state assoc :current-sound-id nil)
-      (.emit core/socket "track-deleted"))))
+      (.emit app-state/socket  "track-deleted"))))
 
 (defn clear-tracks! []
   (println "Clearing tracks!")

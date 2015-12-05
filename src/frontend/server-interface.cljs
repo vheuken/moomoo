@@ -5,24 +5,24 @@
             [moomoo-frontend.player :as player]
             [clojure.string :as string]))
 
-(.on core/socket "sign-in-success"
+(.on app-state/socket "sign-in-success"
   (fn []
     (println "Successfully signed in!")
     (swap! app-state/app-state assoc :signed-in? true)))
 
-(.on core/socket "chat-message"
+(.on app-state/socket "chat-message"
   (fn [message]
     (println "Received chat-message signal:" message)
     (swap! app-state/app-state assoc :messages (conj (:messages @app-state/app-state) message))
     (swap! app-state/app-state assoc :message-received? true)))
 
-(.on core/socket "users-list"
+(.on app-state/socket "users-list"
   (fn [users]
     (println "Received users-list signal: " users)
     (let [users (js->clj users)]
       (swap! app-state/app-state assoc :users users))))
 
-(.on core/socket "file-upload-info"
+(.on app-state/socket "file-upload-info"
   (fn [file-upload-info]
     (if (= (.-totalsize file-upload-info) (.-bytesreceived file-upload-info))
       (swap! app-state/app-state assoc :current-uploads-info
@@ -31,20 +31,20 @@
         (merge (:current-uploads-info @app-state/app-state)
           {(.-id file-upload-info) file-upload-info})))))
 
-(.on core/socket "resume" player/resume!)
+(.on app-state/socket "resume" player/resume!)
 
-(.on core/socket "pause"
+(.on app-state/socket "pause"
   (fn [position]
     (player/pause!)
     (player/set-position! position)))
 
-(.on core/socket "position-change" player/set-position!)
+(.on app-state/socket "position-change" player/set-position!)
 
-(.on core/socket "clear-songs" tracks/clear-tracks!)
+(.on app-state/socket "clear-songs" tracks/clear-tracks!)
 
-(.on core/socket "delete-track" tracks/delete-track!)
+(.on app-state/socket "delete-track" tracks/delete-track!)
 
-(.on core/socket "start-track"
+(.on app-state/socket "start-track"
   (fn [file-url position]
     (let [file-url (str (first (string/split (.-href (.-location js/window))
                                              #"/rooms"))
@@ -54,7 +54,7 @@
                           position
                           core/on-finish))))
 
-(.on core/socket "track-change"
+(.on app-state/socket "track-change"
   (fn [track-id sound-id]
     (println "Received track-change signal:"
              "track-id:" track-id
@@ -67,9 +67,9 @@
       (if-not (nil? last-current-sound-id)
         (player/destroy-track last-current-sound-id)))
 
-      (.emit core/socket "ready-to-start" sound-id)))
+      (.emit app-state/socket "ready-to-start" sound-id)))
 
-(.on core/socket "hotjoin-music-info"
+(.on app-state/socket "hotjoin-music-info"
   (fn [room-track-id-map
        room-music-info
        track-order
@@ -94,49 +94,53 @@
       (player/pause!))
 
     (if-not (nil? current-sound-id)
-      (.emit core/socket "ready-to-start" current-sound-id))))
+      (.emit app-state/socket "ready-to-start" current-sound-id))))
 
-(.on core/socket "set-loop"
+(.on app-state/socket "set-loop"
   (fn [looping?]
     (println "Received set-loop signal with looping?:" looping?)
     (swap! app-state/app-state assoc :looping? looping?)))
 
-(.on core/socket "hash-found"
+(.on app-state/socket "hash-found"
   (fn [file-hash]
     (println "File exists on server. Hash: " file-hash)
     (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))))
 
-(.on core/socket "hash-not-found"
+(.on app-state/socket "hash-not-found"
   (fn [file-hash]
     (println "File does not exist on server. Will upload. Hash: " file-hash)
     (let [file (get (:file-hashes @app-state/app-state) file-hash)]
       (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))
       (core/upload-file file))))
 
-(.on core/socket "user-muted"
+(.on app-state/socket "user-muted"
   (fn [socket-id]
-    (println "Received mute-user signal for"socket-id)
-    (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
-                                         {socket-id (merge (get (:users @app-state/app-state ) socket-id)
-                                                           {"muted" true})}))))
+    (println "Received mute-user signal for" socket-id)
+    (swap! app-state/app-state
+           assoc
+           :users
+           (merge (:users @app-state/app-state)
+                  {socket-id (merge (get (:users @app-state/app-state ) socket-id)
+                                         {"muted" true})}))))
 
-(.on core/socket "user-unmuted"
+
+(.on app-state/socket "user-unmuted"
   (fn [socket-id]
-    (println "Received umute-user signal for"socket-id)
+    (println "Received umute-user signal for" socket-id)
     (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
                                          {socket-id (merge (get (:users @app-state/app-state) socket-id)
-                                                           {"muted" false})}))))
+                                                                {"muted" false})}))))
 
-(.on core/socket "upload-cancelled"
+(.on app-state/socket "upload-cancelled"
   (fn [id]
     (swap! app-state/app-state assoc :current-uploads-info
       (dissoc (:current-uploads-info @app-state/app-state) id))))
 
-(.on core/socket "track-order-change"
+(.on app-state/socket "track-order-change"
   (fn [track-order]
     (swap! app-state/app-state assoc :track-order (js->clj track-order))))
 
-(.on core/socket "upload-complete"
+(.on app-state/socket "upload-complete"
   (fn [music-info track-order track-id-hashes client-id]
     (println "Received upload-complete signal:"
              "music-info:" music-info
@@ -154,7 +158,7 @@
           (if (> (:upload-slots @app-state/app-state) (:num-of-uploads @app-state/app-state))
             (core/upload-file next-file)))))))
 
-(.on core/socket "upload-slots-change"
+(.on app-state/socket "upload-slots-change"
   (fn [new-upload-slots]
     (let [old-upload-slots (:num-of-uploads @app-state/app-state)]
       (swap! app-state/app-state assoc :upload-slots new-upload-slots)

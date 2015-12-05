@@ -1,7 +1,8 @@
 (ns moomoo-frontend.app-state)
 
-(defonce default-upload-slots (js/Number (.getAttribute (. js/document (getElementById "default-upload-slots")) "data"))
-  )
+(defonce socket (js/io))
+(defonce default-upload-slots (js/Number (.getAttribute (. js/document (getElementById "default-upload-slots")) "data")))
+
 (defonce app-state (atom {:signed-in? false
                           :messages []
                           :message-received? false
@@ -20,4 +21,6 @@
                           :num-of-uploads 0
                           :num-of-downloads 0
                           :file-hashes {}
-                          :uploads {}}))
+                          :uploads {}
+                          :active-uploads []
+                          :inactive-uploads []}))
