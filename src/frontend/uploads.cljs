@@ -31,23 +31,28 @@
    Can return: :stopped, :started, :paused, :unpaused"
   (let [upload-diff (data/diff (get (:uploads old-state) upload-id)
                                (get (:uploads new-state) upload-id))
-        new-upload-info (second upload-diff)]
+        old-upload-state (first upload-diff)
+        new-upload-state (second upload-diff)]
 
     (println upload-diff)
-    (println "old:" (get (:uploads old-state) upload-id))
-    (println "new:" (get (:uploads new-state) upload-id))
-    (if-not (nil? new-upload-info)
-      (let [k (first (keys new-upload-info))
-            v (first (vals new-upload-info))]
-        (cond
-          (= k :paused?)
-            (if v
-              :paused
-              :unpaused)
-          (= k :started?)
-             (if v
-               :started
-               :stopped))))))
+    (println "old:" old-upload-state)
+    (println "new:" new-upload-state)
+    (if (nil? old-upload-state)
+      (if (:started? new-upload-state)
+        :started
+        nil)
+      (if-not (nil? new-upload-state)
+        (let [k (first (keys new-upload-state))
+              v (first (vals new-upload-state))]
+          (cond
+            (= k :paused?)
+              (if v
+                :paused
+                :unpaused)
+            (= k :started?)
+               (if v
+                 :started
+                 :stopped)))))))
 
 (defn upload-file! [file]
   (let [new-upload blank-upload
@@ -94,13 +99,14 @@
            "file-upload"
            stream
            (.-name file)
-           (.-size file))
+           (.-size file)
+           upload-id)
 
-      (swap! app-state/app-state
-             assoc
-             :uploads
-             (merge (:uploads @app-state/app-state)
-                    (if (< (:num-of-uploads @app-state/app-state)
-                           (:upload-slots   @app-state/app-state))
-                      {upload-id (start-upload new-upload)}
-                      {upload-id new-upload})))))
+    (swap! app-state/app-state
+           assoc
+           :uploads
+           (merge (:uploads @app-state/app-state)
+                  (if (< (:num-of-uploads @app-state/app-state)
+                         (:upload-slots   @app-state/app-state))
+                    {upload-id (start-upload new-upload)}
+                    {upload-id new-upload})))))
