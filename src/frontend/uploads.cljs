@@ -2,13 +2,13 @@
   (:require [moomoo-frontend.app-state :as app-state]
             [clojure.data :as data]))
 
-(defonce blank-upload {:paused? false
-                       :stopped? false})
+(defonce blank-upload {:paused?  false
+                       :started? false})
 
 (defn pause-upload [upload]
   (assoc upload :paused? true))
 
-(defn unpause-upload [upload]
+(defn resume-upload [upload]
   (assoc upload :paused? false))
 
 (defn start-upload [upload]
@@ -32,6 +32,10 @@
   (let [upload-diff (data/diff (get (:uploads old-state) upload-id)
                                (get (:uploads new-state) upload-id))
         new-upload-info (second upload-diff)]
+
+    (println upload-diff)
+    (println "old:" (get (:uploads old-state) upload-id))
+    (println "new:" (get (:uploads new-state) upload-id))
     (if-not (nil? new-upload-info)
       (let [k (first (keys new-upload-info))
             v (first (vals new-upload-info))]
@@ -40,54 +44,66 @@
             (if v
               :paused
               :unpaused)
-          (= k :stopped?)
+          (= k :started?)
              (if v
-               :stopped
-               :started))))))
-
+               :started
+               :stopped))))))
 
 (defn upload-file! [file]
-  (if (> (:num-of-uploads @app-state/app-state)
-         (:upload-slots @app-state/app-state))
+  (let [new-upload blank-upload
+        upload-id (.v4 js/uuid)
+        stream (.createStream js/ss)
+        blob-stream (.createBlobReadStream js/ss file)
+        upload-watch-fn (fn [_ _ old-state new-state]
+                          (let [action (get-action old-state new-state upload-id)]
+                            (println "ACTION:" action)
+                            (cond
+                              (= action :paused)
+                                (.unpipe blob-stream)
+                              (= action :unpaused)
+                                (.pipe blob-stream stream)
+                              (= action :stopped)
+                                (do
+                                  (.unpipe blob-stream))
+                              (= action :started)
+                                (do
+                                  (.pipe blob-stream stream)))))]
+    (.on blob-stream "end"
+      (fn []
+        (swap! app-state/app-state
+               assoc
+               :num-of-uploads
+               (dec (:num-of-uploads @app-state/app-state)))
+        (swap! app-state/app-state
+               assoc
+               :uploads
+               (dissoc (:uploads @app-state/app-state)
+                       upload-id))
+        (remove-watch app-state/app-state upload-id)))
+    (add-watch app-state/app-state
+               upload-id
+               upload-watch-fn)
     (swap! app-state/app-state
            assoc
-           :num-of-uploads
-           (inc (:num-of-uploads @app-state/app-state)))
-    (let [new-upload blank-upload
-          upload-id (.v4 js/uuid)
-          stream (.createStream js/ss)
-          blob-stream (.createBlobReadStream js/ss file)
-          upload-watch-fn (fn [_ _ _ old-state new-state]
-                            (let [action (get-action old-state new-state upload-id)]
-                              (cond
-                                (or (= action :stopped)
-                                    (= action :paused))
-                                  (.unpipe blob-stream)
-                                (or (= action :started)
-                                    (= action :unpaused))
-                                  (.pipe blob-stream stream))))]
-      (.on blob-stream "end"
-        (fn []
-          (swap! app-state/app-state
-                 assoc
-                 :num-of-uploads
-                 (dec (:num-of-uploads @app-state/app-state)))
-          (swap! app-state/app-state
-                 assoc
-                 :uploads
-                 (dissoc (:uploads @app-state/app-state)
-                         upload-id))
-          (remove-watch app-state/app-state upload-id)))
-      (add-watch app-state/app-state
-                 upload-id
-                 upload-watch-fn)
+           :uploads
+           (merge (:uploads @app-state/app-state)
+                  {upload-id new-upload}))
+    (swap! app-state/app-state
+           assoc
+           :inactive-uploads
+           (append-upload (:inactive-uploads @app-state/app-state)
+                          upload-id))
+
+    (.emit (js/ss app-state/socket)
+           "file-upload"
+           stream
+           (.-name file)
+           (.-size file))
+
+    (if (< (:num-of-uploads @app-state/app-state)
+           (:upload-slots   @app-state/app-state))
       (swap! app-state/app-state
              assoc
              :uploads
              (merge (:uploads @app-state/app-state)
-                    {upload-id new-upload}))
-      (swap! app-state/app-state
-             assoc
-             :inactive-uploads
-             (append-upload (:inactive-uploads @app-state/app-state)
-                            upload-id)))))
+                    {upload-id (start-upload new-upload)})))))

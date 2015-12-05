@@ -141,7 +141,7 @@
   (fn [track-order]
     (swap! app-state/app-state assoc :track-order (js->clj track-order))))
 
-(.on app-state/socket "upload-complete"
+#_(.on app-state/socket "upload-complete"
   (fn [music-info track-order track-id-hashes client-id]
     (println "Received upload-complete signal:"
              "music-info:" music-info
@@ -159,7 +159,8 @@
           (if (> (:upload-slots @app-state/app-state) (:num-of-uploads @app-state/app-state))
             (core/upload-file next-file)))))))
 
-(.on app-state/socket "upload-slots-change"
+
+#_(.on app-state/socket "upload-slots-change"
   (fn [new-upload-slots]
     (let [old-upload-slots (:num-of-uploads @app-state/app-state)]
       (swap! app-state/app-state assoc :upload-slots new-upload-slots)

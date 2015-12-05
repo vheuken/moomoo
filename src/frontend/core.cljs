@@ -29,24 +29,21 @@
       (.val (js/$ this) "")
       false)))
 
-(defn resume-upload [client-id]
-  (println "Pausing:" client-id)
-  (let [upload-info ((:uploads @app-state/app-state) client-id)
-        blob-stream (:blob-stream upload-info)
-        stream      (:stream upload-info)]
-    (.pipe blob-stream stream)
-    (swap! app-state/app-state assoc :uploads (merge (:uploads @app-state/app-state)
-                                           {client-id (merge upload-info
-                                                             {:paused? false})}))))
-(defn pause-upload [client-id]
+(defn resume-upload! [client-id]
   (println "Pausing upload" client-id)
-  (let [upload-info ((:uploads @app-state/app-state) client-id)
-        blob-stream (:blob-stream upload-info)
-        stream      (:stream upload-info)]
-    (.unpipe blob-stream)
-    (swap! app-state/app-state assoc :uploads (merge (:uploads @app-state/app-state)
-                                           {client-id (merge upload-info
-                                                             {:paused? true})}))))
+  (let [upload (get (:uploads @app-state/app-state) client-id)]
+    (swap! app-state/app-state
+           assoc
+           :uploads
+           {client-id (uploads/resume-upload upload)})))
+
+(defn pause-upload! [client-id]
+  (println "Pausing upload" client-id)
+  (let [upload (get (:uploads @app-state/app-state) client-id)]
+    (swap! app-state/app-state
+           assoc
+           :uploads
+           {client-id (uploads/pause-upload upload)})))
 
 (defn stop-upload [client-id]
   (println "Pausing upload" client-id)
