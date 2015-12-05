@@ -33,10 +33,6 @@
                                (get (:uploads new-state) upload-id))
         old-upload-state (first upload-diff)
         new-upload-state (second upload-diff)]
-
-    (println upload-diff)
-    (println "old:" old-upload-state)
-    (println "new:" new-upload-state)
     (if (nil? old-upload-state)
       (if (:started? new-upload-state)
         :started
@@ -61,7 +57,6 @@
         blob-stream (.createBlobReadStream js/ss file)
         upload-watch-fn (fn [_ _ old-state new-state]
                           (let [action (get-action old-state new-state upload-id)]
-                            (println "ACTION:" action)
                             (cond
                               (= action :paused)
                                 (.unpipe blob-stream)
