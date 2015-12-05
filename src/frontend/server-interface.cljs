@@ -3,6 +3,7 @@
             [moomoo-frontend.tracks :as tracks]
             [moomoo-frontend.app-state :as app-state]
             [moomoo-frontend.player :as player]
+            [moomoo-frontend.uploads :as uploads]
             [clojure.string :as string]))
 
 (.on app-state/socket "sign-in-success"
@@ -111,7 +112,7 @@
     (println "File does not exist on server. Will upload. Hash: " file-hash)
     (let [file (get (:file-hashes @app-state/app-state) file-hash)]
       (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))
-      (core/upload-file file))))
+      (uploads/upload-file! file))))
 
 (.on app-state/socket "user-muted"
   (fn [socket-id]
