@@ -38,6 +38,7 @@
         active-uploads   (:active-uploads new-state)
         inactive-uploads (:inactive-uploads new-state)
         uploads (:uploads new-state)]
+    (println "UPLOADS!" uploads)
     (cond
       (and (< old-upload-slots new-upload-slots)
            (< (count active-uploads) new-upload-slots))
@@ -68,7 +69,7 @@
                                      (keys (:uploads new-state)))
         deleted-upload-ids (first uploads-keys-diff)]
     (if-not (nil? deleted-upload-ids)
-      (let [active-uploads  (vec (remove (set deleted-upload-ids) (:active-uploads new-state)))
+      (let [active-uploads   (vec (remove (set deleted-upload-ids) (:active-uploads new-state)))
             inactive-uploads (vec (remove (set deleted-upload-ids) (:inactive-uploads new-state)))
             uploads (:uploads new-state)]
         (if-not (empty? inactive-uploads)
@@ -78,8 +79,7 @@
                                                  (first inactive-uploads))
                   :inactive-uploads (drop-first-upload inactive-uploads)
                   :uploads (merge uploads {(first inactive-uploads)
-                                     (start-upload (uploads (first inactive-uploads)))})}))))))
-
+                                           (start-upload (uploads (first inactive-uploads)))})}))))))
 
 (add-watch app-state/app-state :upload-removed upload-removed-watch-fn!)
 
@@ -127,9 +127,8 @@
       (fn []
         (remove-watch app-state/app-state upload-id)
         (swap! app-state/app-state
-               dissoc
-               :uploads
-               upload-id)))
+               merge
+               {:uploads (dissoc (:uploads @app-state/app-state) upload-id)})))
 
     (add-watch app-state/app-state
                upload-id
@@ -148,11 +147,10 @@
                          (:upload-slots   @app-state/app-state))
              {:uploads (merge (:uploads @app-state/app-state)
                               {upload-id (start-upload new-upload)})
-              :active-uploads (prepend-upload (:active-uploads @app-state/app-state)
-                                              upload-id)}
+              :active-uploads (append-upload (:active-uploads @app-state/app-state)
+                                             upload-id)}
              {:uploads (merge (:uploads @app-state/app-state)
                               {upload-id new-upload})
-              :inactive-uploads (prepend-upload (:inactive-uploads @app-state/app-state)
-                                                upload-id)}))))
-
+              :inactive-uploads (append-upload (:inactive-uploads @app-state/app-state)
+                                               upload-id)}))))
 
