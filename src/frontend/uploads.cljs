@@ -107,10 +107,11 @@
       (fn []
         (remove-watch app-state/app-state upload-id)
         (swap! app-state/app-state
-               assoc
-               :uploads
-               (dissoc (:uploads @app-state/app-state)
-                       upload-id))))
+               merge
+               {:uploads (dissoc (:uploads @app-state/app-state)
+                         upload-id)
+                :active-uploads (remove @app-state/app-state #{upload-id})
+                :inactive-uploads (remove @app-state/app-state #{upload-id})})))
 
     (add-watch app-state/app-state
                upload-id
