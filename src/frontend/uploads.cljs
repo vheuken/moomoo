@@ -65,24 +65,26 @@
 (add-watch app-state/app-state :upload-slots upload-slots-watch-fn!)
 
 (defn upload-removed-watch-fn! [_ _ old-state new-state]
-  (let [uploads-keys-diff (data/diff (keys (:uploads old-state))
-                                     (keys (:uploads new-state)))
-        deleted-upload-ids (first uploads-keys-diff)]
-
-    (println "DELETED-UPLOAD-ID" deleted-upload-ids)
-    (if-not (nil? deleted-upload-ids)
-      (let [active-uploads   (vec (remove (set deleted-upload-ids) (:active-uploads new-state)))
-            inactive-uploads (vec (remove (set deleted-upload-ids) (:inactive-uploads new-state)))
-            uploads (:uploads new-state)]
-        (println "INACTIVE-UPLOADS:" inactive-uploads)
-        (if-not (empty? inactive-uploads)
-          (swap! app-state/app-state
-                 merge
-                 {:active-uploads (append-upload active-uploads
-                                                 (first inactive-uploads))
-                  :inactive-uploads (drop-first-upload inactive-uploads)
-                  :uploads (merge uploads {(first inactive-uploads)
-                                           (start-upload (uploads (first inactive-uploads)))})})))))
+  (let [uploads-keys-diff (data/diff (:uploads old-state)
+                                     (:uploads new-state))]
+    (if-not (nil? (first uploads-keys-diff))
+      (let [deleted-upload-ids (first (keys (first uploads-keys-diff)))]
+        (println "old-state" (:uploads old-state))
+        (println "new-state" (:uploads new-state))
+        (println "DELETED-UPLOAD-ID" deleted-upload-ids)
+        (if-not (nil? deleted-upload-ids)
+          (let [active-uploads   (vec (remove (set deleted-upload-ids) (:active-uploads new-state)))
+                inactive-uploads (vec (remove (set deleted-upload-ids) (:inactive-uploads new-state)))
+                uploads (:uploads new-state)]
+            (println "INACTIVE-UPLOADS:" inactive-uploads)
+            (if-not (empty? inactive-uploads)
+              (swap! app-state/app-state
+                     merge
+                     {:active-uploads (append-upload active-uploads
+                                                     (first inactive-uploads))
+                      :inactive-uploads (drop-first-upload inactive-uploads)
+                      :uploads (merge uploads {(first inactive-uploads)
+                                               (start-upload (uploads (first inactive-uploads)))})})))))))
   (println "APP-STATE" @app-state/app-state))
 
 (add-watch app-state/app-state :upload-removed upload-removed-watch-fn!)

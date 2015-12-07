@@ -72,8 +72,7 @@
   (reify
     om/IRender
     (render [this]
-      (if-not (nil? (:uploads @app-state/app-state))
-                (dom/li nil (if (= (.-uploaderid data) (.-id app-state/socket))
+      (dom/li nil (if (= (.-uploaderid data) (.-id app-state/socket))
                     (list
                       (dom/button #js {:onClick #(core/cancel-upload (.-id data))}       "CANCEL")
                       (if (and (:paused? ((:uploads @app-state/app-state) (.-clientid data)))
@@ -84,7 +83,7 @@
                     "STOPPED!")
                   (((:users @app-state/app-state) (.-uploaderid data)) "name")
                   " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
-                  (.-filename data))))))
+                  (.-filename data)))))
 
 (defn users-upload-progress-view [data owner]
   (reify
