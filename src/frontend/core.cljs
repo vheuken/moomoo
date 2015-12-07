@@ -55,7 +55,8 @@
 (.change (js/$ "#file-upload")
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)]
-      (if (> (:upload-slots @app-state/app-state) (:num-of-uploads @app-state/app-state))
+      (if (> (:upload-slots @app-state/app-state)
+             (count (:active-uploads @app-state/app-state)))
         (check-hash file)
         (swap! app-state/app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state/app-state))))))))
 

@@ -154,5 +154,4 @@
 
 (.on app-state/socket "upload-slots-change"
   (fn [new-upload-slots]
-    (let [old-upload-slots (:num-of-uploads @app-state/app-state)]
-      (swap! app-state/app-state assoc :upload-slots new-upload-slots))))
+    (swap! app-state/app-state assoc :upload-slots new-upload-slots)))
