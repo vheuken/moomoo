@@ -61,7 +61,27 @@
     (if-not (nil? new-uploads-info)
       (swap! app-state/app-state merge new-uploads-info))))
 
-(add-watch app-state/app-state :upload-slots  upload-slots-watch-fn!)
+(add-watch app-state/app-state :upload-slots upload-slots-watch-fn!)
+
+(defn upload-removed-watch-fn! [_ _ old-state new-state]
+  (let [uploads-keys-diff (data/diff (keys (:uploads old-state))
+                                     (keys (:uploads new-state)))
+        deleted-upload-ids (first uploads-keys-diff)]
+    (if-not (nil? deleted-upload-ids)
+      (let [active-uploads  (vec (remove (set deleted-upload-ids) (:active-uploads new-state)))
+            inactive-uploads (vec (remove (set deleted-upload-ids) (:inactive-uploads new-state)))
+            uploads (:uploads new-state)]
+        (if-not (empty? inactive-uploads)
+          (swap! app-state/app-state
+                 merge
+                 {:active-uploads (append-upload active-uploads
+                                                 (first inactive-uploads))
+                  :inactive-uploads (drop-first-upload inactive-uploads)
+                  :uploads (merge uploads {(first inactive-uploads)
+                                     (start-upload (uploads (first inactive-uploads)))})}))))))
+
+
+(add-watch app-state/app-state :upload-removed upload-removed-watch-fn!)
 
 (defn get-action [old-state new-state upload-id]
   "returns the action applied to the given upload-id.
@@ -107,11 +127,9 @@
       (fn []
         (remove-watch app-state/app-state upload-id)
         (swap! app-state/app-state
-               merge
-               {:uploads (dissoc (:uploads @app-state/app-state)
-                         upload-id)
-                :active-uploads (remove @app-state/app-state #{upload-id})
-                :inactive-uploads (remove @app-state/app-state #{upload-id})})))
+               dissoc
+               :uploads
+               upload-id)))
 
     (add-watch app-state/app-state
                upload-id
