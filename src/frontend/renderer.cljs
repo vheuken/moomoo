@@ -92,7 +92,6 @@
       (apply dom/div nil
         (let [sorted-uploads (sort #(compare (.-num %1) (.-num %2))
                                    (vals (:current-uploads-info data)))]
-
           (om/build-all user-upload-progress (vals (:current-uploads-info data))))))))
 
 (defn current-track-tags-view [data owner]
