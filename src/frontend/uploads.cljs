@@ -58,10 +58,7 @@
   (let [new-uploads-info (handle-upload-slots-change old-state new-state)]
     (if-not (nil? new-uploads-info)
       (do
-
-        (println "NEW UPLOADS INFO:" new-uploads-info)
-        (swap! app-state/app-state (merge @app-state/app-state
-                                          new-uploads-info))))))
+        (swap! app-state/app-state merge new-uploads-info)))))
 
 (add-watch app-state/app-state :upload-slots  upload-slots-watch-fn!)
 
@@ -127,7 +124,6 @@
 
     (swap! app-state/app-state
            merge
-           @app-state/app-state
            (if (< (count (:active-uploads @app-state/app-state))
                          (:upload-slots   @app-state/app-state))
              {:uploads (merge (:uploads @app-state/app-state)
@@ -137,6 +133,7 @@
              {:uploads (merge (:uploads @app-state/app-state)
                               {upload-id new-upload})
               :inactive-uploads (prepend-upload (:inactive-uploads @app-state/app-state)
-                                                upload-id)}))))
+                                                upload-id)}))
+    (println @app-state/app-state)))
 
 
