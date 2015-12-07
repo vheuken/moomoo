@@ -39,26 +39,27 @@
         inactive-uploads (:inactive-uploads new-state)
         uploads (:uploads new-state)]
     (cond
-      (< old-upload-slots new-upload-slots)
+      (and (< old-upload-slots new-upload-slots)
+           (< (count active-uploads) new-upload-slots))
         (if-not (empty? inactive-uploads)
           {:active-uploads (append-upload active-uploads
                                           (first inactive-uploads))
            :inactive-uploads (drop-first-upload inactive-uploads)
            :uploads (merge uploads {(first inactive-uploads)
-                                    (start-upload (first inactive-uploads))})})
-      (> old-upload-slots new-upload-slots)
+                                    (start-upload (uploads (first inactive-uploads)))})})
+      (and (> old-upload-slots new-upload-slots)
+           (> (count active-uploads) new-upload-slots))
         (if-not (empty? active-uploads)
           {:active-uploads (drop-last-upload active-uploads)
            :inactive-uploads (prepend-upload inactive-uploads
                                              (last active-uploads))
            :uploads (merge uploads {(last active-uploads)
-                                    (stop-upload (last active-uploads))})}))))
+                                    (stop-upload (uploads (last active-uploads)))})}))))
 
 (defn upload-slots-watch-fn! [_ _ old-state new-state]
   (let [new-uploads-info (handle-upload-slots-change old-state new-state)]
     (if-not (nil? new-uploads-info)
-      (do
-        (swap! app-state/app-state merge new-uploads-info)))))
+      (swap! app-state/app-state merge new-uploads-info))))
 
 (add-watch app-state/app-state :upload-slots  upload-slots-watch-fn!)
 
