@@ -68,11 +68,13 @@
   (let [uploads-keys-diff (data/diff (keys (:uploads old-state))
                                      (keys (:uploads new-state)))
         deleted-upload-ids (first uploads-keys-diff)]
+
+    (println "DELETED-UPLOAD-ID" deleted-upload-ids)
     (if-not (nil? deleted-upload-ids)
       (let [active-uploads   (vec (remove (set deleted-upload-ids) (:active-uploads new-state)))
             inactive-uploads (vec (remove (set deleted-upload-ids) (:inactive-uploads new-state)))
             uploads (:uploads new-state)]
-        (println deleted-upload-ids)
+        (println "INACTIVE-UPLOADS:" inactive-uploads)
         (if-not (empty? inactive-uploads)
           (swap! app-state/app-state
                  merge
@@ -129,8 +131,9 @@
       (fn []
         (remove-watch app-state/app-state upload-id)
         (swap! app-state/app-state
-               merge
-               {:uploads (dissoc (:uploads @app-state/app-state) upload-id)})))
+               assoc
+               :uploads
+               (dissoc (:uploads @app-state/app-state) upload-id))))
 
     (add-watch app-state/app-state
                upload-id

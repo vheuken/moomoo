@@ -55,9 +55,7 @@
 (.change (js/$ "#file-upload")
   (fn [e]
     (let [file (aget (.-files (.-target e)) 0)]
-      (if (> (:upload-slots @app-state/app-state)
-             (count (:active-uploads @app-state/app-state)))
-        (check-hash file)))))
+      (check-hash file))))
 
 (.click (js/$ "#clear-songs-button")
   (fn [e]
