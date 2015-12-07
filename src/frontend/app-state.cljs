@@ -16,7 +16,6 @@
                           :current-sound-id nil
                           :ball-being-dragged? false
                           :looping? false
-                          :upload-queue []
                           :upload-slots default-upload-slots
                           :num-of-uploads 0
                           :num-of-downloads 0
