@@ -72,6 +72,7 @@
       (let [active-uploads   (vec (remove (set deleted-upload-ids) (:active-uploads new-state)))
             inactive-uploads (vec (remove (set deleted-upload-ids) (:inactive-uploads new-state)))
             uploads (:uploads new-state)]
+        (println deleted-upload-ids)
         (if-not (empty? inactive-uploads)
           (swap! app-state/app-state
                  merge
@@ -79,7 +80,8 @@
                                                  (first inactive-uploads))
                   :inactive-uploads (drop-first-upload inactive-uploads)
                   :uploads (merge uploads {(first inactive-uploads)
-                                           (start-upload (uploads (first inactive-uploads)))})}))))))
+                                           (start-upload (uploads (first inactive-uploads)))})})))))
+  (println "APP-STATE" @app-state/app-state))
 
 (add-watch app-state/app-state :upload-removed upload-removed-watch-fn!)
 

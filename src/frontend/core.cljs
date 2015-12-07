@@ -49,7 +49,7 @@
   (js/md5File file
     (fn [file-hash]
       (swap! app-state/app-state assoc :file-hashes (merge {file-hash file}
-                                                 (:file-hashes @app-state/app-state)))
+                                                           (:file-hashes @app-state/app-state)))
       (.emit app-state/socket "check-hash" file-hash))))
 
 (.change (js/$ "#file-upload")
@@ -57,8 +57,7 @@
     (let [file (aget (.-files (.-target e)) 0)]
       (if (> (:upload-slots @app-state/app-state)
              (count (:active-uploads @app-state/app-state)))
-        (check-hash file)
-        (swap! app-state/app-state assoc :upload-queue (vec (cons file (:upload-queue @app-state/app-state))))))))
+        (check-hash file)))))
 
 (.click (js/$ "#clear-songs-button")
   (fn [e]
