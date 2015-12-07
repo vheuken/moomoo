@@ -133,7 +133,6 @@
              {:uploads (merge (:uploads @app-state/app-state)
                               {upload-id new-upload})
               :inactive-uploads (prepend-upload (:inactive-uploads @app-state/app-state)
-                                                upload-id)}))
-    (println @app-state/app-state)))
+                                                upload-id)}))))
 
 
