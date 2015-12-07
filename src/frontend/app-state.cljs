@@ -15,8 +15,10 @@
                           :current-sound-id nil
                           :ball-being-dragged? false
                           :looping? false
-                          :upload-slots default-upload-slots
                           :file-hashes {}
+
+                          ; Uploads
+                          :upload-slots default-upload-slots
                           :uploads {}
                           :active-uploads []
                           :inactive-uploads []}))
