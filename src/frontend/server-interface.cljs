@@ -15,6 +15,7 @@
   (fn [message]
     (println "Received chat-message signal:" message)
     (swap! app-state/app-state assoc :messages (conj (:messages @app-state/app-state) message))
+    ; should probably replace "message-received?" flag with some type of watcher
     (swap! app-state/app-state assoc :message-received? true)))
 
 (.on app-state/socket "users-list"
@@ -62,8 +63,11 @@
              "sound-id:" sound-id)
     (let [last-current-track-id (:current-track-id @app-state/app-state)
           last-current-sound-id (:current-sound-id @app-state/app-state)]
-      (swap! app-state/app-state assoc :current-track-id track-id)
-      (swap! app-state/app-state assoc :current-sound-id sound-id)
+
+      (swap! app-state/app-state
+             merge
+             {:current-track-id track-id
+              :current-sound-id sound-id})
 
       (if-not (nil? last-current-sound-id)
         (player/destroy-track last-current-sound-id)))
@@ -84,12 +88,13 @@
              "current-sound-id:" current-sound-id
              "track-id-hashes:" room-track-id-map)
 
-    (swap! app-state/app-state assoc :track-id-hashes (js->clj room-track-id-map))
-    (swap! app-state/app-state assoc :track-order (js->clj track-order))
-    (swap! app-state/app-state assoc :music-info (vec (map #(clj->js %1) (js->clj room-music-info))))
-
-    (swap! app-state/app-state assoc :current-track-id current-track-id)
-    (swap! app-state/app-state assoc :current-sound-id current-sound-id)
+    (swap! app-state/app-state
+           merge
+           {:track-id-hashes (js->clj room-track-id-map)
+            :track-order (js->clj track-order)
+            :music-info (vec (map #(clj->js %1) (js->clj room-music-info)))
+            :current-track-id current-track-id
+            :current-sound-id current-sound-id})
 
     (if paused?
       (player/pause!))
@@ -146,11 +151,11 @@
     (println "Received upload-complete signal:"
              "music-info:" music-info
              "track-order:" track-order)
-    (swap! app-state/app-state assoc :music-info
-      (conj (:music-info @app-state/app-state) music-info))
-
-    (swap! app-state/app-state assoc :track-id-hashes (js->clj track-id-hashes))
-    (swap! app-state/app-state assoc :track-order (js->clj track-order))))
+    (swap! app-state/app-state
+           merge
+           {:music-info (conj (:music-info @app-state/app-state) music-info)
+            :track-id-hashes (js->clj track-id-hashes)
+            :track-order (js->clj track-order)})))
 
 (.on app-state/socket "upload-slots-change"
   (fn [new-upload-slots]

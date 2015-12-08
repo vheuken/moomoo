@@ -115,15 +115,19 @@
         blob-stream (.createBlobReadStream js/ss file)
         upload-watch-fn! (fn [_ _ old-state new-state]
                            (let [action (get-action old-state new-state upload-id)]
-                             (cond
-                               (= action :paused)
-                                 (.unpipe blob-stream)
-                               (= action :unpaused)
-                                 (.pipe blob-stream stream)
-                               (= action :stopped)
-                                 (.unpipe blob-stream)
-                               (= action :started)
-                                 (.pipe blob-stream stream))))]
+                             (if-not (nil? action)
+                               (do
+                                 (println "ACTION:" action)
+                                 (println "Upload-id:" upload-id)
+                                 (cond
+                                   (= action :paused)
+                                     (.unpipe blob-stream)
+                                   (= action :unpaused)
+                                     (.pipe blob-stream stream)
+                                   (= action :stopped)
+                                     (.unpipe blob-stream)
+                                   (= action :started)
+                                     (.pipe blob-stream stream))))))]
     (.on blob-stream "end"
       (fn []
         (remove-watch app-state/app-state upload-id)
