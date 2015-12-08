@@ -27,11 +27,15 @@
 (.on app-state/socket "file-upload-info"
   (fn [file-upload-info]
     (if (= (.-totalsize file-upload-info) (.-bytesreceived file-upload-info))
-      (swap! app-state/app-state assoc :current-uploads-info
-        (dissoc (:current-uploads-info @app-state/app-state) (.-id file-upload-info)))
-      (swap! app-state/app-state assoc :current-uploads-info
-        (merge (:current-uploads-info @app-state/app-state)
-          {(.-id file-upload-info) file-upload-info})))))
+      (swap! app-state/app-state
+             assoc
+             :current-uploads-info
+             (dissoc (:current-uploads-info @app-state/app-state) (.-id file-upload-info)))
+      (swap! app-state/app-state
+             assoc
+             :current-uploads-info
+             (merge (:current-uploads-info @app-state/app-state)
+                    {(.-id file-upload-info) file-upload-info})))))
 
 (.on app-state/socket "resume" player/resume!)
 
