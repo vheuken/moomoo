@@ -138,13 +138,18 @@
   (fn [socket-id]
     (println "Received umute-user signal for" socket-id)
     (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
-                                         {socket-id (merge (get (:users @app-state/app-state) socket-id)
-                                                                {"muted" false})}))))
+                                                   {socket-id (merge (get (:users @app-state/app-state) socket-id)
+                                                                     {"muted" false})}))))
 
 (.on app-state/socket "upload-cancelled"
   (fn [id]
-    (swap! app-state/app-state assoc :current-uploads-info
-      (dissoc (:current-uploads-info @app-state/app-state) id))))
+    (let [current-uploads-info (:current-uploads-info @app-state/app-state)
+          uploads (:uploads @app-state/app-state)
+          client-id (.-clientid (get current-uploads-info id))]
+    (swap! app-state/app-state
+           merge
+           {:current-uploads-info (dissoc current-uploads-info id)
+            :uploads (dissoc uploads client-id)}))))
 
 (.on app-state/socket "track-order-change"
   (fn [track-order]
