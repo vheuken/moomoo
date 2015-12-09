@@ -118,8 +118,8 @@
         stream (.createStream js/ss)
         blob-stream (.createBlobReadStream js/ss file)
         upload-watch-fn! (fn [_ _ old-state new-state]
-                           (println "COUNT:" (count (:active-uploads @app-state/app-state)))
-                           (let [action (get-action old-state new-state upload-id)]
+                           (let [action (get-action old-state new-state upload-id)
+                                 upload (get (:uploads @app-state/app-state) upload-id)]
                              (if-not (nil? action)
                                (do
                                  (println "ACTION:" action)
@@ -127,11 +127,13 @@
                                  (cond
                                    (= action :paused)
                                      (.unpipe blob-stream)
-                                   (= action :unpaused)
+                                   (and (= action :unpaused)
+                                        (:started? upload))
                                      (.pipe blob-stream stream)
                                    (= action :stopped)
                                      (.unpipe blob-stream)
-                                   (= action :started)
+                                   (and (= action :started)
+                                        (not (:paused? upload)))
                                      (.pipe blob-stream stream))))))]
     (.on blob-stream "end"
       (fn []
