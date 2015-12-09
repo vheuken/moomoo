@@ -69,10 +69,14 @@
   (let [deleted-upload-ids (clojure.set/difference (set (keys (:uploads old-state)))
                                                    (set (keys (:uploads new-state))))]
     (if-not (empty? deleted-upload-ids)
-      (let [active-uploads   (vec (remove (set deleted-upload-ids) (:active-uploads new-state)))
-            inactive-uploads (vec (remove (set deleted-upload-ids) (:inactive-uploads new-state)))
+      (let [active-uploads   (vec (remove deleted-upload-ids (:active-uploads new-state)))
+            inactive-uploads (vec (remove deleted-upload-ids (:inactive-uploads new-state)))
             uploads (:uploads new-state)]
-        (if-not (empty? inactive-uploads)
+        (if (empty? inactive-uploads)
+          (swap! app-state/app-state
+                 merge
+                 {:active-uploads active-uploads
+                  :inactive-uploads inactive-uploads})
           (swap! app-state/app-state
                  merge
                  {:active-uploads (append-upload active-uploads
@@ -114,6 +118,7 @@
         stream (.createStream js/ss)
         blob-stream (.createBlobReadStream js/ss file)
         upload-watch-fn! (fn [_ _ old-state new-state]
+                           (println "COUNT:" (count (:active-uploads @app-state/app-state)))
                            (let [action (get-action old-state new-state upload-id)]
                              (if-not (nil? action)
                                (do

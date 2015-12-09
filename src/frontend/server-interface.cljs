@@ -143,6 +143,7 @@
 
 (.on app-state/socket "upload-cancelled"
   (fn [id]
+    (println "upload cancelled!")
     (let [current-uploads-info (:current-uploads-info @app-state/app-state)
           uploads (:uploads @app-state/app-state)
           client-id (.-clientid (get current-uploads-info id))]
