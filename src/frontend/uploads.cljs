@@ -1,6 +1,7 @@
 (ns moomoo-frontend.uploads
   (:require [moomoo-frontend.app-state :as app-state]
-            [clojure.data :as data]))
+            [clojure.data :as data]
+            [clojure.set]))
 
 (defonce blank-upload {:paused?  false
                        :started? false})
@@ -37,7 +38,7 @@
         new-upload-slots (:upload-slots new-state)
         active-uploads   (:active-uploads new-state)
         inactive-uploads (:inactive-uploads new-state)
-        uploads (:uploads new-state)]
+        uploads          (:uploads new-state)]
     (println "UPLOADS!" uploads)
     (cond
       (and (< old-upload-slots new-upload-slots)
@@ -65,22 +66,20 @@
 (add-watch app-state/app-state :upload-slots upload-slots-watch-fn!)
 
 (defn upload-removed-watch-fn! [_ _ old-state new-state]
-  (let [uploads-keys-diff (data/diff (:uploads old-state)
-                                     (:uploads new-state))]
-    (if-not (nil? (first uploads-keys-diff))
-      (let [deleted-upload-ids (first (keys (first uploads-keys-diff)))]
-        (if-not (nil? deleted-upload-ids)
-          (let [active-uploads   (vec (remove (set deleted-upload-ids) (:active-uploads new-state)))
-                inactive-uploads (vec (remove (set deleted-upload-ids) (:inactive-uploads new-state)))
-                uploads (:uploads new-state)]
-            (if-not (empty? inactive-uploads)
-              (swap! app-state/app-state
-                     merge
-                     {:active-uploads (append-upload active-uploads
-                                                     (first inactive-uploads))
-                      :inactive-uploads (drop-first-upload inactive-uploads)
-                      :uploads (merge uploads {(first inactive-uploads)
-                                               (start-upload (uploads (first inactive-uploads)))})}))))))))
+  (let [deleted-upload-ids (clojure.set/difference (set (keys (:uploads old-state)))
+                                                   (set (keys (:uploads new-state))))]
+    (if-not (empty? deleted-upload-ids)
+      (let [active-uploads   (vec (remove (set deleted-upload-ids) (:active-uploads new-state)))
+            inactive-uploads (vec (remove (set deleted-upload-ids) (:inactive-uploads new-state)))
+            uploads (:uploads new-state)]
+        (if-not (empty? inactive-uploads)
+          (swap! app-state/app-state
+                 merge
+                 {:active-uploads (append-upload active-uploads
+                                                 (first inactive-uploads))
+                  :inactive-uploads (drop-first-upload inactive-uploads)
+                  :uploads (merge uploads {(first inactive-uploads)
+                                           (start-upload (uploads (first inactive-uploads)))})}))))))
 
 (add-watch app-state/app-state :upload-removed upload-removed-watch-fn!)
 
@@ -91,10 +90,11 @@
                                (get (:uploads new-state) upload-id))
         old-upload-state (first upload-diff)
         new-upload-state (second upload-diff)]
+    (println "old-upload-state" old-upload-state)
+    (println "new-upload-state" new-upload-state)
     (if (nil? old-upload-state)
       (if (:started? new-upload-state)
-        :started
-        nil)
+        :started)
       (if-not (nil? new-upload-state)
         (let [k (first (keys new-upload-state))
               v (first (vals new-upload-state))]
