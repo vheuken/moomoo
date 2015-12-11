@@ -7,7 +7,6 @@
                           :messages []
                           :message-received? false
                           :users {}
-                          :current-uploads-info {}
                           :track-order []
                           :track-id-hashes {}
                           :music-info []
@@ -18,6 +17,7 @@
                           :file-hashes {}
 
                           ; Uploads
+                          :current-uploads-info {}
                           :upload-slots default-upload-slots
                           :uploads {}
                           :uploads-order []}))
