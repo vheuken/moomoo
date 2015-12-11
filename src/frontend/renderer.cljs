@@ -98,7 +98,7 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li nil data))))
+      (dom/li nil "Not yet started: " (:filename data)))))
 
 (defn uploads-queue-view [data owner]
   (reify
@@ -110,7 +110,7 @@
                                                                      (.-id app-state/socket))
                                                                  (vals (:current-uploads-info data)))))
             uninitialized-upload-ids (remove initialized-upload-ids uploads-order)
-            uninitialized-uploads    uninitialized-upload-ids]
+            uninitialized-uploads    (vals (select-keys (:uploads data) uninitialized-upload-ids))]
         (om/build-all uninitialized-upload uninitialized-uploads))))))
 
 (defn current-track-tags-view [data owner]
