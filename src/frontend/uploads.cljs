@@ -33,29 +33,27 @@
 (defn drop-last-upload [uploads]
   (subvec uploads 0 (dec (count uploads))))
 
+(defn count-active-uploads [uploads-order uploads]
+  (let [active-uploads (vec (remove #(not (:started? (uploads %1))) uploads-order))]
+    (count active-uploads)))
+
 (defn handle-upload-slots-change [old-state new-state]
   (let [old-upload-slots (:upload-slots old-state)
         new-upload-slots (:upload-slots new-state)
-        active-uploads   (:active-uploads new-state)
-        inactive-uploads (:inactive-uploads new-state)
-        uploads          (:uploads new-state)]
+        uploads          (:uploads new-state)
+        active-uploads   (vec (remove #(not (:started? (uploads %1))) (:uploads-order new-state)))
+        inactive-uploads (vec (remove #(:started? (uploads %1)) (:uploads-order new-state)))]
     (println "UPLOADS!" uploads)
     (cond
       (and (< old-upload-slots new-upload-slots)
            (< (count active-uploads) new-upload-slots))
         (if-not (empty? inactive-uploads)
-          {:active-uploads (append-upload active-uploads
-                                          (first inactive-uploads))
-           :inactive-uploads (drop-first-upload inactive-uploads)
-           :uploads (merge uploads {(first inactive-uploads)
+          {:uploads (merge uploads {(first inactive-uploads)
                                     (start-upload (uploads (first inactive-uploads)))})})
       (and (> old-upload-slots new-upload-slots)
            (> (count active-uploads) new-upload-slots))
         (if-not (empty? active-uploads)
-          {:active-uploads (drop-last-upload active-uploads)
-           :inactive-uploads (prepend-upload inactive-uploads
-                                             (last active-uploads))
-           :uploads (merge uploads {(last active-uploads)
+          {:uploads (merge uploads {(last active-uploads)
                                     (stop-upload (uploads (last active-uploads)))})}))))
 
 (defn upload-slots-watch-fn! [_ _ old-state new-state]
@@ -69,19 +67,16 @@
   (let [deleted-upload-ids (clojure.set/difference (set (keys (:uploads old-state)))
                                                    (set (keys (:uploads new-state))))]
     (if-not (empty? deleted-upload-ids)
-      (let [active-uploads   (vec (remove deleted-upload-ids (:active-uploads new-state)))
-            inactive-uploads (vec (remove deleted-upload-ids (:inactive-uploads new-state)))
-            uploads (:uploads new-state)]
+      (let [uploads (:uploads new-state)
+            uploads-order (vec (remove deleted-upload-ids (:uploads-order new-state)))
+            inactive-uploads (vec (remove #(:started? (uploads %1)) uploads-order))]
         (if (empty? inactive-uploads)
           (swap! app-state/app-state
                  merge
-                 {:active-uploads active-uploads
-                  :inactive-uploads inactive-uploads})
+                 {:uploads-order uploads-order})
           (swap! app-state/app-state
                  merge
-                 {:active-uploads (append-upload active-uploads
-                                                 (first inactive-uploads))
-                  :inactive-uploads (drop-first-upload inactive-uploads)
+                 {:uploads-order uploads-order
                   :uploads (merge uploads {(first inactive-uploads)
                                            (start-upload (uploads (first inactive-uploads)))})}))))))
 
@@ -156,14 +151,12 @@
 
     (swap! app-state/app-state
            merge
-           (if (< (count (:active-uploads @app-state/app-state))
-                         (:upload-slots   @app-state/app-state))
-             {:uploads (merge (:uploads @app-state/app-state)
-                              {upload-id (start-upload new-upload)})
-              :active-uploads (append-upload (:active-uploads @app-state/app-state)
-                                             upload-id)}
-             {:uploads (merge (:uploads @app-state/app-state)
-                              {upload-id new-upload})
-              :inactive-uploads (append-upload (:inactive-uploads @app-state/app-state)
-                                               upload-id)}))))
+           {:uploads (merge (:uploads @app-state/app-state)
+                            (if (< (count-active-uploads (:uploads-order @app-state/app-state)
+                                                         (:uploads @app-state/app-state))
+                                   (:upload-slots   @app-state/app-state))
+                              {upload-id (start-upload new-upload)}
+                              {upload-id new-upload}))
+            :uploads-order (append-upload (:uploads-order @app-state/app-state)
+                                           upload-id)})))
 

@@ -20,5 +20,4 @@
                           ; Uploads
                           :upload-slots default-upload-slots
                           :uploads {}
-                          :active-uploads []
-                          :inactive-uploads []}))
+                          :uploads-order []}))
