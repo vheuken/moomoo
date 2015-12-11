@@ -99,8 +99,9 @@
                  :stopped)))))))
 
 (defn upload-file! [file]
-  (let [new-upload (merge blank-upload {:filename (.-name file)})
-        upload-id (.v4 js/uuid)
+  (let [upload-id (.v4 js/uuid)
+        new-upload (merge blank-upload {:filename (.-name file)
+                                        :id upload-id})
         stream (.createStream js/ss)
         blob-stream (.createBlobReadStream js/ss file)
         upload-watch-fn! (fn [_ _ old-state new-state]

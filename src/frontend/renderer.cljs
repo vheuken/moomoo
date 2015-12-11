@@ -98,7 +98,14 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li nil "Not yet started: " (:filename data)))))
+      (dom/li nil (list (dom/button #js {:onClick #(swap! app-state/app-state
+                                                          assoc
+                                                          :uploads
+                                                          (dissoc (:uploads @app-state/app-state)
+                                                                  (:id data)))}
+                                    "CANCEL")
+                        "Not yet started: "
+                        (:filename data))))))
 
 (defn uploads-queue-view [data owner]
   (reify
