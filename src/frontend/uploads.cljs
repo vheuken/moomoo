@@ -18,31 +18,22 @@
 (defn stop-upload [upload]
   (assoc upload :started? false))
 
-(defn initialize-upload [upload]
-  (assoc upload :started? true))
-
 (defn append-upload [uploads upload]
   (conj uploads upload))
 
-(defn prepend-upload [uploads upload]
-  (into [upload] uploads))
+(defn active-uploads [uploads-order uploads]
+  (vec (remove #(not (:started? (uploads %1))) uploads-order)))
 
-(defn drop-first-upload [uploads]
-  (subvec uploads 1))
-
-(defn drop-last-upload [uploads]
-  (subvec uploads 0 (dec (count uploads))))
-
-(defn count-active-uploads [uploads-order uploads]
-  (let [active-uploads (vec (remove #(not (:started? (uploads %1))) uploads-order))]
-    (count active-uploads)))
+(defn inactive-uploads [uploads-order uploads]
+  (vec (remove #(:started? (uploads %1)) uploads-order)))
 
 (defn handle-upload-slots-change [old-state new-state]
   (let [old-upload-slots (:upload-slots old-state)
         new-upload-slots (:upload-slots new-state)
         uploads          (:uploads new-state)
-        active-uploads   (vec (remove #(not (:started? (uploads %1))) (:uploads-order new-state)))
-        inactive-uploads (vec (remove #(:started? (uploads %1)) (:uploads-order new-state)))]
+        uploads-order    (:uploads-order new-state)
+        active-uploads   (active-uploads   uploads-order uploads)
+        inactive-uploads (inactive-uploads uploads-order uploads)]
     (println "UPLOADS!" uploads)
     (cond
       (and (< old-upload-slots new-upload-slots)
@@ -69,7 +60,7 @@
     (if-not (empty? deleted-upload-ids)
       (let [uploads (:uploads new-state)
             uploads-order (vec (remove deleted-upload-ids (:uploads-order new-state)))
-            inactive-uploads (vec (remove #(:started? (uploads %1)) uploads-order))]
+            inactive-uploads (inactive-uploads uploads-order uploads)]
         (if (empty? inactive-uploads)
           (swap! app-state/app-state
                  merge
@@ -152,8 +143,8 @@
     (swap! app-state/app-state
            merge
            {:uploads (merge (:uploads @app-state/app-state)
-                            (if (< (count-active-uploads (:uploads-order @app-state/app-state)
-                                                         (:uploads @app-state/app-state))
+                            (if (< (count (active-uploads (:uploads-order @app-state/app-state)
+                                                          (:uploads @app-state/app-state)))
                                    (:upload-slots   @app-state/app-state))
                               {upload-id (start-upload new-upload)}
                               {upload-id new-upload}))
