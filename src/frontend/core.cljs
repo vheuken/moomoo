@@ -35,7 +35,8 @@
     (swap! app-state/app-state
            assoc
            :uploads
-           {client-id (uploads/resume-upload upload)})))
+           (merge (:uploads @app-state/app-state)
+                  {client-id (uploads/resume-upload upload)}))))
 
 (defn pause-upload! [client-id]
   (println "Pausing upload" client-id)
@@ -43,7 +44,8 @@
     (swap! app-state/app-state
            assoc
            :uploads
-           {client-id (uploads/pause-upload upload)})))
+           (merge (:uploads @app-state/app-state)
+                  {client-id (uploads/pause-upload upload)}))))
 
 (defn check-hash [file]
   (js/md5File file
