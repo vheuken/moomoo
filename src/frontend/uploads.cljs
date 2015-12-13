@@ -14,6 +14,12 @@
   (and (not (:started? upload))
        (not (:paused?  upload))))
 
+(defn uploads-after-id [uploads-order id]
+  (let [index (first (keep-indexed #(when (= %2 id) %1)
+                                   uploads-order))]
+    (if (nil? index)
+      []
+      (subvec uploads-order (inc index)))))
 
 (defn pause-upload [upload]
   (assoc upload :paused? true))
@@ -125,20 +131,31 @@
                                  (println "Upload-id:" upload-id)
                                  (cond
                                    (= action :paused)
-                                    (do
-                                     (.unpipe blob-stream)
-                                     (let [first-inactive-upload-id (first (filter #(unpaused-and-not-started? (uploads %)) uploads-order))
-                                           first-inactive-upload    (uploads first-inactive-upload-id)]
-                                       (if-not (nil? first-inactive-upload)
-                                         (swap! app-state/app-state
-                                                assoc
-                                                :uploads
-                                                (merge uploads
-                                                       {first-inactive-upload-id
-                                                        (start-upload first-inactive-upload)})))))
+                                     (do
+                                       (.unpipe blob-stream)
+                                       (let [first-inactive-upload-id (first (filter #(unpaused-and-not-started? (uploads %)) uploads-order))
+                                             first-inactive-upload    (uploads first-inactive-upload-id)]
+                                         (if-not (nil? first-inactive-upload)
+                                           (swap! app-state/app-state
+                                                  assoc
+                                                  :uploads
+                                                  (merge uploads
+                                                         {first-inactive-upload-id
+                                                          (start-upload first-inactive-upload)})))))
                                    (and (= action :unpaused)
                                         (:started? upload))
-                                     (.pipe blob-stream stream)
+                                     (do
+                                       (.pipe blob-stream stream)
+                                       (let [uploads-order-after-id (uploads-after-id uploads-order upload-id)
+                                             upload-to-stop-id (first (active-uploads uploads-order-after-id uploads))
+                                             upload-to-stop (uploads upload-to-stop-id)]
+                                         (if-not (nil? upload-to-stop)
+                                           (swap! app-state/app-state
+                                                  assoc
+                                                  :uploads
+                                                  (merge uploads
+                                                         {upload-to-stop-id
+                                                          (stop-upload upload-to-stop)})))))
                                    (= action :stopped)
                                      (.unpipe blob-stream)
                                    (and (= action :started)
