@@ -6,6 +6,15 @@
 (defonce blank-upload {:paused?  false
                        :started? false})
 
+(defn active? [upload]
+  (and (:started? upload)
+       (not (:paused? upload))))
+
+(defn unpaused-and-not-started? [upload]
+  (and (not (:started? upload))
+       (not (:paused?  upload))))
+
+
 (defn pause-upload [upload]
   (assoc upload :paused? true))
 
@@ -22,10 +31,10 @@
   (conj uploads upload))
 
 (defn active-uploads [uploads-order uploads]
-  (vec (remove #(not (:started? (uploads %1))) uploads-order)))
+  (vec (remove #(not (active? (uploads %1))) uploads-order)))
 
 (defn inactive-uploads [uploads-order uploads]
-  (vec (remove #(:started? (uploads %1)) uploads-order)))
+  (vec (remove #(active? (uploads %1)) uploads-order)))
 
 (defn handle-upload-slots-change [old-state new-state]
   (let [old-upload-slots (:upload-slots old-state)
@@ -106,14 +115,27 @@
         blob-stream (.createBlobReadStream js/ss file)
         upload-watch-fn! (fn [_ _ old-state new-state]
                            (let [action (get-action old-state new-state upload-id)
-                                 upload (get (:uploads @app-state/app-state) upload-id)]
+                                 uploads (:uploads new-state)
+                                 uploads-order (:uploads-order new-state)
+                                 upload (get uploads upload-id)
+                                 upload-slots (:upload-slots new-state)]
                              (if-not (nil? action)
                                (do
                                  (println "ACTION:" action)
                                  (println "Upload-id:" upload-id)
                                  (cond
                                    (= action :paused)
+                                    (do
                                      (.unpipe blob-stream)
+                                     (let [first-inactive-upload-id (first (filter #(unpaused-and-not-started? (uploads %)) uploads-order))
+                                           first-inactive-upload    (uploads first-inactive-upload-id)]
+                                       (if-not (nil? first-inactive-upload)
+                                         (swap! app-state/app-state
+                                                assoc
+                                                :uploads
+                                                (merge uploads
+                                                       {first-inactive-upload-id
+                                                        (start-upload first-inactive-upload)})))))
                                    (and (= action :unpaused)
                                         (:started? upload))
                                      (.pipe blob-stream stream)
