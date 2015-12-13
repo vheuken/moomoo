@@ -103,6 +103,9 @@
                                                           (dissoc (:uploads @app-state/app-state)
                                                                   (:id data)))}
                                     "CANCEL")
+                        (if (:paused? data)
+                          (dom/button #js {:onClick #(core/resume-upload! (:id data))} "RESUME")
+                          (dom/button #js {:onClick #(core/pause-upload!  (:id data))} "PAUSE"))
                         "Not yet started: "
                         (:filename data))))))
 
