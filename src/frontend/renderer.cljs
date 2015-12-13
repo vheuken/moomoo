@@ -75,8 +75,7 @@
       (dom/li nil (if (= (.-uploaderid data) (.-id app-state/socket))
                     (list
                       (dom/button #js {:onClick #(core/cancel-upload (.-id data))}       "CANCEL")
-                      (if (and (:paused? ((:uploads @app-state/app-state) (.-clientid data)))
-                               (not (:stopped? ((:uploads @app-state/app-state) (.-clientid data)))))
+                      (if (:paused? ((:uploads @app-state/app-state) (.-clientid data)))
                         (dom/button #js {:onClick #(core/resume-upload!  (.-clientid data))} "RESUME")
                         (dom/button #js {:onClick #(core/pause-upload!   (.-clientid data))} "PAUSE"))))
                   (if (:stopped? ((:uploads @app-state/app-state) (.-clientid data)))
