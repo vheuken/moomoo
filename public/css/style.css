@@ -129,6 +129,7 @@ body,html {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  font-family: 'Noto Sans', sans-serif;
 }
 
 #messages-window {
@@ -262,6 +263,7 @@ body,html {
   position: relative;
 }
 
+
 #volume-bar-display {
   display: block;
   width: 100%;
@@ -270,7 +272,6 @@ body,html {
   position: relative;
   padding: 0px;
 }
-
 
 
 #volume {
