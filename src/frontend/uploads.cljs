@@ -145,7 +145,6 @@
                                    (and (= action :unpaused)
                                         (:started? upload))
                                      (do
-                                       (println "UNPAUSED1!")
                                        (.pipe blob-stream stream)
                                        (if (>  (count (active-uploads uploads-order uploads))
                                                upload-slots)
