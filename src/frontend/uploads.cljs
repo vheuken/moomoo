@@ -145,17 +145,19 @@
                                    (and (= action :unpaused)
                                         (:started? upload))
                                      (do
+                                       (println "UNPAUSED1!")
                                        (.pipe blob-stream stream)
-                                       (let [uploads-order-after-id (uploads-after-id uploads-order upload-id)
-                                             upload-to-stop-id (first (active-uploads uploads-order-after-id uploads))
-                                             upload-to-stop (uploads upload-to-stop-id)]
-                                         (if-not (nil? upload-to-stop)
-                                           (swap! app-state/app-state
-                                                  assoc
-                                                  :uploads
-                                                  (assoc (:uploads @app-state/app-state)
-                                                         upload-to-stop-id
-                                                         (stop-upload upload-to-stop))))))
+                                       (if (>  (count (active-uploads uploads-order uploads))
+                                               upload-slots)
+                                         (let [uploads-order-after-id (uploads-after-id uploads-order upload-id)
+                                               upload-to-stop-id (last (active-uploads uploads-order uploads))]
+                                           (if-let [upload-to-stop (uploads upload-to-stop-id)]
+                                             (swap! app-state/app-state
+                                                    assoc
+                                                    :uploads
+                                                    (assoc (:uploads @app-state/app-state)
+                                                           upload-to-stop-id
+                                                           (stop-upload upload-to-stop)))))))
                                    (= action :stopped)
                                      (.unpipe blob-stream)
                                    (and (= action :started)
