@@ -15,7 +15,10 @@
   (reify
     om/IRender
     (render [this]
-      (dom/div nil (get user "name") (if (get user "muted") " - Muted!")))))
+      (dom/div nil
+               (let [username (get user "name")]
+                 (if (empty? username) "Anonymous" username))
+               (if (get user "muted") " - Muted!")))))
 
 (defn users-list-view [data owner]
   (reify
