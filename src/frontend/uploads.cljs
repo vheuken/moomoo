@@ -139,9 +139,9 @@
                                            (swap! app-state/app-state
                                                   assoc
                                                   :uploads
-                                                  (merge uploads
-                                                         {first-inactive-upload-id
-                                                          (start-upload first-inactive-upload)})))))
+                                                  (assoc (:uploads @app-state/app-state)
+                                                         first-inactive-upload-id
+                                                         (start-upload first-inactive-upload))))))
                                    (and (= action :unpaused)
                                         (:started? upload))
                                      (do
@@ -153,9 +153,9 @@
                                            (swap! app-state/app-state
                                                   assoc
                                                   :uploads
-                                                  (merge uploads
-                                                         {upload-to-stop-id
-                                                          (stop-upload upload-to-stop)})))))
+                                                  (assoc (:uploads @app-state/app-state)
+                                                         upload-to-stop-id
+                                                         (stop-upload upload-to-stop))))))
                                    (= action :stopped)
                                      (.unpipe blob-stream)
                                    (and (= action :started)
