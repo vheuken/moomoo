@@ -135,7 +135,9 @@
                                        (.unpipe blob-stream)
                                        (let [first-inactive-upload-id (first (filter #(unpaused-and-not-started? (uploads %)) uploads-order))
                                              first-inactive-upload    (uploads first-inactive-upload-id)]
-                                         (if-not (nil? first-inactive-upload)
+                                         (if (and (not (nil? first-inactive-upload))
+                                                  (> (count (active-uploads uploads-order uploads))
+                                                     upload-slots))
                                            (swap! app-state/app-state
                                                   assoc
                                                   :uploads
@@ -146,8 +148,8 @@
                                         (:started? upload))
                                      (do
                                        (.pipe blob-stream stream)
-                                       (if (>  (count (active-uploads uploads-order uploads))
-                                               upload-slots)
+                                       (if (> (count (active-uploads uploads-order uploads))
+                                              upload-slots)
                                          (let [uploads-order-after-id (uploads-after-id uploads-order upload-id)
                                                upload-to-stop-id (last (active-uploads uploads-order uploads))]
                                            (if-let [upload-to-stop (uploads upload-to-stop-id)]
