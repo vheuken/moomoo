@@ -76,15 +76,19 @@
       (let [uploads (:uploads new-state)
             uploads-order (vec (remove deleted-upload-ids (:uploads-order new-state)))
             inactive-uploads (inactive-uploads uploads-order uploads)]
-        (if (empty? inactive-uploads)
-          (swap! app-state/app-state
-                 merge
-                 {:uploads-order uploads-order})
-          (swap! app-state/app-state
-                 merge
-                 {:uploads-order uploads-order
-                  :uploads (merge uploads {(first inactive-uploads)
-                                           (start-upload (uploads (first inactive-uploads)))})}))))))
+        (cond
+          (empty? inactive-uploads)
+            (swap! app-state/app-state
+                   merge
+                   {:uploads-order uploads-order})
+          (> (count (active-uploads uploads-order uploads))
+             (:upload-slots new-state))
+            (swap! app-state/app-state
+                   merge
+                   {:uploads-order uploads-order
+                    :uploads (assoc uploads
+                                    (first inactive-uploads)
+                                    (start-upload (uploads (first inactive-uploads))))}))))))
 
 (add-watch app-state/app-state :upload-removed upload-removed-watch-fn!)
 
