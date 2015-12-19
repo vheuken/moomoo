@@ -140,7 +140,7 @@
       (callback))))
 
 (defn set-current-track-position [room position callback]
-  (let [writer (transit/writer :json)
+  (let [writer (transit/writer :json-verbose)
         track-position-info {:position position
                              :start-time (.now js/Date)}]
   (.set redis-client (redis-room-prefix room "track-position")
@@ -149,13 +149,13 @@
       (callback track-position-info)))))
 
 (defn get-current-track-position [room callback]
- (let [reader (transit/reader :json)]
+ (let [reader (transit/reader :json-verbose)]
    (.get redis-client (redis-room-prefix room "track-position")
      (fn [err reply]
        (callback (transit/read reader reply))))))
 
 (defn pause-current-track [room position callback]
-  (let [writer (transit/writer :json)]
+  (let [writer (transit/writer :json-verbose)]
     (.set redis-client (redis-room-prefix room "track-position")
                        (transit/write writer {:position position
                                               :start-time (.now js/Date)})
@@ -165,12 +165,12 @@
             (callback)))))))
 
 (defn resume-current-track [room callback]
-  (let [reader (transit/reader :json)]
+  (let [reader (transit/reader :json-verbose)]
     (.get redis-client (redis-room-prefix room "track-position")
       (fn [err reply]
         (let [old-track-position-info (transit/read reader reply)
               new-track-position-info (merge old-track-position-info {:start-time (.now js/Date)})
-              writer (transit/writer :json)]
+              writer (transit/writer :json-verbose)]
           (.set redis-client (redis-room-prefix room "track-position")
                              (transit/write writer new-track-position-info)
             (fn []
@@ -199,7 +199,7 @@
 
 (defn change-current-track-position [room position callback]
   (letfn [(change-pos []
-            (let [writer (transit/writer :json)]
+            (let [writer (transit/writer :json-verbose)]
               (.set redis-client (redis-room-prefix room "track-position")
                                  (transit/write writer {:position position
                                                         :start-time (.now js/Date)})
@@ -257,7 +257,7 @@
                             (fn []
                               (.get redis-client (str "file-hash:" file-hash)
                                 (fn [err music-info-reply]
-                                  (let [reader (transit/reader :json)
+                                  (let [reader (transit/reader :json-verbose)
                                         music-info-json (transit/read reader music-info-reply)
                                         music-info (js->clj music-info-json)]
                                     (callback music-info)))))))))))))))))))
@@ -358,7 +358,7 @@
   ((.scriptWrap redis-lua "getAllMusicInfo") 0 room-id
     (fn [err music-info-reply]
       (let [info (js->clj music-info-reply)
-            reader (transit/reader :json)
+            reader (transit/reader :json-verbose)
             info-to-send (map #(transit/read reader %1) info)]
         (if (empty? info-to-send)
           (callback nil nil)
@@ -446,9 +446,7 @@
     0 room track-num sound-id
     (fn [err reply]
       (if-not (nil? reply)
-        (set-current-track-position room 0
-          (fn []
-            (callback reply)))))))
+        (callback reply)))))
 
 (defn mute-user [socket-id callback]
   (.set redis-client (str "users:" socket-id ":muted?") "true"
