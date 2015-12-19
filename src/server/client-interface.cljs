@@ -42,13 +42,14 @@
                                                                current-track-id
                                                                current-sound-id
                                                                (not playing?))))))))))))))))
+
 (defn change-track [room track-num sound-id]
   (rooms/change-track room track-num sound-id
     (fn [track-id]
       (.emit (.to io room)
              "track-change"
-              track-id
-              sound-id))))
+             track-id
+             sound-id))))
 
 (defn connection [socket]
   (println (str "User " (.-id socket) " has connected!"))
