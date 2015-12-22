@@ -80,6 +80,7 @@ body,html {
 
 #current-track-tags {
   position: absolute;
+  height: 100%;
 }
 
 #file-upload {

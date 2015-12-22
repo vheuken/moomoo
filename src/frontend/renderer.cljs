@@ -133,10 +133,9 @@
         (let [music-info (tracks/get-music-info-from-id (:current-track-id data))
               tags (.-tags music-info)]
 
-          (dom/div nil
+          (dom/div #js {:style #js {:height "100%"}}
             (dom/div #js {:style #js {:float "left"
-                                      :width "10%"
-                                      :height "10%"}}
+                                      :height "100%"}}
               (if (nil? (.-picture tags))
                 (dom/img #js {:src grey-out-image
                               :style #js {:width "100%"
