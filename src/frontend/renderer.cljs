@@ -136,14 +136,13 @@
           (dom/div #js {:style #js {:height "100%"}}
             (dom/div #js {:style #js {:float "left"
                                       :height "100%"}}
-              (if (nil? (.-picture tags))
-                (dom/img #js {:src grey-out-image
-                              :style #js {:width "100%"
-                                          :height "100%"}})
-                (dom/img #js {:src (str (first (string/split (.-href (.-location js/window))
-                                                             #"/rooms")) (.-picture tags))
-                              :style #js {:width "100%"
-                                          :height "100%"}})))
+
+              (dom/img #js {:src (if (nil? (.-picture tags))
+                                   grey-out-image
+                                   (str (first (string/split (.-href (.-location js/window))
+                                                             #"/rooms")) (.-picture tags)))
+                            :style #js {:width "100%"
+                                        :height "100%"}}))
             (dom/div nil
               (dom/div nil (.-title tags))
               (dom/div nil (.-album tags))
