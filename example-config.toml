@@ -3,6 +3,9 @@ music-watch-dirs = ["public/servermusic"]
 max-upload-slots = 4
 default-upload-slots = 2
 
+lastfm-api-key = ""
+lastfm-api-secret = ""
+
 [rooms]
   [rooms.testroom]
     allowed-file-extensions = [".mp3", ".wav", ".flac"]
