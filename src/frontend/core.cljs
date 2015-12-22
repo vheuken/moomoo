@@ -4,8 +4,9 @@
             [moomoo-frontend.player :as player]
             [moomoo-frontend.uploads :as uploads]))
 
-(defonce room-id (.getAttribute (. js/document (getElementById "roomid")) "data"))
+(defonce room-id    (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce max-upload-slots (js/Number (.getAttribute (. js/document (getElementById "max-upload-slots")) "data")))
+(defonce lastfm-key (.getAttribute (. js/document (getElementById "lastfm-key")) "data"))
 
 (enable-console-print!)
 
@@ -17,6 +18,15 @@
     (.emit app-state/socket "sign-in" room-id (.val (js/$ "#username")))
     (.show (js/$ "#file-upload-input"))
     false))
+
+(.click (js/$ "#lastfm-button")
+  (fn []
+    (let [callback-url (.-href (.-location js/window))
+          lastfm-url (str "http://www.last.fm/api/auth/?api_key="
+                          lastfm-key
+                          "&cb="
+                          callback-url)]
+      (set! (.-href (.-location js/window)) lastfm-url))))
 
 (defn send-chat-message [message]
   (println "Sending chat message: " message)

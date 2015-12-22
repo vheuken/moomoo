@@ -3,6 +3,7 @@ html
   head
     title MooMoo
     #roomid(data!= roomid)
+    #lastfm-key(data!= lastfmkey)
     #max-upload-slots(data!= maxuploadslots)
     #default-upload-slots(data!= defaultuploadslots)
     link(rel="stylesheet" type="text/css" href="/css/style.css")
@@ -28,7 +29,7 @@ html
         #next-track-button.player-button
         #loop-button.player-button
 
-      button#invite-friends-button.top-bar-button Invite Friends
+      button#lastfm-button.top-bar-button Last.fm
       input#file-upload(type="file")
       button#file-upload-input.top-bar-button(onclick="document.getElementById('file-upload').click();") Add Music
 
