@@ -14,9 +14,10 @@
                           :current-sound-id nil
                           :ball-being-dragged? false
                           :looping? false
-                          :file-hashes {}
+                          :lastfm-api-key nil
 
                           ; Uploads
+                          :file-hashes {}
                           :current-uploads-info {}
                           :upload-slots default-upload-slots
                           :uploads {}

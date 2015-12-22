@@ -28,6 +28,18 @@
                           callback-url)]
       (set! (.-href (.-location js/window)) lastfm-url))))
 
+(let [url (.-href (.-location js/window))
+      split-url (string/split url "?token=")
+      pruned-url (first split-url)
+      lastfm-token (second split-url)]
+  (if-not (nil? lastfm-token)
+    (do
+      (.replaceState (.-history js/window) "Object" "Title" pruned-url)
+      (swap! app-state/app-state
+            assoc
+            :lastfm-token
+            lastfm-token))))
+
 (defn send-chat-message [message]
   (println "Sending chat message: " message)
   (.emit app-state/socket "chat-message" room-id message))
