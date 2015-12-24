@@ -14,7 +14,7 @@
                           :current-sound-id nil
                           :ball-being-dragged? false
                           :looping? false
-                          :lastfm-api-key nil
+                          :lastfm-token nil
 
                           ; Uploads
                           :file-hashes {}

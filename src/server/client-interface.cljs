@@ -6,6 +6,7 @@
             [moomoo.config :as config]
             [moomoo.file-hash :as file-hash]))
 
+(def lastfm-api-url "http://ws.audioscrobbler.com/2.0/")
 (defonce socketio (nodejs/require "socket.io"))
 (defonce socketio-redis (nodejs/require "socket.io-redis"))
 (defonce socketio-stream (nodejs/require "socket.io-stream"))
@@ -15,6 +16,7 @@
 (defonce redis (nodejs/require "redis"))
 (defonce redis-pub-client (.createClient redis))
 (defonce redis-lock ((nodejs/require "redis-lock") rooms/redis-client))
+(defonce request (nodejs/require "request"))
 (defonce mmm (nodejs/require "mmmagic"))
 (defonce Magic (.-Magic mmm))
 
@@ -327,6 +329,37 @@
             (fn [ok?]
               (if ok?
                 (change-track room track-num sound-id))))))))
+
+  (.on socket "lastfm-scrobble"
+    (fn [token artist title]
+      (println "A")
+      (let [api-key (config/data "lastfm-api-key")
+            api-secret (config/data "lastfm-api-secret")
+            method "track.scrobble"
+            timestamp (Math.floor (/ (.now js/Date) 1000))
+            signature (str "api_key" api-key
+                           "artist" artist
+                           "method"  method
+                           "sk" token
+                           "timestamp" timestamp
+                           "token"   token
+                           "track" title
+                           api-secret)
+            signature-buffer (js/Buffer. signature)
+            signature-hash (file-hash/get-hash-from-buffer signature-buffer)]
+        (println signature)
+        (println signature-hash)
+        (.post request
+               #js {:url lastfm-api-url
+                    :form     #js {:api_key api-key
+                                   :api_sig signature-hash
+                                   :artist  artist
+                                   :method method
+                                   :sk token
+                                   :timestamp timestamp
+                                   :track   title}}
+                    (fn [err response body]
+                        (println err response body))))))
 
   (.on socket "change-upload-slots"
     (fn [new-upload-slots]

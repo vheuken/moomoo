@@ -34,7 +34,7 @@
       lastfm-token (second split-url)]
   (if-not (nil? lastfm-token)
     (do
-      (.replaceState (.-history js/window) "Object" "Title" pruned-url)
+      ;(.replaceState (.-history js/window) "Object" "Title" pruned-url)
       (swap! app-state/app-state
             assoc
             :lastfm-token
