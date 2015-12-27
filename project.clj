@@ -29,6 +29,7 @@
                        [toml "2.3.0"]
                        [request "2.67.0"]
                        [watchr "2.4.13"]
+                       [xml2js "0.4.15"]
                        [ws "0.8.0"]]}
 
   :plugins [[lein-cljsbuild "1.1.1"]
