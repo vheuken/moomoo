@@ -120,7 +120,10 @@
   (fn [file-hash]
     (println "File does not exist on server. Will upload. Hash: " file-hash)
     (let [file (get (:file-hashes @app-state/app-state) file-hash)]
-      (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))
+      (swap! app-state/app-state
+             assoc
+             :file-hashes
+             (dissoc (:file-hashes @app-state/app-state) file-hash))
       (uploads/upload-file! file))))
 
 (.on app-state/socket "user-muted"
@@ -137,9 +140,12 @@
 (.on app-state/socket "user-unmuted"
   (fn [socket-id]
     (println "Received umute-user signal for" socket-id)
-    (swap! app-state/app-state assoc :users (merge (:users @app-state/app-state)
-                                                   {socket-id (merge (get (:users @app-state/app-state) socket-id)
-                                                                     {"muted" false})}))))
+    (swap! app-state/app-state
+           assoc
+           :users
+           (merge (:users @app-state/app-state)
+                  {socket-id (merge (get (:users @app-state/app-state) socket-id)
+                                    {"muted" false})}))))
 
 (.on app-state/socket "upload-cancelled"
   (fn [id]
