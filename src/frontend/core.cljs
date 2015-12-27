@@ -2,7 +2,8 @@
   (:require [clojure.string :as string]
             [moomoo-frontend.app-state :as app-state]
             [moomoo-frontend.player :as player]
-            [moomoo-frontend.uploads :as uploads]))
+            [moomoo-frontend.uploads :as uploads]
+            [moomoo-frontend.lastfm :as lastfm]))
 
 (defonce room-id    (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce max-upload-slots (js/Number (.getAttribute (. js/document (getElementById "max-upload-slots")) "data")))
@@ -32,13 +33,15 @@
       split-url (string/split url "?token=")
       pruned-url (first split-url)
       lastfm-token (second split-url)]
+  (println "LASTFM TOKEN" lastfm-token)
   (if-not (nil? lastfm-token)
     (do
-      ;(.replaceState (.-history js/window) "Object" "Title" pruned-url)
+      (.replaceState (.-history js/window) "Object" "Title" pruned-url)
       (swap! app-state/app-state
             assoc
             :lastfm-token
-            lastfm-token))))
+            lastfm-token)
+      (lastfm/authenticate lastfm-token))))
 
 (defn send-chat-message [message]
   (println "Sending chat message: " message)

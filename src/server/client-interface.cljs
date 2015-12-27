@@ -332,8 +332,10 @@
   (.on socket "lastfm-auth"
     (fn [token]
       (lastfm/authenticate! (.-id socket) token
-        (fn [err response body]
-          ))))
+        (fn [status username]
+          (if (= :success status)
+            (.emit socket "lastfm-auth" "success" username)
+            (.emit socket "lastfm-auth" "failure" nil))))))
 
   (.on socket "change-upload-slots"
     (fn [new-upload-slots]

@@ -35,5 +35,5 @@
                               session-key (first (.-key session))]
                           (println username)
                           (println session-key)
-                          (callback :success username session-key))))
-                    (callback :failure))))))
+                          (callback :success username))))
+                    (callback :failure nil))))))

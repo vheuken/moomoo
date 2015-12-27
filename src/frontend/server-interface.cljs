@@ -170,3 +170,9 @@
 (.on app-state/socket "upload-slots-change"
   (fn [new-upload-slots]
     (swap! app-state/app-state assoc :upload-slots new-upload-slots)))
+
+(.on app-state/socket "lastfm-auth"
+  (fn [status username]
+    (if (= status "success")
+      (js/alert (str "Logged into LastFM as " username))
+      (js/alert "Failed to log into LastfM"))))
