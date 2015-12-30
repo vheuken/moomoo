@@ -337,6 +337,10 @@
             (.emit socket "lastfm-auth" "success" username)
             (.emit socket "lastfm-auth" "failure" nil))))))
 
+  (.on socket "lastfm-scrobble"
+    (fn [artist track]
+      (lastfm/scrobble! (.-id socket) artist track)))
+
   (.on socket "change-upload-slots"
     (fn [new-upload-slots]
       (println "Received change-upload-slots signal from" (.-id socket)
