@@ -180,5 +180,10 @@
 (.on app-state/socket "lastfm-auth"
   (fn [status username]
     (if (= status "success")
-      (js/alert (str "Logged into LastFM as " username))
+      (do
+        (swap! app-state/app-state
+               assoc
+               :lastfm-username
+               username)
+        (js/alert (str "Logged into LastFM as " username)))
       (js/alert "Failed to log into LastfM"))))

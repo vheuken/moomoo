@@ -406,7 +406,14 @@
       (dom/span nil
         (dom/span nil "Upload slots: " (:upload-slots data))
         (dom/button #js {:onClick core/incr-upload-slots} "Increase")
-        (dom/button #js {:onClick core/decr-upload-slots} "Decrease")))))
+        (dom/button #js {:onClick core/decr-upload-slots} "Decrease")
+        (dom/button #js {:onClick #(swap! app-state/app-state
+                                          assoc
+                                          :should-scrobble?
+                                          (not (:should-scrobble? @app-state/app-state)))}
+                    (if (:should-scrobble? @app-state/app-state)
+                      "Disable scrobbling"
+                      "Enable scrobbling"))))))
 
 
 (om/root upload-slots app-state/app-state {:target (. js/document (getElementById "upload-slots"))})

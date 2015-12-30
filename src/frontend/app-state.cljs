@@ -15,6 +15,8 @@
                           :ball-being-dragged? false
                           :looping? false
                           :lastfm-token nil
+                          :lastfm-username nil
+                          :should-scrobble? true
 
                           ; Uploads
                           :file-hashes {}

@@ -1,4 +1,7 @@
-(ns moomoo-frontend.player)
+(ns moomoo-frontend.player
+  (:require [moomoo-frontend.lastfm :as lastfm]
+            [moomoo-frontend.app-state :as app-state]
+            [moomoo-frontend.tracks   :as tracks]))
 
 (defonce app-state (atom {:current-sound nil
                           :current-sound-id nil
@@ -7,12 +10,33 @@
                           :ball-being-dragged? false
                           :on-finish nil
                           :volume 100
-                          :paused? false}))
+                          :paused? false
+                          :scrobbled? false}))
 
 ; TODO: can we get rid of this?
 ;       This is just used because om updates when the state atom updates
 ;       Maybe there is a way to do this in om with just :current-sound?
 (defn while-playing []
+  (this-as sound
+    (if (and (lastfm/signed-in?)
+             (lastfm/scrobble?))
+      (if-not (:scrobbled? @app-state)
+        (if (> (.-durationEstimate sound) 30000)
+          (if (or (>= (.-position sound) 240000)
+                  (>= (/ (.-position sound)
+                         (.-durationEstimate sound))
+                      0.5))
+            (let [music-info (tracks/get-music-info-from-id (:current-track-id @app-state/app-state))
+                  tags (.-tags music-info)
+                  artist (if (nil? (.-artist tags))
+                           ""
+                           (first (.-artist tags)))
+                  track (if (nil? (.-title tags))
+                          ""
+                          (.-title tags))]
+              (println artist track)
+              (lastfm/scrobble artist track)
+              (swap! app-state assoc :scrobbled? true)))))))
   (if-not (:ball-being-dragged? @app-state)
     (swap! app-state assoc :current-sound-position (.-position (:current-sound @app-state)))))
 
@@ -45,8 +69,11 @@
 
 (defn play-track! [sound-url sound-id position on-finish]
   (println "Sound URL to play:" sound-url)
-  (swap! app-state assoc :on-finish on-finish)
-  (swap! app-state assoc :current-sound-id sound-id)
+  (swap! app-state
+         merge
+         {:on-finish on-finish
+          :current-sound-id sound-id
+          :scrobbled? false})
 
   (swap! app-state assoc :current-sound
     (.createSound js/soundManager #js {:id sound-id
