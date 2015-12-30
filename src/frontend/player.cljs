@@ -1,7 +1,6 @@
 (ns moomoo-frontend.player
   (:require [moomoo-frontend.lastfm :as lastfm]
-            [moomoo-frontend.app-state :as app-state]
-            [moomoo-frontend.tracks   :as tracks]))
+            [moomoo-frontend.app-state :as app-state]))
 
 (defonce app-state (atom {:current-sound nil
                           :current-sound-id nil
@@ -26,16 +25,8 @@
                   (>= (/ (.-position sound)
                          (.-durationEstimate sound))
                       0.5))
-            (let [music-info (tracks/get-music-info-from-id (:current-track-id @app-state/app-state))
-                  tags (.-tags music-info)
-                  artist (if (nil? (.-artist tags))
-                           ""
-                           (first (.-artist tags)))
-                  track (if (nil? (.-title tags))
-                          ""
-                          (.-title tags))]
-              (println artist track)
-              (lastfm/scrobble artist track)
+            (do
+              (lastfm/scrobble (:current-track-id @app-state/app-state))
               (swap! app-state assoc :scrobbled? true)))))))
   (if-not (:ball-being-dragged? @app-state)
     (swap! app-state assoc :current-sound-position (.-position (:current-sound @app-state)))))

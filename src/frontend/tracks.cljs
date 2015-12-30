@@ -1,6 +1,5 @@
 (ns moomoo-frontend.tracks
   (:require [moomoo-frontend.app-state :as app-state]
-            [moomoo-frontend.core :as core]
             [moomoo-frontend.player :as player]))
 
 (defn delete-track! [track-id]

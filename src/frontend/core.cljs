@@ -1,9 +1,9 @@
 (ns moomoo-frontend.core
   (:require [clojure.string :as string]
             [moomoo-frontend.app-state :as app-state]
+            [moomoo-frontend.lastfm :as lastfm]
             [moomoo-frontend.player :as player]
-            [moomoo-frontend.uploads :as uploads]
-            [moomoo-frontend.lastfm :as lastfm]))
+            [moomoo-frontend.uploads :as uploads]))
 
 (defonce room-id    (.getAttribute (. js/document (getElementById "roomid")) "data"))
 (defonce max-upload-slots (js/Number (.getAttribute (. js/document (getElementById "max-upload-slots")) "data")))
