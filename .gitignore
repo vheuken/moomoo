@@ -17,3 +17,4 @@ pom.xml
 figwheel_server.log
 .cljs_rhino_repl/
 package.json
+config.toml
