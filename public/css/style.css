@@ -60,7 +60,7 @@
   left: 0;
   right:0;
   margin:auto;
-  width: 50%;
+
   /* make sure you can't accidentally highlight
    * the buttons */
   -webkit-touch-callout: none;
@@ -73,7 +73,7 @@
 
 .player-button {
   display: inline-block;
-  width: 6%;
+  width: 5%;
 }
 
 .player-button-img {
