@@ -55,10 +55,12 @@
 
 #player-buttons {
   position: absolute;
-  width: 50%;
-  left: 50%;
+  text-align: center;
   bottom: 0;
-
+  left: 0;
+  right:0;
+  margin:auto;
+  width: 50%;
   /* make sure you can't accidentally highlight
    * the buttons */
   -webkit-touch-callout: none;
