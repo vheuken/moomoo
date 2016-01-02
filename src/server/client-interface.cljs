@@ -462,7 +462,7 @@
                                             absolute-file-path (str file-upload-directory "/" file-hash file-extension)]
                                         (.rename fs temp-absolute-file-path absolute-file-path
                                           (fn []
-                                            (file-hash/handle-new-file absolute-file-path file-hash
+                                            (file-hash/handle-new-file absolute-file-path file-hash mime-type
                                               (fn [file-hash music-info]
                                                 (rooms/set-music-info file-id
                                                                       file-hash

@@ -188,15 +188,18 @@
             album (.-album tags)
             username (tracks/get-uploader-from-id track-id)
             current-track-id (:current-track-id @app-state/app-state)
+            mime-type (.-mime data)
+            title-str (str "Title: " title
+                           "\nAlbum: " album
+                           "\nArtist: " artist
+                           "\nAdded by: " username
+                           "\nMIME type: " mime-type)
             content (list
-                      (dom/span #js {:className "track-title"
-                                     :title title}
+                      (dom/span #js {:className "track-title"}
                                 title)
-                      (dom/span #js {:className "track-album"
-                                     :title album}
+                      (dom/span #js {:className "track-album"}
                                 album)
-                      (dom/span #js {:className "track-artist"
-                                     :title artist}
+                      (dom/span #js {:className "track-artist"}
                                 artist)
                       (dom/span #js {:className "track-uploader"
                                      :title (str "Added by " username)} "Added by " username)
@@ -206,11 +209,13 @@
         (if (:playing? state)
           (dom/div #js {:id track-id
                         :className "track-view"
+                        :title title-str
                         :onDoubleClick (fn []
                                          (core/change-track (first (core/indices #(= %1 track-id) (:track-order @app-state/app-state)))))
                         :style #js {:backgroundColor "#BABAB9"}} content)
           (dom/div #js {:id track-id
                         :className "track-view"
+                        :title title-str
                         :onDoubleClick (fn []
                                          (core/change-track (first (core/indices #(= %1 track-id) (:track-order @app-state/app-state)))))
                         } content))))

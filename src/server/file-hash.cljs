@@ -47,14 +47,15 @@
     (.readFile fs file-path
       (fn [err buf]
         (let [file-hash (get-hash-from-buffer buf)]
-          (handle-new-file file-path file-hash callback)))))
+          (handle-new-file file-path file-hash "application/octet-stream" callback)))))
 
-  ([file-path file-hash callback]
+  ([file-path file-hash mime-type callback]
     (mm (.createReadStream fs file-path)
       (fn [err tags]
         (handle-album-art (js->clj tags) file-hash
           (fn [tags-without-album-art]
             (let [music-info {:tags tags-without-album-art
+                              :mime mime-type
                               :filehash file-hash}
                   writer (transit/writer :json)
                   music-info-json (transit/write writer music-info)]
