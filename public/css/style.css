@@ -264,7 +264,7 @@ body,html {
   border-radius: 50%;
   background-color: #96C8E9;
   position: relative;
-  cursor: pointer;
+  cursor: move;
 }
 
 #volume-bar-display {
