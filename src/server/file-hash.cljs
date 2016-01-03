@@ -50,7 +50,7 @@
           (handle-new-file file-path file-hash "application/octet-stream" callback)))))
 
   ([file-path file-hash mime-type callback]
-    (mm (.createReadStream fs file-path)
+    (mm (.createReadStream fs file-path) #js {:duration true}
       (fn [err tags]
         (handle-album-art (js->clj tags) file-hash
           (fn [tags-without-album-art]
