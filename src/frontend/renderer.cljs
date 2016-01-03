@@ -222,7 +222,6 @@
                       (dom/span #js {:className "track-delete-button"
                                      :title "Delete Track"
                                      :onClick #(core/delete-track track-id)} "X"))]
-        (println "DURATION!" duration)
         (if (:playing? state)
           (dom/div #js {:id track-id
                         :className "track-view"
