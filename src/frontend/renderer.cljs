@@ -191,9 +191,14 @@
             duration-minutes (Math.floor (/ (mod duration 3600) 60))
             duration-seconds (Math.floor (mod duration 60))
             duration-str (str (if (> duration-hours 0)
-                                       (str duration-hours ":"))
-                                     duration-minutes ":"
-                                     duration-seconds)
+                                (do
+                                  (if (> 10 duration-minutes)
+                                    "0")
+                                  (str duration-hours ":")))
+                              duration-minutes ":"
+                              (if (> 10 duration-seconds)
+                                "0")
+                              duration-seconds)
             username (tracks/get-uploader-from-id track-id)
             current-track-id (:current-track-id @app-state/app-state)
             mime-type (.-mime data)
