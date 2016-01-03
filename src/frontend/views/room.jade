@@ -18,36 +18,37 @@ html
     script(src="/vendor/spark-md5.min.js")
     script(src="/vendor/md5-file.js")
   body
-    #username-form
-    #top-bar.top-bottom-bars
-      #current-track-tags
-      #progress-track
-      #player-buttons
-        #restart-button.player-button
-        #previous-track-button.player-button
-        #play-pause-button.player-button
-        #next-track-button.player-button
-        #loop-button.player-button
+    #moomoo
+      #username-form
+      #top-bar.top-bottom-bars
+        #current-track-tags
+        #progress-track
+        #player-buttons
+          #restart-button.player-button
+          #previous-track-button.player-button
+          #play-pause-button.player-button
+          #next-track-button.player-button
+          #loop-button.player-button
 
-      button#lastfm-button.top-bar-button Last.fm
-      input#file-upload(type="file")
-      button#file-upload-input.top-bar-button(onclick="document.getElementById('file-upload').click();") Add Music
+        button#lastfm-button.top-bar-button Last.fm
+        input#file-upload(type="file")
+        button#file-upload-input.top-bar-button(onclick="document.getElementById('file-upload').click();") Add Music
 
-    #center-area
-      #center-left
-        #messages-window
-        #message-box
-        #userslist
-      #track-queue
-        #playlist
-        #download-progress
-        #users-upload-progress
-        #queued-uploads
+      #center-area
+        #center-left
+          #messages-window
+          #message-box
+          #userslist
+        #track-queue
+          #playlist
+          #download-progress
+          #users-upload-progress
+          #queued-uploads
 
-    #bottom-bar.top-bottom-bars
-      #upload-slots
-      #volume
+      #bottom-bar.top-bottom-bars
+        #upload-slots
+        #volume
 
-      button#clear-songs-button.bottom-bar-button Clear Songs
+        button#clear-songs-button.bottom-bar-button Clear Songs
 
     script(src="/js/moomoo-frontend.js")
