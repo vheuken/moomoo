@@ -190,12 +190,17 @@
             duration-hours   (Math.floor (/ duration 3600))
             duration-minutes (Math.floor (/ (mod duration 3600) 60))
             duration-seconds (Math.floor (mod duration 60))
+            duration-str (str (if (> duration-hours 0)
+                                       (str duration-hours ":"))
+                                     duration-minutes ":"
+                                     duration-seconds)
             username (tracks/get-uploader-from-id track-id)
             current-track-id (:current-track-id @app-state/app-state)
             mime-type (.-mime data)
             title-str (str "Title: " title
                            "\nAlbum: " album
                            "\nArtist: " artist
+                           "\nDuration: " duration-str
                            "\nAdded by: " username
                            "\nMIME type: " mime-type)
             content (list
@@ -206,10 +211,7 @@
                       (dom/span #js {:className "track-artist"}
                                 artist)
                       (dom/span #js {:className "track-duration"}
-                                (str (if (> duration-hours 0)
-                                       (str duration-hours ":"))
-                                     duration-minutes ":"
-                                     duration-seconds))
+                                duration-str)
                       (dom/span #js {:className "track-uploader"
                                      :title (str "Added by " username)} "Added by " username)
                       (dom/span #js {:className "track-delete-button"
