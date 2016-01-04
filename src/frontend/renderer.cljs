@@ -247,11 +247,11 @@
       (apply dom/span nil
         (om/build-all track-view (:track-order data))))))
 
-(defn render-track-bar [data root-id display-bar-id progress-bar-id progress-ball-id ball-position]
+(defn render-track-bar [root-id display-bar-id progress-bar-id progress-ball-id ball-position]
   (let [height 20]
     (dom/div nil
       (let [top (/ height 2)
-            width (+ (.height (js/$ "#display-bar-id")))
+            width (+ (.height (js/$ (str "#" display-bar-id))))
             display-style #js {:height (str height "px")
                        :top (str top "px")
                        :borderRadius (str (/ height 2) "px")}]
@@ -265,7 +265,7 @@
         (dom/div #js {:id progress-bar-id
                       :className "track-bar"
                       :style bar-style}
-          (let [percent-completed (ball-position)
+          (let [percent-completed ball-position
                 style #js {:left (str percent-completed "%")}]
               (dom/div #js {:id progress-ball-id
                             :className "bar-tracker"
@@ -279,7 +279,7 @@
                   (dom/div #js {:className "track-ball-display"
                                 :style track-ball-display-style})))))))))
 
-(defn track-bar-did-mount [data owner ball-id containment start stop]
+(defn track-bar-did-mount [owner ball-id containment start stop]
   (.addEventListener js/window "resize" #(om/refresh! owner))
   (.draggable (js/$ ball-id) #js {:axis "x"
                                   :containment containment
@@ -291,23 +291,23 @@
   (reify
     om/IRender
     (render [this]
-      (render-track-bar data "#progress-track"
-                             "progress-track-bar-display"
-                             "progress-track-bar"
-                             "progress-track-ball"
-                             #(if (nil? (:current-sound data))
-                                  0
-                                  (* 100 (/ (:current-sound-position data)
-                                            (.-duration (:current-sound data)))))))
+      (render-track-bar "#progress-track"
+                        "progress-track-bar-display"
+                        "progress-track-bar"
+                        "progress-track-ball"
+                        (if (nil? (:current-sound data))
+                            0
+                            (* 100 (/ (:current-sound-position data)
+                                      (.-duration (:current-sound data)))))))
 
     om/IDidMount
     (did-mount [this]
-     (track-bar-did-mount data owner "#progress-track-ball"
-                                     "#progress-track-bar"
-                                     #(swap! player/app-state assoc
-                                             :ball-being-dragged?
-                                             true)
-                                     core/on-drag-stop))))
+     (track-bar-did-mount owner "#progress-track-ball"
+                                "#progress-track-bar"
+                                #(swap! player/app-state assoc
+                                        :ball-being-dragged?
+                                        true)
+                                core/on-drag-stop))))
 
 (defn play-pause-button [data owner]
   (reify
@@ -404,19 +404,19 @@
   (reify
     om/IRender
     (render [this]
-      (render-track-bar data "#volume"
-                             "volume-bar-display"
-                             "volume-bar"
-                             "volume-ball"
-                             #(:volume data)))
+      (render-track-bar "#volume"
+                        "volume-bar-display"
+                        "volume-bar"
+                        "volume-ball"
+                        (:volume data)))
 
 
     om/IDidMount
     (did-mount [this]
-      (track-bar-did-mount data owner "#volume-ball"
-                                      "#volume-bar"
-                                      nil
-                                      core/on-volume-drag-stop))))
+      (track-bar-did-mount owner "#volume-ball"
+                                 "#volume-bar"
+                                 nil
+                                 core/on-volume-drag-stop))))
 
 (om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
 
