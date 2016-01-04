@@ -284,21 +284,28 @@
   (.draggable (js/$ ball-id) #js {:axis "x"
                                   :containment containment
                                   :start start
-                                  :stop stop}))
+                                  :stop (fn [event ui]
+                                          (stop event ui)
+                                          (om/refresh! owner))}))
 
 
 (defn progress-track [data owner]
   (reify
-    om/IRender
-    (render [this]
+    om/IInitState
+    (init-state [_]
+      {:position 0})
+    om/IWillReceiveProps
+    (will-receive-props [ _ _]
+      (println "A")
+      (om/set-state! owner {:position (* 100 (/ (player/get-position)
+                                                (player/get-duration)))}))
+    om/IRenderState
+    (render-state [_ state]
       (render-track-bar "#progress-track"
                         "progress-track-bar-display"
                         "progress-track-bar"
                         "progress-track-ball"
-                        (if (nil? (:current-sound data))
-                            0
-                            (* 100 (/ (:current-sound-position data)
-                                      (.-duration (:current-sound data)))))))
+                        (:position state)))
 
     om/IDidMount
     (did-mount [this]
@@ -307,7 +314,9 @@
                                 #(swap! player/app-state assoc
                                         :ball-being-dragged?
                                         true)
-                                core/on-drag-stop))))
+                                (fn [event ui]
+                                  (om/set-state! owner {:position 0})
+                                  (core/on-drag-stop event ui))))))
 
 (defn play-pause-button [data owner]
   (reify

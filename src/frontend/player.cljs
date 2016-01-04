@@ -108,10 +108,14 @@
     (.setPosition (:current-sound @app-state) position)))
 
 (defn get-position []
-  (.-position (:current-sound @app-state)))
+  (if (nil? (:current-sound @app-state))
+    0
+    (.-position (:current-sound @app-state))))
 
 (defn get-duration []
-  (.-duration (:current-sound @app-state)))
+  (if (nil? (:current-sound @app-state))
+    0
+    (.-duration (:current-sound @app-state))))
 
 (defn is-sound-loaded? []
   (not (nil? (:current-sound @app-state))))

@@ -106,7 +106,8 @@
     (let [bar-width (.width (js/$ "#progress-track-bar"))
           new-position (* (player/get-duration)
                           (/ (.-left (.-position ui)) bar-width))]
-      (.emit app-state/socket "position-change" new-position))))
+      (.emit app-state/socket "position-change" new-position)
+      new-position)))
 
 (defn get-track-num-from-offset-top [offset-top]
   (println "Offset-top:" offset-top)
