@@ -102,7 +102,7 @@
 
 (defn on-drag-stop [event ui]
   (swap! player/app-state assoc :ball-being-dragged? false)
-  (if-not (player/is-sound-loaded?)
+  (if (player/is-sound-loaded?)
     (let [bar-width (.width (js/$ "#progress-track-bar"))
           new-position (* (player/get-duration)
                           (/ (.-left (.-position ui)) bar-width))]

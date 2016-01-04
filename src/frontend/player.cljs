@@ -114,7 +114,7 @@
   (.-duration (:current-sound @app-state)))
 
 (defn is-sound-loaded? []
-  (nil? (:current-sound @app-state)))
+  (not (nil? (:current-sound @app-state))))
 
 (defn set-volume [volume]
   (println "Setting volume to: " volume)
