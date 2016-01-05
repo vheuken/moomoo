@@ -4,6 +4,7 @@ html
     title MooMoo
     #roomid(data!= roomid)
     #lastfm-key(data!= lastfmkey)
+    #allowed-file-extensions(data!= allowedfileextensions)
     #max-upload-slots(data!= maxuploadslots)
     #default-upload-slots(data!= defaultuploadslots)
     link(rel="stylesheet" type="text/css" href="/css/style.css")
@@ -31,7 +32,7 @@ html
           #loop-button.player-button
 
         button#lastfm-button.top-bar-button Last.fm
-        input#file-upload(type="file")
+        input#file-upload(type="file" accept=allowedfileextensions)
         button#file-upload-input.top-bar-button(onclick="document.getElementById('file-upload').click();") Add Music
 
       #center-area

@@ -492,6 +492,12 @@
         (= mime-type "audio/x-wav"))
     true))
 
+(defn allowed-file-extensions [room]
+  (let [allowed-file-extensions (get ((config/data "rooms") room) "allowed-file-extensions")]
+    (if (nil? allowed-file-extensions)
+      [".mp3" ".wav"]
+      (js->clj allowed-file-extensions))))
+
 (defn is-file-extension-allowed? [room file-extension]
   (if (nil? (get ((config/data "rooms") room) "allowed-file-extensions"))
     (or (= file-extension ".mp3")

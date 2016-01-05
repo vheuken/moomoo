@@ -1,6 +1,7 @@
 (ns moomoo.core
   (:require [cljs.nodejs :as nodejs]
             [moomoo.client-interface :as client-interface]
+            [moomoo.rooms :as rooms]
             [moomoo.config :as config]
             [moomoo.watcher :as watcher]
             [figwheel.client :as fw]))
@@ -27,7 +28,9 @@
 (.get app "/rooms/:id" #(. %2 (render "room" #js {:roomid (.-id (.-params %1))
                                                   :maxuploadslots (config/data "max-upload-slots")
                                                   :defaultuploadslots (config/data "default-upload-slots")
-                                                  :lastfmkey (config/data "lastfm-api-key")})))
+                                                  :lastfmkey (config/data "lastfm-api-key")
+                                                  :allowedfileextensions (reduce (fn [a b] (str a "," b))
+                                                                                 (rooms/allowed-file-extensions (.-id (.-params %1))))})))
 
 (defn -main []
   (config/load-file! "config.toml")
