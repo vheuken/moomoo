@@ -296,7 +296,6 @@
       {:position 0})
     om/IWillReceiveProps
     (will-receive-props [ _ _]
-      (println "A")
       (om/set-state! owner {:position (* 100 (/ (player/get-position)
                                                 (player/get-duration)))}))
     om/IRenderState
