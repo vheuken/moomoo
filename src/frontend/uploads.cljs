@@ -140,7 +140,7 @@
                                        (let [first-inactive-upload-id (first (filter #(unpaused-and-not-started? (uploads %)) uploads-order))
                                              first-inactive-upload    (uploads first-inactive-upload-id)]
                                          (if (and (not (nil? first-inactive-upload))
-                                                  true #_(> (count (active-uploads uploads-order uploads))
+                                                  (> (count (active-uploads uploads-order uploads))
                                                      upload-slots))
                                            (swap! app-state/app-state
                                                   assoc
