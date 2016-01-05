@@ -81,7 +81,7 @@
             (swap! app-state/app-state
                    merge
                    {:uploads-order uploads-order})
-          (> (count (active-uploads uploads-order uploads))
+          (< (count (active-uploads uploads-order uploads))
              (:upload-slots new-state))
             (swap! app-state/app-state
                    merge
