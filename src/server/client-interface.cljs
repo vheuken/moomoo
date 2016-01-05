@@ -61,13 +61,14 @@
       (rooms/disconnect (.-id socket)
         (fn [room-id]
           (redis-lock. room-id
-            (fn [_]
+            (fn [done]
               (rooms/handle-disconnect room-id
                 (fn []
                   (rooms/get-all-users room-id
                     (fn [users]
                       (if-not (empty? users)
-                        (.emit (.to io room-id) "users-list" (clj->js users)))))
+                        (.emit (.to io room-id) "users-list" (clj->js users)))
+                      (done)))
                   (println (str (.-id socket) " has disconnected from " room-id))))))))))
 
   (.on socket "sign-in"
@@ -449,7 +450,7 @@
                       (println "Upload of" original-filename
                                "from" (.-id socket) "is complete!")
                       (redis-lock. room
-                        (fn [_]
+                        (fn [done]
                           (let [magic (Magic. (.-MAGIC_MIME_TYPE mmm))]
                             (.detectFile magic temp-absolute-file-path
                               (fn [_ mime-type]
@@ -487,7 +488,8 @@
                                                               (if-not started?
                                                                 (rooms/get-num-of-tracks room
                                                                   (fn [num-of-tracks]
-                                                                    (change-track room (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))))))))))))))))))))))))))
+                                                                    (change-track room (- num-of-tracks 1) (.v4 js-uuid))
+                                                                    (done))))))))))))))))))))))))))))))))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))
