@@ -145,7 +145,14 @@
                :uploads
                (assoc (:uploads @app-state/app-state)
                       upload-to-stop-id
-                      (stop-upload upload-to-stop)))))))
+                      (stop-upload upload-to-stop)))))
+    (if-not (active? (uploads upload-id))
+      (swap! app-state/app-state
+             assoc
+             :uploads
+             (assoc (:uploads @app-state/app-state)
+                    upload-id
+                    (start-upload (uploads upload-id)))))))
 
 (defn upload-file! [file]
   (let [upload-id (.v4 js/uuid)
@@ -168,8 +175,7 @@
                                      (do
                                        (.unpipe blob-stream)
                                        (handle-pause! uploads uploads-order upload-slots))
-                                   (and (= action :unpaused)
-                                        (:started? upload))
+                                   (= action :unpaused)
                                      (do
                                        (.pipe blob-stream stream)
                                        (handle-unpause-while-started! uploads
