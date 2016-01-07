@@ -120,15 +120,19 @@
 (defn handle-pause! [uploads uploads-order upload-slots]
   (let [first-inactive-upload-id (first (filter #(unpaused-and-not-started? (uploads %)) uploads-order))
         first-inactive-upload    (uploads first-inactive-upload-id)]
+    (println "INACTIVE-UPLOADS" first-inactive-upload)
+    (println "Active-uploads" (active-uploads uploads-order uploads))
+    (println (not (nil? first-inactive-upload)))
+    (println (> (count (active-uploads uploads-order uploads)) upload-slots))
     (if (and (not (nil? first-inactive-upload))
-             (> (count (active-uploads uploads-order uploads))
+             (< (count (active-uploads uploads-order uploads))
                 upload-slots))
       (swap! app-state/app-state
              assoc
              :uploads
              (assoc (:uploads @app-state/app-state)
-             first-inactive-upload-id
-             (start-upload first-inactive-upload))))))
+                    first-inactive-upload-id
+                    (start-upload first-inactive-upload))))))
 
 (defn handle-unpause-while-started! [uploads uploads-order upload-slots active-uploads upload-id]
   (if (> (count (active-uploads uploads-order uploads))
