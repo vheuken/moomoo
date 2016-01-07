@@ -134,7 +134,7 @@
                     first-inactive-upload-id
                     (start-upload first-inactive-upload))))))
 
-(defn handle-unpause-while-started! [uploads uploads-order upload-slots active-uploads upload-id]
+(defn handle-unpause! [uploads uploads-order upload-slots active-uploads upload-id]
   (if (> (count (active-uploads uploads-order uploads))
           upload-slots)
     (let [uploads-order-after-id (uploads-after-id uploads-order upload-id)
@@ -178,7 +178,7 @@
                                    (= action :unpaused)
                                      (do
                                        (.pipe blob-stream stream)
-                                       (handle-unpause-while-started! uploads
+                                       (handle-unpause! uploads
                                                                       uploads-order
                                                                       upload-slots
                                                                       active-uploads
