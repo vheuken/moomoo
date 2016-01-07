@@ -141,9 +141,8 @@
                                    grey-out-image
                                    (str (first (string/split (.-href (.-location js/window))
                                                              #"/rooms")) (.-picture tags)))
-                            :style #js {:width "100%"
-                                        :height "100%"}}))
-            (dom/div nil
+                            :style #js {:height "100%"}}))
+            (dom/div #js {:id "current-track-tags-text"}
               (dom/div nil (.-title tags))
               (dom/div nil (.-album tags))
               (dom/div nil (.-artist tags)))))))))
