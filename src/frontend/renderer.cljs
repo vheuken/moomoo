@@ -87,15 +87,6 @@
                   " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
                   (.-filename data)))))
 
-(defn users-upload-progress-view [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (apply dom/div nil
-        (let [sorted-uploads (sort #(compare (.-num %1) (.-num %2))
-                                   (vals (:current-uploads-info data)))]
-          (om/build-all user-upload-progress (vals (:current-uploads-info data))))))))
-
 (defn uninitialized-upload [data owner]
   (reify
     om/IRender
@@ -110,6 +101,29 @@
                           (dom/button #js {:onClick #(core/pause-upload!  (:id data))} "PAUSE"))
                         "Not yet started: "
                         (:filename data))))))
+
+(defn build-upload-id-view [upload-data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [upload (first upload-data)
+            upload-info (second upload-data)]
+        (if (nil? upload-info)
+          (om/build uninitialized-upload upload)
+          (om/build user-upload-progress upload-info))))))
+
+(defn users-upload-progress-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [uploads-data (map (fn [id]
+                                (let [upload-info (first (filter #(= id (.-clientid %1))
+                                                                 (vals (:current-uploads-info data))))]
+                                  [((:uploads data) id) upload-info]))
+                              (:uploads-order data))]
+        (apply dom/div nil
+          (om/build-all build-upload-id-view
+                        uploads-data))))))
 
 (defn uploads-queue-view [data owner]
   (reify
@@ -356,7 +370,6 @@
   (reify
     om/IRender
     (render [this]
-      (println (core/get-current-track-num))
       (if (nil? (:current-track-id data))
         (dom/img #js {:className "player-button-img"
                       :src grey-out-image})
