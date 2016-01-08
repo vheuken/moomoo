@@ -122,8 +122,9 @@
                                                                      (.-id app-state/socket))
                                                                  (vals (:current-uploads-info data)))))
             uninitialized-upload-ids (remove initialized-upload-ids uploads-order)
-            uninitialized-uploads    (vals (select-keys (:uploads data) uninitialized-upload-ids))]
-        (om/build-all uninitialized-upload uninitialized-uploads))))))
+            uninitialized-uploads    (vals (select-keys (:uploads data) uninitialized-upload-ids))
+            uninitialized-uploads-sorted (sort-by #(.indexOf (to-array uploads-order) (:id %)) uninitialized-uploads)]
+        (om/build-all uninitialized-upload uninitialized-uploads-sorted))))))
 
 (defn current-track-tags-view [data owner]
   (reify
