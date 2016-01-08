@@ -81,12 +81,15 @@
               (if-not reply
                 (rooms/init-room room-id #(println))
                 (handle-hotjoin socket room-id))))
-          (rooms/set-username room-id (.-id socket) username
-            (fn []
-              (println "Sending sign-in success signal to" (.-id socket))
-              (.emit socket "sign-in-success")
-              (rooms/get-all-users room-id
-                #(.emit (.to io room-id) "users-list" (clj->js %1)))))))))
+          (let [user-id (.v4 js-uuid)]
+            (rooms/set-user-id room-id (.-id socket) user-id
+              (fn []
+                (rooms/set-username room-id user-id username
+                  (fn []
+                    (println "Sending sign-in success signal to" (.-id socket))
+                    (.emit socket "sign-in-success" user-id)
+                    (rooms/get-all-users room-id
+                      #(.emit (.to io room-id) "users-list" (clj->js %1))))))))))))
 
   (.on socket "chat-message"
     (fn [room message]

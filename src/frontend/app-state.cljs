@@ -6,6 +6,7 @@
 (defonce app-state (atom {:signed-in? false
                           :messages []
                           :message-received? false
+                          :user-id nil
                           :users {}
                           :track-order []
                           :track-id-hashes {}

@@ -503,3 +503,8 @@
     (or (= file-extension ".mp3")
         (= file-extension ".wav"))
     true))
+
+(defn set-user-id [room-id socket-id user-id callback]
+  (.set redis-client (str "socket:" socket-id ":user-id" user-id)
+    (fn [_ _]
+      (callback))))

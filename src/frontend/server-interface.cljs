@@ -7,9 +7,13 @@
             [clojure.string :as string]))
 
 (.on app-state/socket "sign-in-success"
-  (fn []
+  (fn [userId]
     (println "Successfully signed in!")
-    (swap! app-state/app-state assoc :signed-in? true)))
+    (println "User-id:" userId)
+    (swap! app-state/app-state
+           merge
+           {:signed-in? true
+            :user-id    userId})))
 
 (.on app-state/socket "chat-message"
   (fn [message]
