@@ -15,6 +15,16 @@
 (defn redis-room-prefix [room-id suffix]
   (str "room:" room-id ":" suffix))
 
+(defn set-user-id [socket-id user-id callback]
+  (.set redis-client (str "socket:" socket-id ":user-id") user-id
+    (fn [_ _]
+      (callback))))
+
+(defn get-user-id-from-socket [socket-id callback]
+  (.get redis-client (str "socket:" socket-id ":user-id")
+    (fn [_ reply]
+      (callback reply))))
+
 (defn set-waiting-to-start-flag [room-id callback]
   (.set redis-client (redis-room-prefix room-id "waiting-to-start?") "true"
     (fn [err reply]
@@ -84,22 +94,25 @@
 (defn get-room-from-user-id [id callback]
   (.get redis-client (str "users:" id) #(callback %2)))
 
-(defn delete-user [id callback]
+(defn delete-user [socket-id id callback]
   (.get redis-client (str "users:" id)
     (fn [err reply]
       (if-not (nil? reply)
         (let [room (.toString reply)]
           (.hdel redis-client (redis-room-prefix room "users") id
             (fn []
+              (.del redis-client (str "socket:" socket-id ":user-id"))
               (.del redis-client (str "users:" id ":muted?"))
               (.del redis-client (str "users:" id) callback))))))))
 
 (defn disconnect [socket-id callback]
-  (.get redis-client (str "users:" socket-id)
-    (fn [err reply]
-      (if-not (nil? reply)
-        (delete-user socket-id #(callback reply))
-        callback))))
+  (get-user-id-from-socket socket-id
+    (fn [user-id]
+      (.get redis-client (str "users:" user-id)
+        (fn [err reply]
+          (if-not (nil? reply)
+            (delete-user socket-id user-id #(callback reply))
+            (callback)))))))
 
 (defn does-room-exist? [room callback]
   (.get redis-client (redis-room-prefix room "current-track")
@@ -504,7 +517,3 @@
         (= file-extension ".wav"))
     true))
 
-(defn set-user-id [room-id socket-id user-id callback]
-  (.set redis-client (str "socket:" socket-id ":user-id" user-id)
-    (fn [_ _]
-      (callback))))

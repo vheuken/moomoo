@@ -68,8 +68,8 @@
                     (fn [users]
                       (if-not (empty? users)
                         (.emit (.to io room-id) "users-list" (clj->js users)))
-                      (done)))
-                  (println (str (.-id socket) " has disconnected from " room-id))))))))))
+                      (println (str (.-id socket) " has disconnected from " room-id))
+                      (done)))))))))))
 
   (.on socket "sign-in"
     (fn [room-id username]
@@ -82,7 +82,7 @@
                 (rooms/init-room room-id #(println))
                 (handle-hotjoin socket room-id))))
           (let [user-id (.v4 js-uuid)]
-            (rooms/set-user-id room-id (.-id socket) user-id
+            (rooms/set-user-id (.-id socket) user-id
               (fn []
                 (rooms/set-username room-id user-id username
                   (fn []
