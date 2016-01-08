@@ -49,7 +49,6 @@
         uploads-order    (:uploads-order new-state)
         active-uploads   (active-uploads   uploads-order uploads)
         inactive-uploads (inactive-uploads uploads-order uploads)]
-    (println "UPLOADS!" uploads)
     (cond
       (and (< old-upload-slots new-upload-slots)
            (< (count active-uploads) new-upload-slots))
@@ -73,23 +72,21 @@
   (let [deleted-upload-ids (clojure.set/difference (set (keys (:uploads old-state)))
                                                    (set (keys (:uploads new-state))))]
     (if-not (empty? deleted-upload-ids)
-      (let [uploads (:uploads new-state)
-            uploads-order (vec (remove deleted-upload-ids (:uploads-order new-state)))
+      (let [uploads (:uploads @app-state/app-state)
+            uploads-order (vec (remove deleted-upload-ids (:uploads-order @app-state/app-state)))
             inactive-uploads (inactive-uploads uploads-order uploads)]
-        (println "NUM OF UPLOADS" (count uploads-order))
-        (cond
-          (empty? inactive-uploads)
-            (swap! app-state/app-state
-                   merge
-                   {:uploads-order uploads-order})
-          (< (count (active-uploads uploads-order uploads))
-             (:upload-slots new-state))
-            (swap! app-state/app-state
-                   merge
-                   {:uploads-order uploads-order
-                    :uploads (assoc uploads
-                                    (first inactive-uploads)
-                                    (start-upload (uploads (first inactive-uploads))))}))))))
+        (if (< (count (active-uploads uploads-order uploads))
+               (:upload-slots new-state))
+          (swap! app-state/app-state
+                 merge
+                 {:uploads-order uploads-order
+                  :uploads (assoc uploads
+                                  (first inactive-uploads)
+                                  (start-upload (uploads (first inactive-uploads))))})
+          (swap! app-state/app-state
+                   assoc
+                   :uploads-order
+                   uploads-order))))))
 
 (add-watch app-state/app-state :upload-removed upload-removed-watch-fn!)
 
@@ -100,8 +97,6 @@
                                (get (:uploads new-state) upload-id))
         old-upload-state (first upload-diff)
         new-upload-state (second upload-diff)]
-    (println "old-upload-state" old-upload-state)
-    (println "new-upload-state" new-upload-state)
     (if (nil? old-upload-state)
       (if (:started? new-upload-state)
         :started)
@@ -121,10 +116,6 @@
 (defn handle-pause! [uploads uploads-order upload-slots]
   (let [first-inactive-upload-id (first (filter #(unpaused-and-not-started? (uploads %)) uploads-order))
         first-inactive-upload    (uploads first-inactive-upload-id)]
-    (println "INACTIVE-UPLOADS" first-inactive-upload)
-    (println "Active-uploads" (active-uploads uploads-order uploads))
-    (println (not (nil? first-inactive-upload)))
-    (println (> (count (active-uploads uploads-order uploads)) upload-slots))
     (if (and (not (nil? first-inactive-upload))
              (< (count (active-uploads uploads-order uploads))
                 upload-slots))

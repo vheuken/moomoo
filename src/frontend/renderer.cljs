@@ -103,9 +103,7 @@
       (dom/li nil (list (dom/button #js {:onClick #(swap! app-state/app-state
                                                           merge
                                                           {:uploads (dissoc (:uploads @app-state/app-state)
-                                                                            (:id data))
-                                                           :uploads-order (vec (remove #{(:id data)}
-                                                                                       (:uploads-order @app-state/app-state)))})}
+                                                                            (:id data))})}
                                     "CANCEL")
                         (if (:paused? data)
                           (dom/button #js {:onClick #(core/resume-upload! (:id data))} "RESUME")
