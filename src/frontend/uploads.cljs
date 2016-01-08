@@ -76,6 +76,7 @@
       (let [uploads (:uploads new-state)
             uploads-order (vec (remove deleted-upload-ids (:uploads-order new-state)))
             inactive-uploads (inactive-uploads uploads-order uploads)]
+        (println "NUM OF UPLOADS" (count uploads-order))
         (cond
           (empty? inactive-uploads)
             (swap! app-state/app-state

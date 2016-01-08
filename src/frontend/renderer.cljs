@@ -101,10 +101,11 @@
     om/IRender
     (render [this]
       (dom/li nil (list (dom/button #js {:onClick #(swap! app-state/app-state
-                                                          assoc
-                                                          :uploads
-                                                          (dissoc (:uploads @app-state/app-state)
-                                                                  (:id data)))}
+                                                          merge
+                                                          {:uploads (dissoc (:uploads @app-state/app-state)
+                                                                            (:id data))
+                                                           :uploads-order (vec (remove #{(:id data)}
+                                                                                       (:uploads-order @app-state/app-state)))})}
                                     "CANCEL")
                         (if (:paused? data)
                           (dom/button #js {:onClick #(core/resume-upload! (:id data))} "RESUME")
