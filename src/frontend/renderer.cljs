@@ -125,20 +125,6 @@
           (om/build-all build-upload-id-view
                         uploads-data))))))
 
-(defn uploads-queue-view [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (apply dom/div nil
-      (let [uploads-order (:uploads-order data)
-            initialized-upload-ids (set (map #(.-clientid %1) (remove #(= (.-uploaderid data)
-                                                                     (.-id app-state/socket))
-                                                                 (vals (:current-uploads-info data)))))
-            uninitialized-upload-ids (remove initialized-upload-ids uploads-order)
-            uninitialized-uploads    (vals (select-keys (:uploads data) uninitialized-upload-ids))
-            uninitialized-uploads-sorted (sort-by #(.indexOf (to-array uploads-order) (:id %)) uninitialized-uploads)]
-        (om/build-all uninitialized-upload uninitialized-uploads-sorted))))))
-
 (defn current-track-tags-view [data owner]
   (reify
     om/IRender
@@ -164,7 +150,6 @@
 (om/root users-list-view app-state/app-state {:target (. js/document (getElementById "userslist"))})
 (om/root messages-view app-state/app-state {:target (. js/document (getElementById "messages-window"))})
 (om/root users-upload-progress-view app-state/app-state {:target (. js/document (getElementById "users-upload-progress"))})
-(om/root uploads-queue-view app-state/app-state {:target (. js/document (getElementById "queued-uploads"))})
 (om/root username-form app-state/app-state {:target (. js/document (getElementById "username-form"))})
 (om/root message-form app-state/app-state {:target (. js/document (getElementById "message-box"))})
 (om/root current-track-tags-view app-state/app-state {:target (. js/document (getElementById "current-track-tags"))})
