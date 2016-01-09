@@ -152,202 +152,233 @@
     (fn [position]
       (println "Received pause signal with position" position
                "from" (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room]
-          (rooms/cooldown room "play-pause"
-            (fn [ok?]
-              (if ok?
-                (rooms/pause-current-track room position
-                  (fn []
-                    (.emit (.to io room) "pause" position))))))))))
+
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room]
+              (rooms/cooldown room "play-pause"
+                (fn [ok?]
+                  (if ok?
+                    (rooms/pause-current-track room position
+                      (fn []
+                        (.emit (.to io room) "pause" position))))))))))))
 
   (.on socket "resume"
     (fn []
       (println "Received resume signal from" (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room]
-          (rooms/cooldown room "play-pause"
-            (fn [ok?]
-              (if ok?
-                (rooms/resume-current-track room
-                  (fn []
-                    (.emit (.to io room) "resume"))))))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room]
+              (rooms/cooldown room "play-pause"
+                (fn [ok?]
+                  (if ok?
+                    (rooms/resume-current-track room
+                      (fn []
+                        (.emit (.to io room) "resume"))))))))))))
 
   (.on socket "position-change"
     (fn [position]
       (println "Received position-change signal with position" position
                "from" (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room]
-          (rooms/cooldown room "position-change"
-            (fn [ok?]
-              (if ok?
-                (rooms/get-current-sound-id room
-                  (fn [sound-id]
-                    (if-not (nil? sound-id)
-                      (rooms/change-current-track-position room position
-                        (fn []
-                          (.emit (.to io room) "position-change" position)))))))))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room]
+              (rooms/cooldown room "position-change"
+                (fn [ok?]
+                  (if ok?
+                    (rooms/get-current-sound-id room
+                      (fn [sound-id]
+                        (if-not (nil? sound-id)
+                          (rooms/change-current-track-position room position
+                            (fn []
+                              (.emit (.to io room) "position-change" position)))))))))))))))
 
   (.on socket "start-looping"
     (fn []
       (println "Received start-looping signal from" (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room]
-
-          (rooms/cooldown room "looping"
-            (fn [ok?]
-              (if ok?
-                (rooms/start-looping room
-                  (fn []
-                    (.emit (.to io room) "set-loop" true))))))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room]
+              (rooms/cooldown room "looping"
+                (fn [ok?]
+                  (if ok?
+                    (rooms/start-looping room
+                      (fn []
+                        (.emit (.to io room) "set-loop" true))))))))))))
 
   (.on socket "stop-looping"
     (fn []
       (println "Received stop-looping signal from" (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room]
-          (rooms/cooldown room "looping"
-            (fn [ok?]
-              (if ok?
-                (rooms/stop-looping room
-                  (fn []
-                    (.emit (.to io room) "set-loop" false))))))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room]
+              (rooms/cooldown room "looping"
+                (fn [ok?]
+                  (if ok?
+                    (rooms/stop-looping room
+                      (fn []
+                        (.emit (.to io room) "set-loop" false))))))))))))
 
   (.on socket "mute-user"
     (fn []
       (println "Socket id " (.-id socket) " is muted!")
-      (rooms/mute-user (.-id socket)
-        (fn []
-          (rooms/get-room-from-user-id (.-id socket)
-            (fn [room-id]
-              (.emit (.to io room-id) "user-muted" (.-id socket))))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/mute-user user-id
+            (fn []
+              (rooms/get-room-from-user-id (.-id socket)
+                (fn [room-id]
+                  (.emit (.to io room-id) "user-muted" (.-id socket))))))))))
 
   (.on socket "unmute-user"
     (fn []
       (println "Socket id " (.-id socket) " is unmuted!")
-      (rooms/unmute-user (.-id socket)
-        (fn []
-          (rooms/get-room-from-user-id (.-id socket)
-            (fn [room-id]
-              (.emit (.to io room-id) "user-unmuted" (.-id socket))))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/unmute-user user-id
+            (fn []
+              (rooms/get-room-from-user-id (.-id socket)
+                (fn [room-id]
+                  (.emit (.to io room-id) "user-unmuted" (.-id socket))))))))))
 
 
   (.on socket "track-complete"
     (fn []
       (println "Received track-complete signal from " (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room]
-          (rooms/client-sync room "track-complete" (.-id socket)
-            (fn [synced?]
-              (if synced?
-                (rooms/clear-track-complete room
-                  (fn []
-                    (rooms/is-looping? room
-                      (fn [looping?]
-                        (if looping?
-                          (rooms/set-current-track-position room 0
-                            (fn []
-                              (.emit (.to io room) "position-change" 0)))
-                          (rooms/next-track room
-                            (fn [track-id sound-id]
-                              (rooms/track-complete room
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room]
+              (rooms/client-sync room "track-complete" (.-id socket)
+                (fn [synced?]
+                  (if synced?
+                    (rooms/clear-track-complete room
+                      (fn []
+                        (rooms/is-looping? room
+                          (fn [looping?]
+                            (if looping?
+                              (rooms/set-current-track-position room 0
                                 (fn []
-                                  (if-not (nil? track-id)
-                                    (rooms/clear-ready-to-start room
-                                      (fn []
-                                        (rooms/set-waiting-to-start-flag room
+                                  (.emit (.to io room) "position-change" 0)))
+                              (rooms/next-track room
+                                (fn [track-id sound-id]
+                                  (rooms/track-complete room
+                                    (fn []
+                                      (if-not (nil? track-id)
+                                        (rooms/clear-ready-to-start room
                                           (fn []
-                                            (.emit (.to io room)
-                                                   "track-change"
-                                                   track-id
-                                                   sound-id))))))))))))))))))))))
+                                            (rooms/set-waiting-to-start-flag room
+                                              (fn []
+                                                (.emit (.to io room)
+                                                       "track-change"
+                                                       track-id
+                                                       sound-id))))))))))))))))))))))))
 
   (.on socket "track-deleted"
     (fn []
       (println "Received track-delete signal from" (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room]
-          (rooms/client-sync room "track-deleted" (.-id socket)
-            (fn [synced?]
-              (if synced?
-                (rooms/track-complete room
-                  (fn []
-                    (rooms/delete-client-sync room "track-deleted"
+
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room]
+              (rooms/client-sync room "track-deleted" (.-id socket)
+                (fn [synced?]
+                  (if synced?
+                    (rooms/track-complete room
                       (fn []
-                        (rooms/clear-ready-to-start room
+                        (rooms/delete-client-sync room "track-deleted"
                           (fn []
-                            (rooms/clear-track-complete room
+                            (rooms/clear-ready-to-start room
                               (fn []
-                                (rooms/next-track room
-                                  (fn [track-id sound-id]
-                                    (println "next-track returned track-id:" track-id)
-                                    (if-not (nil? track-id)
-                                      (.emit (.to io room)
-                                             "track-change"
-                                             track-id
-                                             sound-id)))))))))))))))))))
+                                (rooms/clear-track-complete room
+                                  (fn []
+                                    (rooms/next-track room
+                                      (fn [track-id sound-id]
+                                        (println "next-track returned track-id:" track-id)
+                                        (if-not (nil? track-id)
+                                          (.emit (.to io room)
+                                                 "track-change"
+                                                 track-id
+                                                 sound-id)))))))))))))))))))))
 
 
   (.on socket "clear-songs"
     (fn []
       (println "Received clear-songs signal from" (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room-id]
-          (rooms/clear-songs room-id
-            (fn []
-              (.emit (.to io room-id) "clear-songs")))))))
+
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room-id]
+              (rooms/clear-songs room-id
+                (fn []
+                  (.emit (.to io room-id) "clear-songs")))))))))
 
   (.on socket "delete-track"
     (fn [track-id]
       (println "Received delete-track signal for track-id" track-id
                "from" (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room-id]
-          (rooms/delete-track room-id track-id
-            (fn [next-track-num]
-              (rooms/set-delete-flag room-id
-                (fn []
-                  (if-not (nil? next-track-num)
-                    (.emit (.to io room-id) "delete-track" track-id))))))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room-id]
+              (rooms/delete-track room-id track-id
+                (fn [next-track-num]
+                  (rooms/set-delete-flag room-id
+                    (fn []
+                      (if-not (nil? next-track-num)
+                        (.emit (.to io room-id) "delete-track" track-id))))))))))))
 
   (.on socket "track-order-change"
     (fn [track-id destination-track-num]
       (println "Track order change of track-id:" track-id
                "to track-num:" destination-track-num)
-
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room-id]
-          (rooms/cooldown room-id "track-order-change"
-            (fn [ok?]
-              (if ok?
-                (rooms/change-track-order room-id track-id destination-track-num
-                  (fn [new-track-order]
-                    (.emit (.to io room-id) "track-order-change" new-track-order))))))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room-id]
+              (rooms/cooldown room-id "track-order-change"
+                (fn [ok?]
+                  (if ok?
+                    (rooms/change-track-order room-id track-id destination-track-num
+                      (fn [new-track-order]
+                        (.emit (.to io room-id) "track-order-change" new-track-order))))))))))))
 
   (.on socket "change-track"
     (fn [track-num sound-id]
       (println "Received change-track signal to track-num" track-num
                "with sound-id" sound-id
                "from" (.-id socket))
-      (rooms/get-room-from-user-id (.-id socket)
-        (fn [room]
-          (rooms/cooldown room "change-track"
-            (fn [ok?]
-              (if ok?
-                (change-track room track-num sound-id))))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-room-from-user-id user-id
+            (fn [room]
+              (rooms/cooldown room "change-track"
+                (fn [ok?]
+                  (if ok?
+                    (change-track room track-num sound-id))))))))))
 
   (.on socket "lastfm-auth"
     (fn [token]
-      (lastfm/authenticate! (.-id socket) token
-        (fn [status username]
-          (if (= :success status)
-            (.emit socket "lastfm-auth" "success" username)
-            (.emit socket "lastfm-auth" "failure" nil))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (lastfm/authenticate! user-id token
+            (fn [status username]
+              (if (= :success status)
+                (.emit socket "lastfm-auth" "success" username)
+                (.emit socket "lastfm-auth" "failure" nil))))))))
 
   (.on socket "lastfm-scrobble"
     (fn [artist track]
-      (lastfm/scrobble! (.-id socket) artist track)))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (lastfm/scrobble! user-id artist track)))))
 
   (.on socket "change-upload-slots"
     (fn [new-upload-slots]
