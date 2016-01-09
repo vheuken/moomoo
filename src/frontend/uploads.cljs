@@ -131,10 +131,11 @@
                     (start-upload first-inactive-upload))))))
 
 (defn handle-unpause! [uploads uploads-order upload-slots active-uploads upload-id]
-  (if (> (count (active-uploads uploads-order uploads))
+  (if (>= (count (active-uploads uploads-order uploads))
           upload-slots)
     (let [uploads-order-after-id (uploads-after-id uploads-order upload-id)
           upload-to-stop-id (last (active-uploads uploads-order uploads))]
+      (println "upload-to-stop" upload-to-stop-id)
       (if-let [upload-to-stop (uploads upload-to-stop-id)]
         (swap! app-state/app-state
                assoc
@@ -163,27 +164,24 @@
                                  upload (get uploads upload-id)
                                  upload-slots (:upload-slots new-state)]
                              (if-not (nil? action)
-                               (do
-                                 (println "ACTION:" action)
-                                 (println "Upload-id:" upload-id)
-                                 (cond
-                                   (= action :paused)
-                                     (do
-                                       (.unpipe blob-stream)
-                                       (handle-pause! uploads uploads-order upload-slots))
-                                   (= action :unpaused)
-                                     (do
-                                       (.pipe blob-stream stream)
-                                       (handle-unpause! uploads
-                                                        uploads-order
-                                                        upload-slots
-                                                        active-uploads
-                                                        upload-id))
-                                   (= action :stopped)
+                               (cond
+                                 (= action :paused)
+                                   (do
                                      (.unpipe blob-stream)
-                                   (and (= action :started)
-                                        (not (:paused? upload)))
-                                     (.pipe blob-stream stream))))))]
+                                     (handle-pause! uploads uploads-order upload-slots))
+                                 (= action :unpaused)
+                                   (do
+                                     (.pipe blob-stream stream)
+                                     (handle-unpause! uploads
+                                                      uploads-order
+                                                      upload-slots
+                                                      active-uploads
+                                                      upload-id))
+                                 (= action :stopped)
+                                   (.unpipe blob-stream)
+                                 (and (= action :started)
+                                      (not (:paused? upload)))
+                                   (.pipe blob-stream stream)))))]
     (.on blob-stream "end"
       (fn []
         (remove-watch app-state/app-state upload-id)
