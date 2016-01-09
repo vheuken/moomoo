@@ -101,9 +101,11 @@
         (let [room (.toString reply)]
           (.hdel redis-client (redis-room-prefix room "users") id
             (fn []
-              (.del redis-client (str "socket:" socket-id ":user-id"))
-              (.del redis-client (str "users:" id ":muted?"))
-              (.del redis-client (str "users:" id) callback))))))))
+              (.del redis-client (str "socket:" socket-id ":user-id")
+                (fn []
+                  (.del redis-client (str "users:" id ":muted?")
+                    (fn []
+                      (.del redis-client (str "users:" id) callback))))))))))))
 
 (defn disconnect [socket-id callback]
   (get-user-id-from-socket socket-id

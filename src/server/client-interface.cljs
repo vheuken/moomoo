@@ -95,10 +95,12 @@
     (fn [room message]
       (println "Received chat-message in " room "from" (.-id socket)
                "containing:" message)
-      (rooms/get-username room (.-id socket)
-        (fn [username]
-          (.emit (.to io room) "chat-message" #js {:username username
-                                                   :message  message})))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-username room user-id
+            (fn [username]
+              (.emit (.to io room) "chat-message" #js {:username username
+                                                       :message  message})))))))
 
   (.on socket "ready-to-start"
     (fn [sound-id]
