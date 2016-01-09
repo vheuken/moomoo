@@ -175,10 +175,10 @@
                                      (do
                                        (.pipe blob-stream stream)
                                        (handle-unpause! uploads
-                                                                      uploads-order
-                                                                      upload-slots
-                                                                      active-uploads
-                                                                      upload-id))
+                                                        uploads-order
+                                                        upload-slots
+                                                        active-uploads
+                                                        upload-id))
                                    (= action :stopped)
                                      (.unpipe blob-stream)
                                    (and (= action :started)
