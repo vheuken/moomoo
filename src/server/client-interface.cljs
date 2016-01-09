@@ -136,18 +136,16 @@
                 (rooms/get-current-sound-id room
                   (fn [current-sound-id]
                     (if (= sound-id current-sound-id)
-                      (rooms/user-ready-to-start (.-id socket)
-                        (fn [num-users-ready]
-                          (rooms/get-num-of-users room
-                            (fn [num-users]
-                              (if (= num-users num-users-ready)
-                                (rooms/has-track-started? room
-                                  (fn [started?]
-                                    (if started?
-                                      (start-track room nil)
-                                      (rooms/start-current-track room
-                                        (fn [track-position-info]
-                                          (start-track room track-position-info)))))))))))))))))))))
+                      (rooms/client-sync room "sync-start" user-id
+                        (fn [ready?]
+                          (if ready?
+                            (rooms/has-track-started? room
+                              (fn [started?]
+                                (if started?
+                                  (start-track room nil)
+                                  (rooms/start-current-track room
+                                    (fn [track-position-info]
+                                      (start-track room track-position-info)))))))))))))))))))
 
   (.on socket "pause"
     (fn [position]

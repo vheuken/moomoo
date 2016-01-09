@@ -294,17 +294,10 @@
     (fn [err reply]
       (callback reply))))
 
-(defn user-ready-to-start [socket-id callback]
-  (get-room-from-user-id socket-id
-    (fn [room]
-      (.lpush redis-client (redis-room-prefix room "sync-start") socket-id
-        (fn [err reply]
-          (callback reply))))))
-
-(defn client-sync [room-id sync-command socket-id callback]
+(defn client-sync [room-id sync-command user-id callback]
   (get-num-of-users room-id
     (fn [num-users]
-      (.lpush redis-client (redis-room-prefix room-id sync-command) socket-id
+      (.lpush redis-client (redis-room-prefix room-id sync-command) user-id
         (fn [err length]
           (if (= length num-users)
             (callback true)
