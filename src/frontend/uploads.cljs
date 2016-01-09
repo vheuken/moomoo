@@ -48,13 +48,17 @@
         uploads          (:uploads new-state)
         uploads-order    (:uploads-order new-state)
         active-uploads   (active-uploads   uploads-order uploads)
-        inactive-uploads (inactive-uploads uploads-order uploads)]
+        inactive-uploads (inactive-uploads uploads-order uploads)
+        unpaused-inactive-uploads (vec (remove #(:paused? (uploads %)) inactive-uploads))]
     (cond
       (and (< old-upload-slots new-upload-slots)
            (< (count active-uploads) new-upload-slots))
-        (if-not (empty? inactive-uploads)
-          {:uploads (merge uploads {(first inactive-uploads)
-                                    (start-upload (uploads (first inactive-uploads)))})})
+      (do
+    (println "ACTIVE-UPLOADS:" active-uploads)
+    (println "inactive-uploads:" inactive-uploads)
+        (if-not (empty? unpaused-inactive-uploads)
+          {:uploads (merge uploads {(first unpaused-inactive-uploads)
+                                    (start-upload (uploads (first unpaused-inactive-uploads)))})}))
       (and (> old-upload-slots new-upload-slots)
            (> (count active-uploads) new-upload-slots))
         (if-not (empty? active-uploads)
