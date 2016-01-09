@@ -75,7 +75,7 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li nil (if (= (.-uploaderid data) (.-id app-state/socket))
+      (dom/li nil (if (= (.-uploaderid data) (:user-id @app-state/app-state))
                     (list
                       (dom/button #js {:onClick #(core/cancel-upload (.-id data))}       "CANCEL")
                       (if (:paused? ((:uploads @app-state/app-state) (.-clientid data)))
