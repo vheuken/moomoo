@@ -56,6 +56,19 @@
 (defn connection [socket]
   (println (str "User " (.-id socket) " has connected!"))
 
+  (.on socket "socket-id-change"
+    (fn [user-id]
+      (rooms/set-user-id (.-id socket) user-id
+        (fn []
+          (rooms/get-room-from-user-id user-id
+            (fn [room-id]
+              (.join socket room-id
+                (fn []
+                  (rooms/get-all-users room-id
+                    (fn [users]
+                      (if-not (empty? users)
+                        (.emit (.to io room-id) "users-list" (clj->js users)))))))))))))
+
   (.on socket "disconnect"
     (fn []
       (rooms/disconnect (.-id socket)
@@ -151,7 +164,6 @@
     (fn [position]
       (println "Received pause signal with position" position
                "from" (.-id socket))
-
       (rooms/get-user-id-from-socket (.-id socket)
         (fn [user-id]
           (rooms/get-room-from-user-id user-id

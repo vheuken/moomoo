@@ -6,6 +6,12 @@
             [moomoo-frontend.uploads :as uploads]
             [clojure.string :as string]))
 
+(.on app-state/socket "reconnect"
+  (fn []
+    (println "RECONNECT!")
+    (if-let [user-id (:user-id @app-state/app-state)]
+      (.emit app-state/socket "socket-id-change" user-id))))
+
 (.on app-state/socket "sign-in-success"
   (fn [userId]
     (println "Successfully signed in!")

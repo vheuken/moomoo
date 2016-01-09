@@ -39,10 +39,6 @@
     (fn [err res]
       (println "Entering redis-monitoring mode")))
 
-  (.on redis-client "monitor"
-    (fn [timestamp args]
-      (println "REDIS:" timestamp ": " (.inspect util args))))
-
   (println (str "Listening on port " port))
   (watcher/watch-directories! (config/data "music-watch-dirs"))
   (client-interface/start-listening!)

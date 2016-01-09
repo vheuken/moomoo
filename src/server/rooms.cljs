@@ -18,7 +18,9 @@
 (defn set-user-id [socket-id user-id callback]
   (.set redis-client (str "socket:" socket-id ":user-id") user-id
     (fn [_ _]
-      (callback))))
+      (.set redis-client (str "users:" user-id ":socket-id") socket-id
+        (fn [_ _]
+          (callback))))))
 
 (defn get-user-id-from-socket [socket-id callback]
   (.get redis-client (str "socket:" socket-id ":user-id")
