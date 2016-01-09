@@ -394,23 +394,24 @@
       (file-hash/file-hash-exists? file-hash
         (fn [file-exists?]
           (if file-exists?
-            (do
-              (.emit socket "hash-found" file-hash)
-              (rooms/set-music-info-from-hash (.v4 js-uuid)
-                                              file-hash
-                                              (.-id socket)
-                (fn [music-info]
-                  (rooms/get-room-from-user-id (.-id socket)
-                    (fn [room-id]
-                      (rooms/get-track-order room-id
-                        (fn [track-order]
-                          (rooms/get-track-id-hashes room-id
-                            (fn [track-id-hashes]
-                              (.emit (.to io room-id) "upload-complete"
-                                                      (clj->js music-info)
-                                                      track-order
-                                                      track-id-hashes)))))
-                      (rooms/is-waiting-to-start? room-id
+            (rooms/get-user-id-from-socket (.-id socket)
+              (fn [user-id]
+                (.emit socket "hash-found" file-hash)
+                (rooms/set-music-info-from-hash (.v4 js-uuid)
+                                                file-hash
+                                                (.-id socket)
+                  (fn [music-info]
+                    (rooms/get-room-from-user-id (.-id socket)
+                      (fn [room-id]
+                        (rooms/get-track-order room-id
+                          (fn [track-order]
+                            (rooms/get-track-id-hashes room-id
+                              (fn [track-id-hashes]
+                                (.emit (.to io room-id) "upload-complete"
+                                                        (clj->js music-info)
+                                                        track-order
+                                                        track-id-hashes)))))
+                        (rooms/is-waiting-to-start? room-id
                         (fn [waiting?]
                           (if-not waiting?
                             (rooms/has-track-started? room-id
@@ -418,7 +419,7 @@
                                 (if-not started?
                                   (rooms/get-num-of-tracks room-id
                                     (fn [num-of-tracks]
-                                      (change-track room-id (- num-of-tracks 1) (.v4 js-uuid)))))))))))))))
+                                      (change-track room-id (- num-of-tracks 1) (.v4 js-uuid))))))))))))))))
             (.emit socket "hash-not-found" file-hash))))))
 
   (.on socket "cancel-upload"
