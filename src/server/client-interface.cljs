@@ -60,16 +60,17 @@
     (fn []
       (rooms/disconnect (.-id socket)
         (fn [room-id]
-          (redis-lock. room-id
-            (fn [done]
-              (rooms/handle-disconnect room-id
-                (fn []
-                  (rooms/get-all-users room-id
-                    (fn [users]
-                      (if-not (empty? users)
-                        (.emit (.to io room-id) "users-list" (clj->js users)))
-                      (println (str (.-id socket) " has disconnected from " room-id))
-                      (done)))))))))))
+          (if-not (nil? room-id)
+            (redis-lock. room-id
+              (fn [done]
+                (rooms/handle-disconnect room-id
+                  (fn []
+                    (rooms/get-all-users room-id
+                      (fn [users]
+                        (if-not (empty? users)
+                          (.emit (.to io room-id) "users-list" (clj->js users)))
+                        (println (str (.-id socket) " has disconnected from " room-id))
+                        (done))))))))))))
 
   (.on socket "sign-in"
     (fn [room-id username]
@@ -425,15 +426,17 @@
   (.on socket "cancel-upload"
     (fn [id]
       (println "Received cancel-upload signal from" (.-id socket) " for id:" id)
-      (rooms/get-uploader-id id
-        (fn [uploader-id]
-          (if (= uploader-id (.-id socket))
-            (rooms/cancel-upload id
-              (fn []
-                (.publish redis-pub-client "cancel-upload" id)
-                (rooms/get-room-from-user-id (.-id socket)
-                  (fn [room]
-                    (.emit (.to io room) "upload-cancelled" id))))))))))
+      (rooms/get-user-id-from-socket (.-id socket)
+        (fn [user-id]
+          (rooms/get-uploader-id id
+            (fn [uploader-id]
+              (if (= uploader-id user-id)
+                (rooms/cancel-upload id
+                  (fn []
+                    (.publish redis-pub-client "cancel-upload" id)
+                    (rooms/get-room-from-user-id (.-id socket)
+                      (fn [room]
+                        (.emit (.to io room) "upload-cancelled" id))))))))))))
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream original-filename file-size client-id]
