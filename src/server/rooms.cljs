@@ -234,11 +234,11 @@
 
 (defn set-music-info [track-id
                       file-hash
-                      socket-id
+                      user-id
                       callback]
-  (get-room-from-user-id socket-id
+  (get-room-from-user-id user-id
     (fn [room]
-      (get-username room socket-id
+      (get-username room user-id
         (fn [username]
           (get-num-of-tracks room
             (fn [track-num]
@@ -246,7 +246,7 @@
                                   track-id
                                   file-hash
                 (fn []
-                  (.set redis-client (str "track:" track-id ":uploader") username
+                  (.set redis-client (str "track:" track-id ":uploader") user-id
                     (fn []
                       (set-track-position room track-id track-num
                         (fn []

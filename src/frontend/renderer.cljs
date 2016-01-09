@@ -197,7 +197,9 @@
                               (if (> 10 duration-seconds)
                                 "0")
                               duration-seconds)
-            username (tracks/get-uploader-from-id track-id)
+            username (((:users @app-state/app-state)
+                       (tracks/get-uploader-from-id track-id))
+                      "name")
             current-track-id (:current-track-id @app-state/app-state)
             mime-type (.-mime data)
             title-str (str "Title: " title

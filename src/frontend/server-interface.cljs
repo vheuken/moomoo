@@ -157,10 +157,10 @@
     (let [current-uploads-info (:current-uploads-info @app-state/app-state)
           uploads (:uploads @app-state/app-state)
           client-id (.-clientid (get current-uploads-info id))]
-    (swap! app-state/app-state
-           merge
-           {:current-uploads-info (dissoc current-uploads-info id)
-            :uploads (dissoc uploads client-id)}))))
+      (swap! app-state/app-state
+             merge
+             {:current-uploads-info (dissoc current-uploads-info id)
+              :uploads (dissoc uploads client-id)}))))
 
 (.on app-state/socket "track-order-change"
   (fn [track-order]
