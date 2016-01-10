@@ -127,9 +127,19 @@
                     (start-upload first-inactive-upload))))))
 
 (defn handle-unpause! [uploads uploads-order upload-slots active-uploads upload-id]
-  (if (> (count (active-uploads uploads-order uploads))
-          upload-slots)
-    (let [upload-to-stop-id (last (active-uploads uploads-order uploads))
+  (println uploads)
+  (println "ACTIVE-UPLOADS "  (active-uploads uploads-order uploads))
+  (println "Upload slots:" upload-slots)
+  (if-not (active? (uploads upload-id))
+    (swap! app-state/app-state
+           assoc
+           :uploads
+           (assoc (:uploads @app-state/app-state)
+                  upload-id
+                  (start-upload (uploads upload-id)))))
+  (if (> (count (active-uploads uploads-order (:uploads @app-state/app-state)))
+         upload-slots)
+    (let [upload-to-stop-id (last (active-uploads uploads-order (:uploads @app-state/app-state)))
           upload-to-stop (uploads upload-to-stop-id)]
       (println "upload-to-stop" upload-to-stop-id)
       (swap! app-state/app-state
@@ -137,14 +147,7 @@
              :uploads
              (assoc (:uploads @app-state/app-state)
                     upload-to-stop-id
-                    (stop-upload upload-to-stop))))
-    (if-not (active? (uploads upload-id))
-      (swap! app-state/app-state
-             assoc
-             :uploads
-             (assoc (:uploads @app-state/app-state)
-                    upload-id
-                    (start-upload (uploads upload-id)))))))
+                    (stop-upload upload-to-stop))))))
 
 (defn upload-file! [file]
   (let [upload-id (.v4 js/uuid)
@@ -166,7 +169,8 @@
                                      (handle-pause! uploads uploads-order upload-slots))
                                  (= action :unpaused)
                                    (do
-                                     (.pipe blob-stream stream)
+                                     (when (:started? upload)
+                                       (.pipe blob-stream stream))
                                      (handle-unpause! uploads
                                                       uploads-order
                                                       upload-slots
