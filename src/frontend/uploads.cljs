@@ -127,7 +127,7 @@
                     (start-upload first-inactive-upload))))))
 
 (defn handle-unpause! [uploads uploads-order upload-slots active-uploads upload-id]
-  (if (>= (count (active-uploads uploads-order uploads))
+  (if (> (count (active-uploads uploads-order uploads))
           upload-slots)
     (let [uploads-order-after-id (uploads-after-id uploads-order upload-id)
           upload-to-stop-id (last (active-uploads uploads-order uploads))]
