@@ -127,9 +127,6 @@
                     (start-upload first-inactive-upload))))))
 
 (defn handle-unpause! [uploads uploads-order upload-slots active-uploads upload-id]
-  (println uploads)
-  (println "ACTIVE-UPLOADS "  (active-uploads uploads-order uploads))
-  (println "Upload slots:" upload-slots)
   (if-not (active? (uploads upload-id))
     (swap! app-state/app-state
            assoc
