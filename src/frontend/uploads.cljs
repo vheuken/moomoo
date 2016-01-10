@@ -129,16 +129,15 @@
 (defn handle-unpause! [uploads uploads-order upload-slots active-uploads upload-id]
   (if (> (count (active-uploads uploads-order uploads))
           upload-slots)
-    (let [uploads-order-after-id (uploads-after-id uploads-order upload-id)
-          upload-to-stop-id (last (active-uploads uploads-order uploads))]
+    (let [upload-to-stop-id (last (active-uploads uploads-order uploads))
+          upload-to-stop (uploads upload-to-stop-id)]
       (println "upload-to-stop" upload-to-stop-id)
-      (if-let [upload-to-stop (uploads upload-to-stop-id)]
-        (swap! app-state/app-state
-               assoc
-               :uploads
-               (assoc (:uploads @app-state/app-state)
-                      upload-to-stop-id
-                      (stop-upload upload-to-stop)))))
+      (swap! app-state/app-state
+             assoc
+             :uploads
+             (assoc (:uploads @app-state/app-state)
+                    upload-to-stop-id
+                    (stop-upload upload-to-stop))))
     (if-not (active? (uploads upload-id))
       (swap! app-state/app-state
              assoc
