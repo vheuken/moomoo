@@ -5,7 +5,8 @@
             [moomoo.rooms :as rooms]
             [moomoo.config :as config]
             [moomoo.file-hash :as file-hash]
-            [moomoo.lastfm :as lastfm]))
+            [moomoo.lastfm :as lastfm])
+  (:require-macros [moomoo.socket :as s]))
 
 (defonce socketio (nodejs/require "socket.io"))
 (defonce socketio-redis (nodejs/require "socket.io-redis"))
@@ -56,7 +57,7 @@
 (defn connection [socket]
   (println (str "User " (.-id socket) " has connected!"))
 
-  (.on socket "socket-id-change"
+  (s/defevent "socket-id-change"
     (fn [user-id]
       (rooms/set-user-id (.-id socket) user-id
         (fn []
@@ -69,7 +70,7 @@
                       (if-not (empty? users)
                         (.emit (.to io room-id) "users-list" (clj->js users)))))))))))))
 
-  (.on socket "disconnect"
+  (s/defevent "disconnect"
     (fn []
       (rooms/disconnect (.-id socket)
         (fn [room-id]
@@ -85,7 +86,7 @@
                         (println (str (.-id socket) " has disconnected from " room-id))
                         (done))))))))))))
 
-  (.on socket "sign-in"
+  (s/defevent "sign-in"
     (fn [room-id username]
       (println (.-id socket) "sign-in as" username "in" room-id)
       (.join socket room-id
@@ -105,7 +106,7 @@
                     (rooms/get-all-users room-id
                       #(.emit (.to io room-id) "users-list" (clj->js %1))))))))))))
 
-  (.on socket "chat-message"
+  (s/defevent "chat-message"
     (fn [room message]
       (println "Received chat-message in " room "from" (.-id socket)
                "containing:" message)
@@ -116,7 +117,7 @@
               (.emit (.to io room) "chat-message" #js {:username username
                                                        :message  message})))))))
 
-  (.on socket "ready-to-start"
+  (s/defevent "ready-to-start"
     (fn [sound-id]
       (println "Received ready-to-start signal for" sound-id
                "from" (.-id socket))
@@ -160,7 +161,7 @@
                                     (fn [track-position-info]
                                       (start-track room track-position-info)))))))))))))))))))
 
-  (.on socket "pause"
+  (s/defevent "pause"
     (fn [position]
       (println "Received pause signal with position" position
                "from" (.-id socket))
@@ -175,7 +176,7 @@
                       (fn []
                         (.emit (.to io room) "pause" position))))))))))))
 
-  (.on socket "resume"
+  (s/defevent "resume"
     (fn []
       (println "Received resume signal from" (.-id socket))
       (rooms/get-user-id-from-socket (.-id socket)
@@ -189,7 +190,7 @@
                       (fn []
                         (.emit (.to io room) "resume"))))))))))))
 
-  (.on socket "position-change"
+  (s/defevent "position-change"
     (fn [position]
       (println "Received position-change signal with position" position
                "from" (.-id socket))
@@ -207,7 +208,7 @@
                             (fn []
                               (.emit (.to io room) "position-change" position)))))))))))))))
 
-  (.on socket "start-looping"
+  (s/defevent "start-looping"
     (fn []
       (println "Received start-looping signal from" (.-id socket))
       (rooms/get-user-id-from-socket (.-id socket)
@@ -221,7 +222,7 @@
                       (fn []
                         (.emit (.to io room) "set-loop" true))))))))))))
 
-  (.on socket "stop-looping"
+  (s/defevent "stop-looping"
     (fn []
       (println "Received stop-looping signal from" (.-id socket))
       (rooms/get-user-id-from-socket (.-id socket)
@@ -235,7 +236,7 @@
                       (fn []
                         (.emit (.to io room) "set-loop" false))))))))))))
 
-  (.on socket "mute-user"
+  (s/defevent "mute-user"
     (fn []
       (println "Socket id " (.-id socket) " is muted!")
       (rooms/get-user-id-from-socket (.-id socket)
@@ -246,7 +247,7 @@
                 (fn [room-id]
                   (.emit (.to io room-id) "user-muted" (.-id socket))))))))))
 
-  (.on socket "unmute-user"
+  (s/defevent "unmute-user"
     (fn []
       (println "Socket id " (.-id socket) " is unmuted!")
       (rooms/get-user-id-from-socket (.-id socket)
@@ -258,7 +259,7 @@
                   (.emit (.to io room-id) "user-unmuted" (.-id socket))))))))))
 
 
-  (.on socket "track-complete"
+  (s/defevent "track-complete"
     (fn []
       (println "Received track-complete signal from " (.-id socket))
       (rooms/get-user-id-from-socket (.-id socket)
@@ -290,7 +291,7 @@
                                                        track-id
                                                        sound-id))))))))))))))))))))))))
 
-  (.on socket "track-deleted"
+  (s/defevent "track-deleted"
     (fn []
       (println "Received track-delete signal from" (.-id socket))
 
@@ -319,7 +320,7 @@
                                                  sound-id)))))))))))))))))))))
 
 
-  (.on socket "clear-songs"
+  (s/defevent "clear-songs"
     (fn []
       (println "Received clear-songs signal from" (.-id socket))
 
@@ -331,7 +332,7 @@
                 (fn []
                   (.emit (.to io room-id) "clear-songs")))))))))
 
-  (.on socket "delete-track"
+  (s/defevent "delete-track"
     (fn [track-id]
       (println "Received delete-track signal for track-id" track-id
                "from" (.-id socket))
@@ -346,7 +347,7 @@
                       (if-not (nil? next-track-num)
                         (.emit (.to io room-id) "delete-track" track-id))))))))))))
 
-  (.on socket "track-order-change"
+  (s/defevent "track-order-change"
     (fn [track-id destination-track-num]
       (println "Track order change of track-id:" track-id
                "to track-num:" destination-track-num)
@@ -361,7 +362,7 @@
                       (fn [new-track-order]
                         (.emit (.to io room-id) "track-order-change" new-track-order))))))))))))
 
-  (.on socket "change-track"
+  (s/defevent "change-track"
     (fn [track-num sound-id]
       (println "Received change-track signal to track-num" track-num
                "with sound-id" sound-id
@@ -375,7 +376,7 @@
                   (if ok?
                     (change-track room track-num sound-id))))))))))
 
-  (.on socket "lastfm-auth"
+  (s/defevent "lastfm-auth"
     (fn [token]
       (rooms/get-user-id-from-socket (.-id socket)
         (fn [user-id]
@@ -385,13 +386,13 @@
                 (.emit socket "lastfm-auth" "success" username)
                 (.emit socket "lastfm-auth" "failure" nil))))))))
 
-  (.on socket "lastfm-scrobble"
+  (s/defevent "lastfm-scrobble"
     (fn [artist track]
       (rooms/get-user-id-from-socket (.-id socket)
         (fn [user-id]
           (lastfm/scrobble! user-id artist track)))))
 
-  (.on socket "change-upload-slots"
+  (s/defevent "change-upload-slots"
     (fn [new-upload-slots]
       (println "Received change-upload-slots signal from" (.-id socket)
                "with value of" new-upload-slots)
@@ -399,7 +400,7 @@
                (<= new-upload-slots (config/data "max-upload-slots")))
         (.emit socket "upload-slots-change" new-upload-slots))))
 
-  (.on socket "check-hash"
+  (s/defevent "check-hash"
     (fn [file-hash]
       (println (.-id socket) "sent hash:" file-hash)
       (file-hash/file-hash-exists? file-hash
@@ -433,7 +434,7 @@
                                       (change-track room-id (- num-of-tracks 1) (.v4 js-uuid))))))))))))))))
             (.emit socket "hash-not-found" file-hash))))))
 
-  (.on socket "cancel-upload"
+  (s/defevent "cancel-upload"
     (fn [id]
       (println "Received cancel-upload signal from" (.-id socket) " for id:" id)
       (rooms/get-user-id-from-socket (.-id socket)
