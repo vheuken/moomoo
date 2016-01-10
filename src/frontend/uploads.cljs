@@ -53,17 +53,13 @@
     (cond
       (and (< old-upload-slots new-upload-slots)
            (< (count active-uploads) new-upload-slots))
-      (do
-    (println "ACTIVE-UPLOADS:" active-uploads)
-    (println "inactive-uploads:" inactive-uploads)
         (if-not (empty? unpaused-inactive-uploads)
           {:uploads (merge uploads {(first unpaused-inactive-uploads)
-                                    (start-upload (uploads (first unpaused-inactive-uploads)))})}))
+                                    (start-upload (uploads (first unpaused-inactive-uploads)))})})
       (and (> old-upload-slots new-upload-slots)
            (> (count active-uploads) new-upload-slots))
-        (if-not (empty? active-uploads)
-          {:uploads (merge uploads {(last active-uploads)
-                                    (stop-upload (uploads (last active-uploads)))})}))))
+        {:uploads (merge uploads {(last active-uploads)
+                                  (stop-upload (uploads (last active-uploads)))})})))
 
 (defn upload-slots-watch-fn! [_ _ old-state new-state]
   (let [new-uploads-info (handle-upload-slots-change old-state new-state)]
