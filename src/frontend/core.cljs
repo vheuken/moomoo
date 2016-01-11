@@ -217,4 +217,4 @@
   (fn []
     (.createSound js/soundManager #js {
       :id "join-sound"
-      :url "http://www.soundjay.com/button/beep-03.mp3"})))
+      :url "/audio/moomoo.wav"})))
