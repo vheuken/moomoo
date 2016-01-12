@@ -32,7 +32,7 @@
                        [xml2js "0.4.15"]
                        [ws "0.8.0"]]}
 
-  :plugins [[lein-cljsbuild "1.1.1"]
+  :plugins [[lein-cljsbuild "1.1.2"]
             [lein-npm "0.6.1"]
             [lein-cljfmt "0.3.0"]
             [lein-figwheel "0.5.0-1"]
