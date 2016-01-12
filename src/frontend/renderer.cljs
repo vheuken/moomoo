@@ -81,7 +81,7 @@
                       (if (:paused? ((:uploads @app-state/app-state) (.-clientid data)))
                         (dom/button #js {:onClick #(core/resume-upload!  (.-clientid data))} "RESUME")
                         (dom/button #js {:onClick #(core/pause-upload!   (.-clientid data))} "PAUSE"))))
-                  (if (:stopped? ((:uploads @app-state/app-state) (.-clientid data)))
+                  (if-not (:started? ((:uploads @app-state/app-state) (.-clientid data)))
                     "STOPPED!")
                   (((:users @app-state/app-state) (.-uploaderid data)) "name")
                   " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
