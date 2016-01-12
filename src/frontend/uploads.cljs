@@ -127,7 +127,7 @@
                     (start-upload first-inactive-upload))))))
 
 (defn handle-unpause! [uploads uploads-order upload-slots active-uploads upload-id]
-  (if-not (active? (uploads upload-id))
+  (when-not (active? (uploads upload-id))
     (swap! app-state/app-state
            assoc
            :uploads
@@ -138,7 +138,6 @@
          upload-slots)
     (let [upload-to-stop-id (last (active-uploads uploads-order (:uploads @app-state/app-state)))
           upload-to-stop (uploads upload-to-stop-id)]
-      (println "upload-to-stop" upload-to-stop-id)
       (swap! app-state/app-state
              assoc
              :uploads

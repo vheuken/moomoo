@@ -445,7 +445,7 @@
                 (rooms/cancel-upload id
                   (fn []
                     (.publish redis-pub-client "cancel-upload" id)
-                    (rooms/get-room-from-user-id (.-id socket)
+                    (rooms/get-room-from-user-id user-id
                       (fn [room]
                         (.emit (.to io room) "upload-cancelled" id))))))))))))
 
