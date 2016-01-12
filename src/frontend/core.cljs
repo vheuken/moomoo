@@ -55,8 +55,9 @@
       false)))
 
 (defn resume-upload! [client-id]
-  (println "Pausing upload" client-id)
+  (println "Resuming upload" client-id)
   (let [upload (get (:uploads @app-state/app-state) client-id)]
+    (println upload)
     (swap! app-state/app-state
            assoc
            :uploads

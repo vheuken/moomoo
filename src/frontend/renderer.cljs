@@ -71,36 +71,30 @@
     (render [this]
       (dom/textarea #js {:id "message-input"} nil))))
 
-(defn user-upload-progress [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/li nil (if (= (.-uploaderid data) (:user-id @app-state/app-state))
-                    (list
-                      (dom/button #js {:onClick #(core/cancel-upload (.-id data))}       "CANCEL")
-                      (if (:paused? ((:uploads @app-state/app-state) (.-clientid data)))
-                        (dom/button #js {:onClick #(core/resume-upload!  (.-clientid data))} "RESUME")
-                        (dom/button #js {:onClick #(core/pause-upload!   (.-clientid data))} "PAUSE"))))
-                  (if-not (:started? ((:uploads @app-state/app-state) (.-clientid data)))
-                    "STOPPED!")
-                  (((:users @app-state/app-state) (.-uploaderid data)) "name")
-                  " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
-                  (.-filename data)))))
+(defn user-upload-progress [data]
+  (dom/li nil (if (= (.-uploaderid data) (:user-id @app-state/app-state))
+                (list
+                  (dom/button #js {:onClick #(core/cancel-upload (.-id data))}       "CANCEL")
+                  (if (:paused? ((:uploads @app-state/app-state) (.-clientid data)))
+                    (dom/button #js {:onClick #(core/resume-upload!  (.-clientid data))} "RESUME")
+                    (dom/button #js {:onClick #(core/pause-upload!   (.-clientid data))} "PAUSE"))))
+              (if-not (:started? ((:uploads @app-state/app-state) (.-clientid data)))
+                "STOPPED!")
+              (((:users @app-state/app-state) (.-uploaderid data)) "name")
+              " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
+              (.-filename data)))
 
-(defn uninitialized-upload [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/li nil (list (dom/button #js {:onClick #(swap! app-state/app-state
-                                                          merge
-                                                          {:uploads (dissoc (:uploads @app-state/app-state)
-                                                                            (:id data))})}
-                                    "CANCEL")
-                        (if (:paused? data)
-                          (dom/button #js {:onClick #(core/resume-upload! (:id data))} "RESUME")
-                          (dom/button #js {:onClick #(core/pause-upload!  (:id data))} "PAUSE"))
-                        "Not yet started: "
-                        (:filename data))))))
+(defn uninitialized-upload [data]
+  (dom/li nil (list (dom/button #js {:onClick #(swap! app-state/app-state
+                                                      merge
+                                                      {:uploads (dissoc (:uploads @app-state/app-state)
+                                                                        (:id data))})}
+                                "CANCEL")
+                    (if (:paused? data)
+                      (dom/button #js {:onClick #(core/resume-upload! (:id data))} "RESUME")
+                      (dom/button #js {:onClick #(core/pause-upload!  (:id data))} "PAUSE"))
+                    "Not yet started: "
+                    (:filename data))))
 
 (defn build-upload-id-view [upload-data owner]
   (reify
@@ -109,8 +103,8 @@
       (let [upload (first upload-data)
             upload-info (second upload-data)]
         (if (nil? upload-info)
-          (om/build uninitialized-upload upload)
-          (om/build user-upload-progress upload-info))))))
+          (uninitialized-upload upload)
+          (user-upload-progress upload-info))))))
 
 (defn users-upload-progress-view [data owner]
   (reify
