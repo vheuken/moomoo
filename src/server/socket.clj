@@ -1,5 +1,4 @@
-(ns moomoo.socket
-  (:require [moomoo.rooms :as rooms]))
+(ns moomoo.socket)
 
-(defmacro defevent [event-name f]
-  (list '.on 'socket event-name f))
+(defmacro defevent [event-name params & body]
+  (list '.on 'socket event-name `(fn ~params ~@body)))
