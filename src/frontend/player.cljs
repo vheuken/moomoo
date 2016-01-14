@@ -71,16 +71,19 @@
                                        :url sound-url
                                        :whileloading while-loading
                                        :onfinish on-finish
-                                       :volume (:volume @app-state)}))
-
+                                       :volume (:volume @app-state)
+                                       :from (if (nil? position)
+                                               (.-MAX_SAFE_INTEGER js/Number)
+                                               position)}))
   (defn on-play []
     (if (nil? position)
-      (.setPosition (:current-sound @app-state) (.-MAX_SAFE_INTEGER js/Number))
-      (.setPosition (:current-sound @app-state) position)))
+      (.setPosition (:current-sound @app-state) (.-MAX_SAFE_INTEGER js/Number))))
 
   (.play (:current-sound @app-state)
                #js {:whileplaying while-playing
                     :onplay on-play})
+
+  (println "POSITION:" position)
   (if (:paused? @app-state)
       (.pause (:current-sound @app-state))))
 
