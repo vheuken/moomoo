@@ -358,10 +358,12 @@
                   (change-track room track-num sound-id)))))))))
 
   (s/defevent "lastfm-auth" [token]
+    (println "Ayy lastfm!")
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
         (lastfm/authenticate! user-id token
           (fn [status username]
+            (println status)
             (if (= :success status)
               (.emit socket "lastfm-auth" "success" username)
               (.emit socket "lastfm-auth" "failure" nil)))))))
