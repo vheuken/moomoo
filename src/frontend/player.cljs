@@ -75,9 +75,13 @@
                                        :from (if (nil? position)
                                                (.-MAX_SAFE_INTEGER js/Number)
                                                position)}))
+  (defn on-play []
+    (if (nil? position)
+      (.setPosition (:current-sound @app-state) (.-MAX_SAFE_INTEGER js/Number))))
 
   (.play (:current-sound @app-state)
-               #js {:whileplaying while-playing})
+               #js {:whileplaying while-playing
+                    :onplay on-play})
 
   (println "POSITION:" position)
   (if (:paused? @app-state)

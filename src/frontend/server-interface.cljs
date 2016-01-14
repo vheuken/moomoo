@@ -62,7 +62,6 @@
 
 (.on app-state/socket "start-track"
   (fn [file-url position]
-    (println "Calling start-track!")
     (let [file-url (str (first (string/split (.-href (.-location js/window))
                                              #"/rooms"))
                         file-url)]
