@@ -72,9 +72,7 @@
                                        :whileloading while-loading
                                        :onfinish on-finish
                                        :volume (:volume @app-state)
-                                       :from (if (nil? position)
-                                               (.-MAX_SAFE_INTEGER js/Number)
-                                               position)}))
+                                       :from position}))
   (defn on-play []
     (if (nil? position)
       (.setPosition (:current-sound @app-state) (.-MAX_SAFE_INTEGER js/Number))))

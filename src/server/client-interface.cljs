@@ -118,6 +118,8 @@
              "from" (.-id socket))
     (letfn [(convert-position [track-position-info]
               (println "POSITION!!" (:position track-position-info))
+              (println (= -1 (:position track-position-info)))
+              (println (= "-1" (:position track-position-info)))
               (if (= -1 (:position track-position-info))
                 nil
                 (+ (:position track-position-info)
@@ -131,7 +133,8 @@
                       (rooms/get-music-file room track-id
                         (fn [file-path]
                           (let [file-url (string/replace file-path "public" "")]
-                            (if (nil? track-position-info)
+                            (println "TRACK-POSITION-INFO" track-position-info)
+                            (if (nil? (convert-position track-position-info))
                               (rooms/get-current-track-position room
                                 (fn [track-position-info]
                                   (.emit socket "start-track" file-url
