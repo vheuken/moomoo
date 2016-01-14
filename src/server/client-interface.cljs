@@ -458,8 +458,6 @@
 
                       (.on stream "data"
                         (fn [data-chunk]
-                          (println "Received data chunk of" original-filename
-                                   "from" (.-id socket))
                           (rooms/get-username room user-id
                             (fn [username]
                               (let [bytes-received (aget (.statSync fs temp-absolute-file-path) "size")]
