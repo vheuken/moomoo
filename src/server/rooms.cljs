@@ -301,9 +301,7 @@
     (fn [num-users]
       (.lpush redis-client (redis-room-prefix room-id sync-command) user-id
         (fn [err length]
-          (if (= length num-users)
-            (callback true)
-            (callback false)))))))
+          (callback (= length num-users)))))))
 
 (defn delete-client-sync [room-id sync-command callback]
   (.del redis-client (redis-room-prefix room-id sync-command)
