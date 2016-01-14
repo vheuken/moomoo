@@ -141,7 +141,7 @@
         old-volume (player/get-volume)]
     (println "old volume:" old-volume)
     (println "new volume:" new-volume)
-
+    (println "A")
     (player/set-volume new-volume)
     (cond
       (and (>= 0 old-volume) (< 0 new-volume))

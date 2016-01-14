@@ -232,9 +232,9 @@
       (fn [user-id]
         (rooms/mute-user user-id
           (fn []
-            (rooms/get-room-from-user-id (.-id socket)
+            (rooms/get-room-from-user-id user-id
               (fn [room-id]
-                (.emit (.to io room-id) "user-muted" (.-id socket)))))))))
+                (.emit (.to io room-id) "user-muted" user-id))))))))
 
   (s/defevent "unmute-user" []
     (println "Socket id " (.-id socket) " is unmuted!")

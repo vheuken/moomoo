@@ -137,14 +137,14 @@
       (uploads/upload-file! file))))
 
 (.on app-state/socket "user-muted"
-  (fn [socket-id]
-    (println "Received mute-user signal for" socket-id)
+  (fn [user-id]
+    (println "Received mute-user signal for" user-id)
     (swap! app-state/app-state
            assoc
            :users
            (merge (:users @app-state/app-state)
-                  {socket-id (merge (get (:users @app-state/app-state ) socket-id)
-                                         {"muted" true})}))))
+                  {user-id (merge (get (:users @app-state/app-state) user-id)
+                                  {"muted" true})}))))
 
 
 (.on app-state/socket "user-unmuted"
