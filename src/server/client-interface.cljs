@@ -57,7 +57,7 @@
 (defn connection [socket]
   (println (str "User " (.-id socket) " has connected!"))
 
-  (s/defevent "socket-id-change" [user-id] [a]
+  (s/defevent "socket-id-change" [user-id] [a b]
     (rooms/set-user-id (.-id socket) user-id
       (fn []
         (rooms/get-room-from-user-id user-id
@@ -69,7 +69,7 @@
                     (if-not (empty? users)
                       (.emit (.to io room-id) "users-list" (clj->js users))))))))))))
 
-  (s/defevent "disconnect" [] [a]
+  (s/defevent "disconnect" [] [a b]
     (rooms/disconnect (.-id socket)
       (fn [room-id]
         (if-not (nil? room-id)
@@ -84,7 +84,7 @@
                       (println (str (.-id socket) " has disconnected from " room-id))
                       (done)))))))))))
 
-  (s/defevent "sign-in" [room-id username] [a]
+  (s/defevent "sign-in" [room-id username] [a b]
     (println (.-id socket) "sign-in as" username "in" room-id)
     (.join socket room-id
       (fn []
@@ -103,8 +103,9 @@
                   (rooms/get-all-users room-id
                     #(.emit (.to io room-id) "users-list" (clj->js %1)))))))))))
 
-  (s/defevent "chat-message" [room message] [a]
+  (s/defevent "chat-message" [room message] [a b]
     (println "A" a)
+    (println "B" b)
     (println "Received chat-message in " room "from" (.-id socket)
              "containing:" message)
     (rooms/get-user-id-from-socket (.-id socket)
@@ -114,7 +115,7 @@
             (.emit (.to io room) "chat-message" #js {:username username
                                                      :message  message}))))))
 
-  (s/defevent "ready-to-start" [sound-id] [a]
+  (s/defevent "ready-to-start" [sound-id] [a b]
     (println "Received ready-to-start signal for" sound-id
              "from" (.-id socket))
     (letfn [(convert-position [track-position-info]
@@ -156,7 +157,7 @@
                                   (fn [track-position-info]
                                     (start-track room track-position-info))))))))))))))))))
 
-  (s/defevent "pause" [position] [a]
+  (s/defevent "pause" [position] [a b]
     (println "Received pause signal with position" position
              "from" (.-id socket))
     (rooms/get-user-id-from-socket (.-id socket)
@@ -170,7 +171,7 @@
                     (fn []
                       (.emit (.to io room) "pause" position)))))))))))
 
-  (s/defevent "resume" [] [a]
+  (s/defevent "resume" [] [a b]
     (println "Received resume signal from" (.-id socket))
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
@@ -183,7 +184,7 @@
                     (fn []
                       (.emit (.to io room) "resume")))))))))))
 
-  (s/defevent "position-change" [position] [a]
+  (s/defevent "position-change" [position] [a b]
     (println "Received position-change signal with position" position
              "from" (.-id socket))
     (rooms/get-user-id-from-socket (.-id socket)
@@ -200,7 +201,7 @@
                           (fn []
                             (.emit (.to io room) "position-change" position))))))))))))))
 
-  (s/defevent "start-looping" [] [a]
+  (s/defevent "start-looping" [] [a b]
     (println "Received start-looping signal from" (.-id socket))
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
@@ -213,7 +214,7 @@
                     (fn []
                       (.emit (.to io room) "set-loop" true)))))))))))
 
-  (s/defevent "stop-looping" [] [a]
+  (s/defevent "stop-looping" [] [a b]
     (println "Received stop-looping signal from" (.-id socket))
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
@@ -226,7 +227,7 @@
                     (fn []
                       (.emit (.to io room) "set-loop" false)))))))))))
 
-  (s/defevent "mute-user" [] [a]
+  (s/defevent "mute-user" [] [a b]
     (println "Socket id " (.-id socket) " is muted!")
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
@@ -236,7 +237,7 @@
               (fn [room-id]
                 (.emit (.to io room-id) "user-muted" user-id))))))))
 
-  (s/defevent "unmute-user" [] [a]
+  (s/defevent "unmute-user" [] [a b]
     (println "Socket id " (.-id socket) " is unmuted!")
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
@@ -247,7 +248,7 @@
                 (.emit (.to io room-id) "user-unmuted" (.-id socket)))))))))
 
 
-  (s/defevent "track-complete" [] [a]
+  (s/defevent "track-complete" [] [a b]
     (println "Received track-complete signal from " (.-id socket))
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
@@ -278,7 +279,7 @@
                                                      track-id
                                                      sound-id)))))))))))))))))))))))
 
-  (s/defevent "track-deleted" [] [a]
+  (s/defevent "track-deleted" [] [a b]
     (println "Received track-delete signal from" (.-id socket))
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
@@ -305,7 +306,7 @@
                                                sound-id))))))))))))))))))))
 
 
-  (s/defevent "clear-songs" [] [a]
+  (s/defevent "clear-songs" [] [a b]
     (println "Received clear-songs signal from" (.-id socket))
 
     (rooms/get-user-id-from-socket (.-id socket)
@@ -316,7 +317,7 @@
               (fn []
                 (.emit (.to io room-id) "clear-songs"))))))))
 
-  (s/defevent "delete-track" [track-id] [a]
+  (s/defevent "delete-track" [track-id] [a b]
     (println "Received delete-track signal for track-id" track-id
              "from" (.-id socket))
     (rooms/get-user-id-from-socket (.-id socket)
@@ -330,7 +331,7 @@
                     (if-not (nil? next-track-num)
                       (.emit (.to io room-id) "delete-track" track-id)))))))))))
 
-  (s/defevent "track-order-change" [track-id destination-track-num] [a]
+  (s/defevent "track-order-change" [track-id destination-track-num] [a b]
     (println "Track order change of track-id:" track-id
              "to track-num:" destination-track-num)
     (rooms/get-user-id-from-socket (.-id socket)
@@ -344,7 +345,7 @@
                     (fn [new-track-order]
                       (.emit (.to io room-id) "track-order-change" new-track-order)))))))))))
 
-  (s/defevent "change-track" [track-num sound-id] [a]
+  (s/defevent "change-track" [track-num sound-id] [a b]
     (println "Received change-track signal to track-num" track-num
              "with sound-id" sound-id
              "from" (.-id socket))
@@ -357,7 +358,7 @@
                 (if ok?
                   (change-track room track-num sound-id)))))))))
 
-  (s/defevent "lastfm-auth" [token] [a]
+  (s/defevent "lastfm-auth" [token] [a b]
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
         (lastfm/authenticate! user-id token
@@ -366,19 +367,19 @@
               (.emit socket "lastfm-auth" "success" username)
               (.emit socket "lastfm-auth" "failure" nil)))))))
 
-  (s/defevent "lastfm-scrobble" [artist track] [a]
+  (s/defevent "lastfm-scrobble" [artist track] [a b]
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
         (lastfm/scrobble! user-id artist track))))
 
-  (s/defevent "change-upload-slots" [new-upload-slots] [a]
+  (s/defevent "change-upload-slots" [new-upload-slots] [a b]
     (println "Received change-upload-slots signal from" (.-id socket)
              "with value of" new-upload-slots)
     (if (and (> new-upload-slots 0)
              (<= new-upload-slots (config/data "max-upload-slots")))
       (.emit socket "upload-slots-change" new-upload-slots)))
 
-  (s/defevent "check-hash" [file-hash] [a]
+  (s/defevent "check-hash" [file-hash] [a b]
     (println (.-id socket) "sent hash:" file-hash)
     (file-hash/file-hash-exists? file-hash
       (fn [file-exists?]
@@ -411,7 +412,7 @@
                                     (change-track room-id (- num-of-tracks 1) (.v4 js-uuid))))))))))))))))
           (.emit socket "hash-not-found" file-hash)))))
 
-  (s/defevent "cancel-upload" [id] [a]
+  (s/defevent "cancel-upload" [id] [a b]
     (println "Received cancel-upload signal from" (.-id socket) " for id:" id)
     (rooms/get-user-id-from-socket (.-id socket)
       (fn [user-id]
