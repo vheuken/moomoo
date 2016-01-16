@@ -20,6 +20,7 @@
                           :should-scrobble? true
 
                           ; Uploads
+                          :room-uploads-order []
                           :file-hashes {}
                           :current-uploads-info {}
                           :upload-slots default-upload-slots

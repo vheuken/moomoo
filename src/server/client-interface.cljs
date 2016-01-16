@@ -372,7 +372,7 @@
                     (rooms/add-new-upload room user-id file-id
                       (fn [uploads-order]
                         (println (str "Saving" original-filename "as" temp-absolute-file-path))
-                        (.emit socket "new-uploads-order" (clj->js uploads-order))
+                        (.emit (.to io room) "new-uploads-order" (clj->js uploads-order))
                         (.pipe stream (.createWriteStream fs temp-absolute-file-path))
 
                         (.subscribe redis-sub-client "cancel-upload")
@@ -405,7 +405,7 @@
                         (fn []
                           (println "Upload of" original-filename
                                    "from" (.-id socket) "is complete!")
-                          (rooms/upload-complete room file-id #(.emit socket
+                          (rooms/upload-complete room file-id #(.emit (.to io room)
                                                                       "new-uploads-order"
                                                                       (clj->js %1)))
                           (redis-lock. room

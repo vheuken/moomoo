@@ -509,7 +509,7 @@
     true))
 
 (defn get-uploads-order [room-id callback]
-  (.lrange rooms/redis-client 0 -1
+  (.lrange redis-client (str "room:" room-id ":uploads-order") 0 -1
     (fn [_ uploads-order]
       (callback (js->clj uploads-order)))))
 

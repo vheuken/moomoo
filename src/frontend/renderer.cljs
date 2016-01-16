@@ -110,11 +110,12 @@
   (reify
     om/IRender
     (render [this]
+      (println (:room-uploads-order data))
       (let [uploads-data (map (fn [id]
-                                (let [upload-info (first (filter #(= id (.-clientid %1))
+                                (let [upload-info (first (filter #(= id (.-id %1))
                                                                  (vals (:current-uploads-info data))))]
                                   [((:uploads data) id) upload-info]))
-                              (:uploads-order data))]
+                              (:room-uploads-order data))]
         (apply dom/div nil
           (om/build-all build-upload-id-view
                         uploads-data))))))

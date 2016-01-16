@@ -197,3 +197,10 @@
                username)
         (js/alert (str "Logged into LastFM as " username)))
       (js/alert "Failed to log into LastfM"))))
+
+(.on app-state/socket "new-uploads-order"
+  (fn [uploads-order]
+    (swap! app-state/app-state
+           assoc
+           :room-uploads-order
+           (js->clj uploads-order))))
