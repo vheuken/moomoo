@@ -522,7 +522,7 @@
           (get-uploads-order room-id callback))))))
 
 (defn upload-complete [room-id upload-id callback]
-  (.lrem redis-client (str "room:" room-id ":uploads-order") upload-id 1
+  (.lrem redis-client (str "room:" room-id ":uploads-order") 0 upload-id
     (fn []
       (get-uploads-order room-id callback))))
 

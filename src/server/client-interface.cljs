@@ -381,10 +381,12 @@
                           (fn [channel message]
                             (println "CHANNEL:" channel)
                             (println "Message:" message)
-                            (if (= message file-id)
-                              (do
-                                (.unpipe stream)
-                                (.unlink fs temp-absolute-file-path)))))
+                            (when (= message file-id)
+                              (rooms/upload-complete room file-id #(.emit (.to io room)
+                                                                          "new-uploads-order"
+                                                                          (clj->js %1)))
+                              (.unpipe stream)
+                              (.unlink fs temp-absolute-file-path))))
 
                       (.on stream "data"
                         (fn [data-chunk]
