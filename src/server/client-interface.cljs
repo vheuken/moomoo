@@ -369,10 +369,10 @@
                         temp-filename (subs file-id 0 7)
                         temp-absolute-file-path (str file-upload-directory "/" temp-filename file-extension)
                         redis-sub-client (.createClient redis)]
-                    (.set rooms/redis-client (str "track:" file-id ":uploader") user-id
-                      (fn []
-
+                    (rooms/add-new-upload room user-id file-id
+                      (fn [uploads-order]
                         (println (str "Saving" original-filename "as" temp-absolute-file-path))
+                        (.emit socket "new-uploads-order" (clj->js uploads-order))
                         (.pipe stream (.createWriteStream fs temp-absolute-file-path))
 
                         (.subscribe redis-sub-client "cancel-upload")
@@ -405,6 +405,9 @@
                         (fn []
                           (println "Upload of" original-filename
                                    "from" (.-id socket) "is complete!")
+                          (rooms/upload-complete room file-id #(.emit socket
+                                                                      "new-uploads-order"
+                                                                      (clj->js %1)))
                           (redis-lock. room
                             (fn [done]
                               (let [magic (Magic. (.-MAGIC_MIME_TYPE mmm))]

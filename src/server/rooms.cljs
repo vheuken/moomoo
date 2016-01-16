@@ -508,3 +508,21 @@
         (= file-extension ".wav"))
     true))
 
+(defn get-uploads-order [room-id callback]
+  (.lrange rooms/redis-client 0 -1
+    (fn [_ uploads-order]
+      (callback (js->clj uploads-order)))))
+
+
+(defn add-new-upload [room-id user-id upload-id callback]
+  (.set redis-client (str "track:" upload-id ":uploader") user-id
+    (fn []
+      (.rpush redis-client (str "room:" room-id ":uploads-order") upload-id
+        (fn []
+          (get-uploads-order room-id callback))))))
+
+(defn upload-complete [room-id upload-id callback]
+  (.lrem redis-client (str "room:" room-id ":uploads-order") upload-id 1
+    (fn []
+      (get-uploads-order room-id callback))))
+
