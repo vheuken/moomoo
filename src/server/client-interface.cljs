@@ -209,7 +209,7 @@
     (println "Socket id " (.-id socket) " is unmuted!")
     (rooms/unmute-user user-id
       (fn []
-        (.emit (.to io room-id) "user-unmuted" (.-id socket)))))
+        (.emit (.to io room-id) "user-unmuted" user-id))))
 
 
   (s/defevent "track-complete" [] [user-id room-id]
