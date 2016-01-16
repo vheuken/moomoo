@@ -72,17 +72,19 @@
       (dom/textarea #js {:id "message-input"} nil))))
 
 (defn user-upload-progress [data]
-  (dom/li nil (if (= (.-uploaderid data) (:user-id @app-state/app-state))
-                (list
-                  (dom/button #js {:onClick #(core/cancel-upload (.-id data))}       "CANCEL")
-                  (if (:paused? ((:uploads @app-state/app-state) (.-clientid data)))
-                    (dom/button #js {:onClick #(core/resume-upload!  (.-clientid data))} "RESUME")
-                    (dom/button #js {:onClick #(core/pause-upload!   (.-clientid data))} "PAUSE"))))
-              (if-not (:started? ((:uploads @app-state/app-state) (.-clientid data)))
-                "STOPPED!")
-              (((:users @app-state/app-state) (.-uploaderid data)) "name")
-              " - " (* 100 (/ (.-bytesreceived data) (.-totalsize data))) "% - "
-              (.-filename data)))
+  (let [upload (first data)
+        upload-info (second data)]
+    (dom/li nil (if-not (nil? upload)
+                  (list
+                    (dom/button #js {:onClick #(core/cancel-upload (.-id upload-info))}       "CANCEL")
+                    (if (:paused? ((:uploads @app-state/app-state) (:id upload)))
+                      (dom/button #js {:onClick #(core/resume-upload!  (:id upload))} "RESUME")
+                      (dom/button #js {:onClick #(core/pause-upload!   (:id upload))} "PAUSE"))
+                    (if-not (:started? upload)
+                      "STOPPED!")))
+                (((:users @app-state/app-state) (.-uploaderid upload-info)) "name")
+                " - " (* 100 (/ (.-bytesreceived upload-info) (.-totalsize upload-info))) "% - "
+                (.-filename upload-info))))
 
 (defn uninitialized-upload [data]
   (dom/li nil (list (dom/button #js {:onClick #(swap! app-state/app-state
@@ -100,11 +102,12 @@
   (reify
     om/IRender
     (render [this]
+      (println upload-data)
       (let [upload (first upload-data)
             upload-info (second upload-data)]
         (if (nil? upload-info)
           (uninitialized-upload upload)
-          (user-upload-progress upload-info))))))
+          (user-upload-progress upload-data))))))
 
 (defn users-upload-progress-view [data owner]
   (reify
@@ -113,8 +116,9 @@
       (println (:room-uploads-order data))
       (let [uploads-data (map (fn [id]
                                 (let [upload-info (first (filter #(= id (.-id %1))
-                                                                 (vals (:current-uploads-info data))))]
-                                  [((:uploads data) id) upload-info]))
+                                                                 (vals (:current-uploads-info data))))
+                                      client-id (.-clientid upload-info)]
+                                  [((:uploads data) client-id) upload-info]))
                               (:room-uploads-order data))]
         (apply dom/div nil
           (om/build-all build-upload-id-view
