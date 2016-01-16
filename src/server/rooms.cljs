@@ -206,13 +206,9 @@
   (println "Starting current track")
   (.set redis-client (redis-room-prefix room "started?") "true"
     (fn []
-      (get-current-track-position room
+      (set-current-track-position room 0
         (fn [track-position-info]
-          (if (= -1 (:position track-position-info))
-            (callback track-position-info)
-            (set-current-track-position room 0
-              (fn [track-position-info]
-                (callback track-position-info)))))))))
+          (callback track-position-info))))))
 
 (defn change-current-track-position [room position callback]
   (letfn [(change-pos []

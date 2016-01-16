@@ -120,21 +120,22 @@
                 (+ (:position track-position-info)
                   (- (.now js/Date)
                      (:start-time track-position-info)))))
-            (start-track [room track-position-info]
-              (rooms/unset-waiting-to-start-flag room
+            (start-track [track-position-info]
+              (rooms/unset-waiting-to-start-flag room-id
                 (fn []
-                  (rooms/get-current-track-id room
+                  (rooms/get-current-track-id room-id
                     (fn [track-id]
-                      (rooms/get-music-file room track-id
+                      (rooms/get-music-file room-id track-id
                         (fn [file-path]
                           (let [file-url (string/replace file-path "public" "")]
+                            (println "TRACK POS INFO" track-position-info)
                             (if (nil? (convert-position track-position-info))
-                              (rooms/get-current-track-position room
+                              (rooms/get-current-track-position room-id
                                 (fn [track-position-info]
                                   (.emit socket "start-track" file-url
                                                               (convert-position track-position-info))))
-                              (.emit (.to io room) "start-track" file-url
-                                                                 (convert-position track-position-info)))))))))))]
+                              (.emit (.to io room-id) "start-track" file-url
+                                                                    (convert-position track-position-info)))))))))))]
       (rooms/get-current-sound-id room-id
         (fn [current-sound-id]
           (if (= sound-id current-sound-id)
@@ -144,10 +145,10 @@
                   (rooms/has-track-started? room-id
                     (fn [started?]
                       (if started?
-                        (start-track room-id nil)
+                        (start-track nil)
                         (rooms/start-current-track room-id
                           (fn [track-position-info]
-                            (start-track room-id track-position-info))))))))))))))
+                            (start-track track-position-info))))))))))))))
 
   (s/defevent "pause" [position] [user-id room-id]
     (println "Received pause signal with position" position
