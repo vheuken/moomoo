@@ -315,6 +315,10 @@
              (<= new-upload-slots (config/data "max-upload-slots")))
       (.emit socket "upload-slots-change" new-upload-slots)))
 
+  (s/defevent "new-hash" [client-id] [user-id room-id]
+    (println "WOOO" client-id)
+    (.emit socket (str "start-hashing-" client-id) (.v4 js-uuid)))
+
   (s/defevent "check-hash" [file-hash] [user-id room-id]
     (println (.-id socket) "sent hash:" file-hash)
     (file-hash/file-hash-exists? file-hash

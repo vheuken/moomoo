@@ -74,11 +74,17 @@
                   {client-id (uploads/pause-upload upload)}))))
 
 (defn check-hash [file]
-  (js/md5File file
-    (fn [file-hash]
-      (swap! app-state/app-state assoc :file-hashes (merge {file-hash file}
-                                                           (:file-hashes @app-state/app-state)))
-      (.emit app-state/socket "check-hash" file-hash))))
+  (let [client-id (.v4 js/uuid)]
+    (.on app-state/socket (str "start-hashing-" client-id)
+      (fn [id]
+        (js/md5File file
+          (fn [current-chunk chunks]
+            (.emit app-state/socket "hash-progress" id current-chunk chunks))
+          (fn [file-hash]
+            (swap! app-state/app-state assoc :file-hashes (merge {file-hash file}
+                                                                 (:file-hashes @app-state/app-state)))
+            (.emit app-state/socket "check-hash" file-hash)))))
+    (.emit app-state/socket "new-hash" client-id)))
 
 (.change (js/$ "#file-upload")
   (fn [e]

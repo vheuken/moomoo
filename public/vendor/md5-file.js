@@ -1,4 +1,4 @@
-function md5File (file, callback) {
+function md5File (file, load_callback, callback) {
     var blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice,
         chunkSize = 2097152,                             // Read in chunks of 2MB
         chunks = Math.ceil(file.size / chunkSize),
@@ -10,6 +10,8 @@ function md5File (file, callback) {
         console.log('read chunk nr', currentChunk + 1, 'of', chunks);
         spark.append(e.target.result);                   // Append array buffer
         currentChunk++;
+
+        load_callback(currentChunk + 1, chunks);
 
         if (currentChunk < chunks) {
             loadNext();
