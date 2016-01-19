@@ -207,10 +207,12 @@
            (js->clj uploads-order))))
 
 (.on app-state/socket "hash-progress"
-  (fn [id current-chunk chunks]
+  (fn [id filename current-chunk chunks]
     (swap! app-state/app-state
            assoc
            :room-file-hashes
            (assoc (:room-file-hashes @app-state/app-state)
                   id
-                  [current-chunk chunks]))))
+                  {:current-chunk current-chunk
+                   :chunks chunks
+                   :name filename}))))

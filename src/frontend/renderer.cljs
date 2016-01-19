@@ -74,6 +74,8 @@
 (defn user-upload-progress [data]
   (let [upload (first data)
         upload-info (second data)]
+    (println "UPLOADERID" (js->clj upload-info))
+    (println ((:users @app-state/app-state) (.-uploaderid upload-info)) "NAMEQ")
     (dom/div #js {:className "track-view"}
              (when-not (nil? upload)
                (dom/button #js {:onClick #(core/cancel-upload (.-id upload-info))}       "CANCEL")
@@ -106,9 +108,11 @@
       (println upload-data)
       (let [upload (first upload-data)
             upload-info (second upload-data)]
-        (if (nil? upload)
-          (uninitialized-upload upload)
-          (user-upload-progress upload-data))))))
+        (cond
+          (not (nil? upload-info))
+            (user-upload-progress upload-data)
+          (nil? upload-info)
+            (uninitialized-upload upload))))))
 
 (defn users-upload-progress-view [data owner]
   (reify
@@ -118,7 +122,8 @@
                                 (let [upload-info (first (filter #(= id (.-id %1))
                                                                  (vals (:current-uploads-info data))))
                                       client-id (when-not (nil? upload-info)
-                                                  (.-clientid upload-info))]
+                                                  (.-clientid upload-info))
+                                      file-hash-info ((:room-file-hashes data) id)]
                                   [((:uploads data) client-id) upload-info]))
                               (:room-uploads-order data))]
         (apply dom/div nil

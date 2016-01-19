@@ -325,8 +325,8 @@
           (.emit (.to io room-id) "new-uploads-order" (clj->js uploads-order))
           (.emit socket (str "start-hashing-" client-id) upload-id)))))
 
-  (s/defevent "hash-progress" [id current-chunk chunks] [user-id room-id]
-    (.emit (.to io room-id) "hash-progress" id current-chunk chunks))
+  (s/defevent "hash-progress" [id filename current-chunk chunks] [user-id room-id]
+    (.emit (.to io room-id) "hash-progress" id filename current-chunk chunks))
 
   (s/defevent "check-hash" [id file-hash] [user-id room-id]
     (println (.-id socket) "sent hash:" file-hash)

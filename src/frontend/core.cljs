@@ -79,11 +79,10 @@
       (fn [id]
         (js/md5File file
           (fn [current-chunk chunks]
-            (.emit app-state/socket "hash-progress" id current-chunk chunks))
+            (.emit app-state/socket "hash-progress" id (.-name file) current-chunk chunks))
           (fn [file-hash]
             (swap! app-state/app-state assoc :file-hashes (merge {file-hash file}
                                                                  (:file-hashes @app-state/app-state)))
-            (println "AAA" (:file-hashes @app-state/app-state))
             (.emit app-state/socket "check-hash" id file-hash)))))
     (.emit app-state/socket "new-hash" client-id)))
 
