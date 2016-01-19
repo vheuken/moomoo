@@ -39,6 +39,9 @@
                       (fn [current-sound-id]
                         (rooms/is-playing? room-id
                           (fn [playing?]
+                            (rooms/get-uploads-order room-id
+                              (fn [uploads-order]
+                                (.emit socket "new-uploads-order" (clj->js uploads-order))))
                             (.emit socket "hotjoin-music-info" room-track-id-map
                                                                room-music-info
                                                                room-track-order
@@ -316,10 +319,16 @@
       (.emit socket "upload-slots-change" new-upload-slots)))
 
   (s/defevent "new-hash" [client-id] [user-id room-id]
-    (println "WOOO" client-id)
-    (.emit socket (str "start-hashing-" client-id) (.v4 js-uuid)))
+    (let [upload-id (.v4 js-uuid)]
+      (rooms/new-hash room-id user-id upload-id
+        (fn [uploads-order]
+          (.emit (.to io room-id) "new-uploads-order" (clj->js uploads-order))
+          (.emit socket (str "start-hashing-" client-id) upload-id)))))
 
-  (s/defevent "check-hash" [file-hash] [user-id room-id]
+  (s/defevent "hash-progress" [id current-chunk chunks] [user-id room-id]
+    (.emit (.to io room-id) "hash-progress" id current-chunk chunks))
+
+  (s/defevent "check-hash" [id file-hash] [user-id room-id]
     (println (.-id socket) "sent hash:" file-hash)
     (file-hash/file-hash-exists? file-hash
       (fn [file-exists?]

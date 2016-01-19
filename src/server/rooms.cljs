@@ -526,3 +526,8 @@
     (fn []
       (get-uploads-order room-id callback))))
 
+
+(defn new-hash [room-id user-id upload-id callback]
+  (.rpush redis-client (redis-room-prefix room-id "uploads-order") upload-id
+    (fn []
+      (get-uploads-order room-id callback))))

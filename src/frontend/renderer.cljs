@@ -106,7 +106,7 @@
       (println upload-data)
       (let [upload (first upload-data)
             upload-info (second upload-data)]
-        (if (nil? upload-info)
+        (if (nil? upload)
           (uninitialized-upload upload)
           (user-upload-progress upload-data))))))
 

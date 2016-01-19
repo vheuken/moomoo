@@ -83,7 +83,8 @@
           (fn [file-hash]
             (swap! app-state/app-state assoc :file-hashes (merge {file-hash file}
                                                                  (:file-hashes @app-state/app-state)))
-            (.emit app-state/socket "check-hash" file-hash)))))
+            (println "AAA" (:file-hashes @app-state/app-state))
+            (.emit app-state/socket "check-hash" id file-hash)))))
     (.emit app-state/socket "new-hash" client-id)))
 
 (.change (js/$ "#file-upload")

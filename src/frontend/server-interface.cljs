@@ -134,6 +134,7 @@
              assoc
              :file-hashes
              (dissoc (:file-hashes @app-state/app-state) file-hash))
+      (println file file-hash)
       (uploads/upload-file! file))))
 
 (.on app-state/socket "user-muted"
@@ -204,3 +205,12 @@
            assoc
            :room-uploads-order
            (js->clj uploads-order))))
+
+(.on app-state/socket "hash-progress"
+  (fn [id current-chunk chunks]
+    (swap! app-state/app-state
+           assoc
+           :room-file-hashes
+           (assoc (:room-file-hashes @app-state/app-state)
+                  id
+                  [current-chunk chunks]))))
