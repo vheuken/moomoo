@@ -122,12 +122,12 @@
     (swap! app-state/app-state assoc :looping? looping?)))
 
 (.on app-state/socket "hash-found"
-  (fn [file-hash]
+  (fn [id file-hash]
     (println "File exists on server. Hash: " file-hash)
     (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))))
 
 (.on app-state/socket "hash-not-found"
-  (fn [file-hash]
+  (fn [id file-hash]
     (println "File does not exist on server. Will upload. Hash: " file-hash)
     (let [file (get (:file-hashes @app-state/app-state) file-hash)]
       (swap! app-state/app-state
@@ -135,7 +135,7 @@
              :file-hashes
              (dissoc (:file-hashes @app-state/app-state) file-hash))
       (println file file-hash)
-      (uploads/upload-file! file))))
+      (uploads/upload-file! file id))))
 
 (.on app-state/socket "user-muted"
   (fn [user-id]

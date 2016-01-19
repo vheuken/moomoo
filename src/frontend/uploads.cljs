@@ -145,17 +145,17 @@
                     upload-to-stop-id
                     (stop-upload upload-to-stop))))))
 
-(defn upload-file! [file]
-  (let [upload-id (.v4 js/uuid)
+(defn upload-file! [file upload-server-id]
+  (let [upload-client-id (.v4 js/uuid)
         new-upload (merge blank-upload {:filename (.-name file)
-                                        :id upload-id})
+                                        :id upload-client-id})
         stream (.createStream js/ss)
         blob-stream (.createBlobReadStream js/ss file)
         upload-watch-fn! (fn [_ _ old-state new-state]
-                           (let [action (get-action old-state new-state upload-id)
+                           (let [action (get-action old-state new-state upload-client-id)
                                  uploads (:uploads new-state)
                                  uploads-order (:uploads-order new-state)
-                                 upload (get uploads upload-id)
+                                 upload (get uploads upload-client-id)
                                  upload-slots (:upload-slots new-state)]
                              (if-not (nil? action)
                                (cond
@@ -171,7 +171,7 @@
                                                       uploads-order
                                                       upload-slots
                                                       active-uploads
-                                                      upload-id))
+                                                      upload-client-id))
                                  (= action :stopped)
                                    (.unpipe blob-stream)
                                  (and (= action :started)
@@ -179,14 +179,14 @@
                                    (.pipe blob-stream stream)))))]
     (.on blob-stream "end"
       (fn []
-        (remove-watch app-state/app-state upload-id)
+        (remove-watch app-state/app-state upload-client-id)
         (swap! app-state/app-state
                assoc
                :uploads
-               (dissoc (:uploads @app-state/app-state) upload-id))))
+               (dissoc (:uploads @app-state/app-state) upload-client-id))))
 
     (add-watch app-state/app-state
-               upload-id
+               upload-client-id
                upload-watch-fn!)
 
     (.emit (js/ss app-state/socket)
@@ -194,7 +194,8 @@
            stream
            (.-name file)
            (.-size file)
-           upload-id)
+           upload-client-id
+           upload-server-id)
 
     (swap! app-state/app-state
            merge
@@ -202,8 +203,8 @@
                             (if (< (count (active-uploads (:uploads-order @app-state/app-state)
                                                           (:uploads @app-state/app-state)))
                                    (:upload-slots   @app-state/app-state))
-                              {upload-id (start-upload new-upload)}
-                              {upload-id new-upload}))
+                              {upload-client-id (start-upload new-upload)}
+                              {upload-client-id new-upload}))
             :uploads-order (append-upload (:uploads-order @app-state/app-state)
-                                           upload-id)})))
+                                           upload-client-id)})))
 
