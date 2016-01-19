@@ -103,8 +103,8 @@
   (dom/div #js {:className "track-view"}
            (:name file-hash-info)
            " - "
-           (/ (:current-chunk file-hash-info)
-              (:chunks file-hash-info))
+           (* 100 (/ (:current-chunk file-hash-info)
+                  (:chunks file-hash-info)))
            "%"))
 
 (defn build-upload-id-view [upload-data owner]
