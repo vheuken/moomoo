@@ -320,7 +320,7 @@
 
   (s/defevent "new-hash" [client-id] [user-id room-id]
     (let [upload-id (.v4 js-uuid)]
-      (rooms/new-hash room-id user-id upload-id
+      (rooms/add-new-upload room-id user-id upload-id
         (fn [uploads-order]
           (.emit (.to io room-id) "new-uploads-order" (clj->js uploads-order))
           (.emit socket (str "start-hashing-" client-id) upload-id)))))
@@ -362,7 +362,9 @@
     (println "Received cancel-upload signal from" (.-id socket) " for id:" id)
     (rooms/get-uploader-id id
       (fn [uploader-id]
-        (if (= uploader-id user-id)
+        (println "UPLOADER ID" uploader-id)
+        (println "USER ID" user-id)
+        (when (= uploader-id user-id)
           (rooms/cancel-upload id
             (fn []
               (.publish redis-pub-client "cancel-upload" id)
@@ -391,6 +393,7 @@
                       (fn [channel message]
                         (println "CHANNEL:" channel)
                         (println "Message:" message)
+                        (println "File-id:" file-id)
                         (when (= message file-id)
                           (rooms/upload-complete room file-id #(.emit (.to io room)
                                                                       "new-uploads-order"

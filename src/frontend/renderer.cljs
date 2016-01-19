@@ -78,7 +78,7 @@
     (dom/div #js {:className "track-view"}
              (when-not (nil? upload)
                (list
-               (dom/button #js {:onClick #(core/cancel-upload (.-id upload-info))}       "CANCEL")
+               (dom/button #js {:onClick #(core/cancel-upload (.-id upload-info))} "CANCEL")
                  (if (:paused? ((:uploads @app-state/app-state) (:id upload)))
                    (dom/button #js {:onClick #(core/resume-upload!  (:id upload))} "RESUME")
                    (dom/button #js {:onClick #(core/pause-upload!   (:id upload))} "PAUSE"))
