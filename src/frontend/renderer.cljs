@@ -74,14 +74,16 @@
 (defn user-upload-progress [data]
   (let [upload (first data)
         upload-info (second data)]
+    (println "DATAQ" data)
     (dom/div #js {:className "track-view"}
              (when-not (nil? upload)
+               (list
                (dom/button #js {:onClick #(core/cancel-upload (.-id upload-info))}       "CANCEL")
                  (if (:paused? ((:uploads @app-state/app-state) (:id upload)))
                    (dom/button #js {:onClick #(core/resume-upload!  (:id upload))} "RESUME")
                    (dom/button #js {:onClick #(core/pause-upload!   (:id upload))} "PAUSE"))
                  (when-not (:started? upload)
-                   "STOPPED!"))
+                   "STOPPED!")))
              (((:users @app-state/app-state) (.-uploaderid upload-info)) "name")
              " - " (* 100 (/ (.-bytesreceived upload-info) (.-totalsize upload-info))) "% - "
              (.-filename upload-info))))
