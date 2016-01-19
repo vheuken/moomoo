@@ -107,8 +107,11 @@
            "HASHING: "
            (:name file-hash-info)
            " - "
-           (* 100 (/ (:current-chunk file-hash-info)
-                  (:chunks file-hash-info)))
+           (if (< (:current-chunk file-hash-info)
+                  (:chunks file-hash-info))
+             (* 100 (/ (:current-chunk file-hash-info)
+                       (:chunks file-hash-info)))
+             100)
            "%"))
 
 (defn build-upload-id-view [upload-data owner]
