@@ -74,8 +74,6 @@
 (defn user-upload-progress [data]
   (let [upload (first data)
         upload-info (second data)]
-    (println "UPLOADERID" (js->clj upload-info))
-    (println ((:users @app-state/app-state) (.-uploaderid upload-info)) "NAMEQ")
     (dom/div #js {:className "track-view"}
              (when-not (nil? upload)
                (dom/button #js {:onClick #(core/cancel-upload (.-id upload-info))}       "CANCEL")
