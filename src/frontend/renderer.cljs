@@ -99,18 +99,30 @@
                  "Not yet started: "
                  (:filename data))))
 
+(defn file-hash-progress [file-hash-info]
+  (dom/div #js {:className "track-view"}
+           (:name file-hash-info)
+           " - "
+           (/ (:current-chunk file-hash-info)
+              (:chunks file-hash-info))
+           "%"))
+
 (defn build-upload-id-view [upload-data owner]
   (reify
     om/IRender
     (render [this]
       (println upload-data)
       (let [upload (first upload-data)
-            upload-info (second upload-data)]
+            upload-info (second upload-data)
+            file-hash-info (last upload-data)]
         (cond
           (not (nil? upload-info))
             (user-upload-progress upload-data)
-          (nil? upload-info)
-            (uninitialized-upload upload))))))
+          (and (nil? upload-info)
+               (nil? file-hash-info))
+            (uninitialized-upload upload)
+          (not (nil? file-hash-info))
+            (file-hash-progress file-hash-info))))))
 
 (defn users-upload-progress-view [data owner]
   (reify
@@ -122,7 +134,7 @@
                                       client-id (when-not (nil? upload-info)
                                                   (.-clientid upload-info))
                                       file-hash-info ((:room-file-hashes data) id)]
-                                  [((:uploads data) client-id) upload-info]))
+                                  [((:uploads data) client-id) upload-info file-hash-info]))
                               (:room-uploads-order data))]
         (apply dom/div nil
           (om/build-all build-upload-id-view
