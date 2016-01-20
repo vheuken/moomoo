@@ -144,9 +144,21 @@
              (assoc (:uploads @app-state/app-state)
                     upload-to-stop-id
                     (stop-upload upload-to-stop))))))
+(defn positions
+  [pred coll]
+  (keep-indexed (fn [idx x]
+                  (when (pred x)
+                    idx))
+                coll))
+
+(defn comp-by-room-order [a b]
+  (let [room-uploads-order (:room-uploads-order @app-state/app-state)
+        a-index (first (positions #{a} room-uploads-order))
+        b-index (first (positions #{b} room-uploads-order))]
+    (< a-index b-index)))
 
 (defn upload-file! [file upload-server-id]
-  (let [upload-client-id (.v4 js/uuid)
+  (let [upload-client-id upload-server-id
         new-upload (merge blank-upload {:filename (.-name file)
                                         :id upload-client-id})
         stream (.createStream js/ss)
@@ -205,6 +217,7 @@
                                    (:upload-slots   @app-state/app-state))
                               {upload-client-id (start-upload new-upload)}
                               {upload-client-id new-upload}))
-            :uploads-order (append-upload (:uploads-order @app-state/app-state)
-                                           upload-client-id)})))
+            :uploads-order (sort comp-by-room-order
+                                 (append-upload (:uploads-order @app-state/app-state)
+                                                upload-client-id))})))
 
