@@ -90,6 +90,37 @@
 
 (add-watch app-state/app-state :upload-removed upload-removed-watch-fn!)
 
+(defn handle-new-upload [old-state new-state]
+  (loop [uploads-order (:uploads-order new-state)
+         upload-slots  (:upload-slots new-state)
+         uploads       (:uploads new-state)]
+    (if (empty? uploads-order)
+      uploads
+      (let [upload-id (first uploads-order)
+            upload    (uploads upload-id)]
+        (if (> upload-slots 0)
+          (if (active? upload)
+            (recur (rest uploads-order) (dec upload-slots) uploads)
+            (if (unpaused-and-not-started? upload)
+              (recur (rest uploads-order)
+                     (dec upload-slots)
+                     (assoc uploads upload-id (start-upload upload)))))
+          (recur (rest uploads-order)
+                 upload-slots
+                 (assoc uploads upload-id (stop-upload upload))))))))
+
+(defn upload-added-watch-fn! [_ _ old-state new-state]
+  (let [new-upload-ids (clojure.set/difference (set (keys (:uploads new-state)))
+                                               (set (keys (:uploads old-state))))]
+    (println "NEW UPLOAD IDS" new-upload-ids)
+    (if-not (empty? new-upload-ids)
+      (swap! app-state/app-state
+             assoc
+             :uploads
+             (handle-new-upload old-state new-state)))))
+
+(add-watch app-state/app-state :upload-added upload-added-watch-fn!)
+
 (defn get-action [old-state new-state upload-id]
   "returns the action applied to the given upload-id.
    Can return: :stopped, :started, :paused, :unpaused"
@@ -212,11 +243,7 @@
     (swap! app-state/app-state
            merge
            {:uploads (merge (:uploads @app-state/app-state)
-                            (if (< (count (active-uploads (:uploads-order @app-state/app-state)
-                                                          (:uploads @app-state/app-state)))
-                                   (:upload-slots   @app-state/app-state))
-                              {upload-client-id (start-upload new-upload)}
-                              {upload-client-id new-upload}))
+                            {upload-client-id new-upload})
             :uploads-order (sort comp-by-room-order
                                  (append-upload (:uploads-order @app-state/app-state)
                                                 upload-client-id))})))
