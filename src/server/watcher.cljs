@@ -1,15 +1,20 @@
 (ns moomoo.watcher
   (:require [cljs.nodejs :as nodejs]
+            [clojure.string :as string]
             [moomoo.file-hash :as file-hash]))
 
 (defonce watchr (nodejs/require "watchr"))
 (defonce fs (nodejs/require "fs"))
 
 (defn new-file [file-path]
-  (println "New file: " file-path)
-  (file-hash/handle-new-file file-path
-    (fn [file-hash music-info]
-      (println "Added file with hash:" file-hash))))
+  (let [file-extension (str "." (last (string/split file-path ".")))]
+    (println file-extension)
+    (when (or (= file-extension ".mp3")
+              (= file-extension ".wav"))
+      (println "New file: " file-path)
+      (file-hash/handle-new-file file-path
+        (fn [file-hash music-info]
+          (println "Added file with hash:" file-hash))))))
 
 (defn delete-file [file-path]
   (println "Deleted file: " file-path))
