@@ -88,7 +88,7 @@
 
 (.change (js/$ "#file-upload")
   (fn [e]
-    (let [file (aget (.-files (.-target e)) 0)]
+    (if-let [file (aget (.-files (.-target e)) 0)]
       (check-hash file))))
 
 (.click (js/$ "#clear-songs-button")
