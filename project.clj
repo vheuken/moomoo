@@ -51,17 +51,29 @@
                 :output-to  "target/moomoo.js"
                 :output-dir "target"
                 :target :nodejs
+                :parallel-build true
                 :optimizations :none}}
 
-             {:id "moomoo-frontend"
+             {:id "moomoo-frontend-dev"
               :source-paths ["src/frontend"]
               :figwheel {:websocket-host "localhost:3449"}
               :compiler {
                 :main "moomoo-frontend.renderer"
                 :asset-path "/js/out"
                 :output-to  "public/js/moomoo-frontend.js"
-                :output-dir "public/js/out"
+                :output-dir "public/js/out-dev"
                 :optimizations :none
-                :source-map true}}]}
+                :parallel-build true
+                :source-map true}}
+
+              {:id "moomoo-frontend-release"
+              :source-paths ["src/frontend"]
+              :figwheel {:websocket-host "localhost:3449"}
+              :compiler {
+                :asset-path "/js/out"
+                :output-to  "public/js/moomoo-frontend.js"
+                :output-dir "public/js/out-release"
+                :parallel-build true
+                :optimizations :simple}}]}
 
   :clean-targets ["target/" "public/js/"])
