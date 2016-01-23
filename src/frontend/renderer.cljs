@@ -138,10 +138,8 @@
       (let [uploads-data (map (fn [id]
                                 (let [upload-info (first (filter #(= id (.-id %1))
                                                                  (vals (:current-uploads-info data))))
-                                      client-id (when-not (nil? upload-info)
-                                                  (.-clientid upload-info))
                                       file-hash-info ((:room-file-hashes data) id)]
-                                  [((:uploads data) client-id) upload-info file-hash-info]))
+                                  [((:uploads data) id) upload-info file-hash-info]))
                               (:room-uploads-order data))]
         (apply dom/div nil
           (om/build-all build-upload-id-view
