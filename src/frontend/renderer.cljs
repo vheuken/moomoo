@@ -17,7 +17,7 @@
     (render [this]
       (dom/div nil
                (let [username (get user "name")]
-                 (if (empty? username) "Anonymous" username))
+                 (if (string/blank? username) "Anonymous" username))
                (if (get user "muted") " - Muted!")))))
 
 (defn users-list-view [data owner]
