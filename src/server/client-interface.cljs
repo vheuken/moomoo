@@ -371,7 +371,7 @@
               (.emit (.to io room-id) "upload-cancelled" id)))))))
 
   (.on (new socketio-stream socket) "file-upload"
-    (fn [stream original-filename file-size client-id file-id]
+    (fn [stream original-filename file-size file-id]
       (println (.-id socket) "is uploading" original-filename)
       (rooms/get-user-id-from-socket (.-id socket)
         (fn [user-id]
@@ -413,8 +413,7 @@
                                         :uploaderid    user-id
                                         :bytesreceived bytes-received
                                         :totalsize     file-size
-                                        :filename      original-filename
-                                        :clientid      client-id}))))))
+                                        :filename      original-filename}))))))
 
                   (.on stream "end"
                     (fn []
@@ -451,7 +450,7 @@
                                                                              (clj->js music-info)
                                                                              track-order
                                                                              track-id-hashes
-                                                                             client-id)))))
+                                                                             file-id)))))
                                                 (rooms/is-waiting-to-start? room
                                                   (fn [waiting?]
                                                     (if-not waiting?

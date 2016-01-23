@@ -188,17 +188,16 @@
         b-index (first (positions #{b} room-uploads-order))]
     (< a-index b-index)))
 
-(defn upload-file! [file upload-server-id]
-  (let [upload-client-id upload-server-id
-        new-upload (merge blank-upload {:filename (.-name file)
-                                        :id upload-client-id})
+(defn upload-file! [file upload-id]
+  (let [new-upload (merge blank-upload {:filename (.-name file)
+                                        :id upload-id})
         stream (.createStream js/ss)
         blob-stream (.createBlobReadStream js/ss file)
         upload-watch-fn! (fn [_ _ old-state new-state]
-                           (let [action (get-action old-state new-state upload-client-id)
+                           (let [action (get-action old-state new-state upload-id)
                                  uploads (:uploads new-state)
                                  uploads-order (:uploads-order new-state)
-                                 upload (get uploads upload-client-id)
+                                 upload (get uploads upload-id)
                                  upload-slots (:upload-slots new-state)]
                              (if-not (nil? action)
                                (cond
@@ -214,7 +213,7 @@
                                                       uploads-order
                                                       upload-slots
                                                       active-uploads
-                                                      upload-client-id))
+                                                      upload-id))
                                  (= action :stopped)
                                    (.unpipe blob-stream)
                                  (and (= action :started)
@@ -222,14 +221,14 @@
                                    (.pipe blob-stream stream)))))]
     (.on blob-stream "end"
       (fn []
-        (remove-watch app-state/app-state upload-client-id)
+        (remove-watch app-state/app-state upload-id)
         (swap! app-state/app-state
                assoc
                :uploads
-               (dissoc (:uploads @app-state/app-state) upload-client-id))))
+               (dissoc (:uploads @app-state/app-state) upload-id))))
 
     (add-watch app-state/app-state
-               upload-client-id
+               upload-id
                upload-watch-fn!)
 
     (.emit (js/ss app-state/socket)
@@ -237,14 +236,13 @@
            stream
            (.-name file)
            (.-size file)
-           upload-client-id
-           upload-server-id)
+           upload-id)
 
     (swap! app-state/app-state
            merge
            {:uploads (merge (:uploads @app-state/app-state)
-                            {upload-client-id new-upload})
+                            {upload-id new-upload})
             :uploads-order (sort comp-by-room-order
                                  (append-upload (:uploads-order @app-state/app-state)
-                                                upload-client-id))})))
+                                                upload-id))})))
 
