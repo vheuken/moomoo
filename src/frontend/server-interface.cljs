@@ -162,19 +162,18 @@
   (fn [id]
     (println "upload cancelled!")
     (let [current-uploads-info (:current-uploads-info @app-state/app-state)
-          uploads (:uploads @app-state/app-state)
-          client-id (.-clientid (get current-uploads-info id))]
+          uploads (:uploads @app-state/app-state)]
       (swap! app-state/app-state
              merge
              {:current-uploads-info (dissoc current-uploads-info id)
-              :uploads (dissoc uploads client-id)}))))
+              :uploads (dissoc uploads id)}))))
 
 (.on app-state/socket "track-order-change"
   (fn [track-order]
     (swap! app-state/app-state assoc :track-order (js->clj track-order))))
 
 (.on app-state/socket "upload-complete"
-  (fn [music-info track-order track-id-hashes client-id]
+  (fn [music-info track-order track-id-hashes]
     (println "Received upload-complete signal:"
              "music-info:" music-info
              "track-order:" track-order)
