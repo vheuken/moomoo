@@ -1,12 +1,15 @@
 (ns moomoo.client-interface
   (:require [cljs.nodejs :as nodejs]
+            [cljs.core.async :as async
+                             :refer [chan >!]]
             [clojure.string :as string]
             [cognitect.transit :as transit]
             [moomoo.rooms :as rooms]
             [moomoo.config :as config]
             [moomoo.file-hash :as file-hash]
             [moomoo.lastfm :as lastfm])
-  (:require-macros [moomoo.socket :as s]))
+  (:require-macros [moomoo.socket :as s]
+                   [cljs.core.async.macros :refer [go go-loop]]))
 
 (defonce socketio (nodejs/require "socket.io"))
 (defonce socketio-redis (nodejs/require "socket.io-redis"))
@@ -15,10 +18,10 @@
 (defonce js-uuid (nodejs/require "uuid"))
 (defonce fs (nodejs/require "fs"))
 (defonce redis (nodejs/require "redis"))
-(defonce redis-pub-client (.createClient redis))
 (defonce redis-lock ((nodejs/require "redis-lock") rooms/redis-client))
 (defonce mmm (nodejs/require "mmmagic"))
 (defonce Magic (.-Magic mmm))
+(defonce server-chan (chan))
 
 (defn initialize! [server options]
   (defonce io (.listen socketio server options))
@@ -367,7 +370,7 @@
         (when (= uploader-id user-id)
           (rooms/cancel-upload id
             (fn []
-              (.publish redis-pub-client "cancel-upload" id)
+              (go (>! server-chan ["cancel-upload" id]))
               (.emit (.to io room-id) "upload-cancelled" id)))))))
 
   (.on (new socketio-stream socket) "file-upload"
@@ -381,25 +384,22 @@
                 (fn [_ upload-num]
                   (let [file-extension (str "." (last (string/split original-filename ".")))
                         temp-filename (subs file-id 0 7)
-                        temp-absolute-file-path (str file-upload-directory "/" temp-filename file-extension)
-                        redis-sub-client (.createClient redis)]
+                        temp-absolute-file-path (str file-upload-directory "/" temp-filename file-extension)]
 
                     (println (str "Saving" original-filename "as" temp-absolute-file-path))
                     (.pipe stream (.createWriteStream fs temp-absolute-file-path))
 
-                    (.subscribe redis-sub-client "cancel-upload")
-
-                    (.on redis-sub-client "message"
-                      (fn [channel message]
-                        (println "CHANNEL:" channel)
-                        (println "Message:" message)
-                        (println "File-id:" file-id)
-                        (when (= message file-id)
-                          (rooms/upload-complete room file-id #(.emit (.to io room)
-                                                                      "new-uploads-order"
-                                                                      (clj->js %1)))
-                          (.unpipe stream)
-                          (.unlink fs temp-absolute-file-path))))
+                    (go-loop []
+                      (let [data (<! server-chan)]
+                        (if (and (= "cancel-upload" (first data))
+                                 (= file-id (second data)))
+                          (do
+                            (rooms/upload-complete room file-id #(.emit (.to io room)
+                                                                        "new-uploads-order"
+                                                                        (clj->js %1)))
+                            (.unpipe stream)
+                            (.unlink fs temp-absolute-file-path))
+                          (recur))))
 
                   (.on stream "data"
                     (fn [data-chunk]

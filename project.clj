@@ -7,7 +7,8 @@
                  [org.omcljs/om "0.9.0"]
                  [com.cognitect/transit-cljs "0.8.225"]
                  [com.cemerick/piggieback "0.2.1"]
-                 [org.clojure/tools.nrepl "0.2.12"] ]
+                 [org.clojure/tools.nrepl "0.2.12"]
+                 [org.clojure/core.async "0.2.374"]]
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
