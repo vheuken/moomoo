@@ -132,7 +132,7 @@
                         (fn [file-path]
                           (let [file-url (string/replace file-path "public" "")]
                             (println "TRACK POS INFO" track-position-info)
-                            (if (nil? (convert-position track-position-info))
+                            (if-not (nil? (convert-position track-position-info))
                               (rooms/get-current-track-position room-id
                                 (fn [track-position-info]
                                   (.emit socket "start-track" file-url
