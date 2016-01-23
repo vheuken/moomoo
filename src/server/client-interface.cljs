@@ -323,7 +323,7 @@
       (rooms/add-new-upload room-id user-id upload-id
         (fn [uploads-order]
           (.emit (.to io room-id) "new-uploads-order" (clj->js uploads-order))
-          (.emit socket (str "start-hashing-" client-id) upload-id)))))
+          (.emit socket "start-hashing" client-id upload-id)))))
 
   (s/defevent "hash-progress" [id filename current-chunk chunks] [user-id room-id]
     (.emit (.to io room-id) "hash-progress" id filename current-chunk chunks))

@@ -215,3 +215,28 @@
                   {:current-chunk current-chunk
                    :chunks chunks
                    :name filename}))))
+
+
+(.on app-state/socket "start-hashing"
+  (fn [client-id id]
+    (when-let [file ((:files-to-check @app-state/app-state) client-id)]
+      (swap! app-state/app-state
+             assoc
+             :files-to-check
+             (dissoc (:files-to-hash @app-state/app-state)
+                     client-id))
+      (js/md5File file
+        (fn [current-chunk chunks]
+          (.emit app-state/socket
+                 "hash-progress"
+                 id
+                 (.-name file)
+                 current-chunk
+                 chunks))
+        (fn [file-hash]
+          (swap! app-state/app-state
+                 assoc
+                 :file-hashes
+                 (merge {file-hash file}
+                        (:file-hashes @app-state/app-state)))
+         (.emit app-state/socket "check-hash" id file-hash))))))

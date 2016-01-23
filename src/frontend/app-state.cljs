@@ -20,6 +20,7 @@
                           :should-scrobble? true
 
                           ; Uploads
+                          :files-to-check {}
                           :room-file-hashes {}
                           :room-uploads-order []
                           :file-hashes {}
