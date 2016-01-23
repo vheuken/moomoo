@@ -4,7 +4,7 @@
             [moomoo.rooms :as rooms]
             [moomoo.config :as config]
             [moomoo.watcher :as watcher]
-            [figwheel.client :as fw]))
+            #_[figwheel.client :as fw]))
 
 (nodejs/enable-util-print!)
 
@@ -46,4 +46,4 @@
 
 (set! *main-cli-fn* -main)
 
-(fw/start { })
+#_(fw/start { })

@@ -42,17 +42,25 @@
   :source-paths ["src"]
 
   :figwheel {:nrepl-port 7888
-             :build-ids ["moomoo-server" "moomoo-frontend"]}
+             :build-ids ["moomoo-server-dev"]}
   :cljsbuild {
-    :builds [{:id "moomoo-server"
-              :source-paths ["src/server"]
+    :builds [{:id "moomoo-server-dev"
+              :source-paths ["src/server" "src-dev/server"]
               :figwheel true
+              :compiler {
+                :output-to  "target-dev/moomoo.js"
+                :output-dir "target-dev"
+                :target :nodejs
+                :optimizations :none
+                :source-map true}}
+
+             {:id "moomoo-server-release"
+              :source-paths ["src/server"]
               :compiler {
                 :output-to  "target/moomoo.js"
                 :output-dir "target"
                 :target :nodejs
-                :optimizations :none
-                :source-map true}}
+                :optimizations :none}}
 
              {:id "moomoo-frontend"
               :source-paths ["src/frontend"]
