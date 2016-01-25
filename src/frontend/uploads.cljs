@@ -123,26 +123,29 @@
 
 (defn get-action [old-state new-state upload-id]
   "returns the action applied to the given upload-id.
-   Can return: :stopped, :started, :paused, :unpaused"
-  (let [upload-diff (data/diff (get (:uploads old-state) upload-id)
-                               (get (:uploads new-state) upload-id))
-        old-upload-state (first upload-diff)
-        new-upload-state (second upload-diff)]
-    (if (nil? old-upload-state)
-      (if (:started? new-upload-state)
-        :started)
-      (if-not (nil? new-upload-state)
-        (let [k (first (keys new-upload-state))
-              v (first (vals new-upload-state))]
-          (cond
-            (= k :paused?)
-              (if v
-                :paused
-                :unpaused)
-            (= k :started?)
-               (if v
-                 :started
-                 :stopped)))))))
+   Can return: :stopped, :started, :paused, :unpaused. :reconnected"
+  (if (and (:reconnected? new-state)
+           (not (:reconnected? old-state)))
+    :reconnected
+    (let [upload-diff (data/diff (get (:uploads old-state) upload-id)
+                                 (get (:uploads new-state) upload-id))
+          old-upload-state (first upload-diff)
+          new-upload-state (second upload-diff)]
+      (if (nil? old-upload-state)
+        (if (:started? new-upload-state)
+          :started)
+        (if-not (nil? new-upload-state)
+          (let [k (first (keys new-upload-state))
+                v (first (vals new-upload-state))]
+            (cond
+              (= k :paused?)
+                (if v
+                  :paused
+                  :unpaused)
+              (= k :started?)
+                 (if v
+                   :started
+                   :stopped))))))))
 
 (defn handle-pause! [uploads uploads-order upload-slots]
   (let [first-inactive-upload-id (first (filter #(unpaused-and-not-started? (uploads %)) uploads-order))
@@ -191,8 +194,14 @@
 (defn upload-file! [file upload-id]
   (let [new-upload (merge blank-upload {:filename (.-name file)
                                         :id upload-id})
-        stream (.createStream js/ss)
+        stream (atom (.createStream js/ss))
         blob-stream (.createBlobReadStream js/ss file)
+        emit #(.emit (js/ss app-state/socket)
+                     "file-upload"
+                     %1
+                     (.-name file)
+                     (.-size file)
+                     upload-id)
         upload-watch-fn! (fn [_ _ old-state new-state]
                            (let [action (get-action old-state new-state upload-id)
                                  uploads (:uploads new-state)
@@ -201,6 +210,16 @@
                                  upload-slots (:upload-slots new-state)]
                              (if-not (nil? action)
                                (cond
+                                 (= action :reconnected)
+                                   (do
+                                     (swap! stream #(.createStream js/ss))
+                                     (emit @stream)
+                                     (when (active? upload)
+                                       (.pipe blob-stream @stream))
+                                     (swap! app-state/app-state
+                                            assoc
+                                            :reconnected?
+                                            false))
                                  (= action :paused)
                                    (do
                                      (.unpipe blob-stream)
@@ -208,7 +227,7 @@
                                  (= action :unpaused)
                                    (do
                                      (when (:started? upload)
-                                       (.pipe blob-stream stream))
+                                       (.pipe blob-stream @stream))
                                      (handle-unpause! uploads
                                                       uploads-order
                                                       upload-slots
@@ -218,7 +237,7 @@
                                    (.unpipe blob-stream)
                                  (and (= action :started)
                                       (not (:paused? upload)))
-                                   (.pipe blob-stream stream)))))]
+                                   (.pipe blob-stream @stream)))))]
     (.on blob-stream "end"
       (fn []
         (remove-watch app-state/app-state upload-id)
@@ -231,12 +250,7 @@
                upload-id
                upload-watch-fn!)
 
-    (.emit (js/ss app-state/socket)
-           "file-upload"
-           stream
-           (.-name file)
-           (.-size file)
-           upload-id)
+    (emit @stream)
 
     (swap! app-state/app-state
            merge

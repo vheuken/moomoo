@@ -18,6 +18,7 @@
                           :lastfm-token nil
                           :lastfm-username nil
                           :should-scrobble? true
+                          :reconnected? false
 
                           ; Uploads
                           :files-to-check {}

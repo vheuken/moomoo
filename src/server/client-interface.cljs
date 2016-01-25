@@ -70,6 +70,7 @@
           (fn [room-id]
             (.join socket room-id
               (fn []
+                (.emit socket "socket-id-change-success")
                 (rooms/get-all-users room-id
                   (fn [users]
                     (if-not (empty? users)

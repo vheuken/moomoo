@@ -8,9 +8,13 @@
 
 (.on app-state/socket "reconnect"
   (fn []
-    (println "RECONNECT!")
     (if-let [user-id (:user-id @app-state/app-state)]
       (.emit app-state/socket "socket-id-change" user-id))))
+
+(.on app-state/socket "socket-id-change-success"
+  (fn []
+    (println "Successfulyl changed socket id")
+    (swap! app-state/app-state assoc :reconnected? true)))
 
 (.on app-state/socket "sign-in-success"
   (fn [userId]
