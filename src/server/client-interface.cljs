@@ -329,7 +329,15 @@
           (.emit socket "start-hashing" client-id upload-id)))))
 
   (s/defevent "hash-progress" [id filename current-chunk chunks] [user-id room-id]
-    (.emit (.to io room-id) "hash-progress" id filename current-chunk chunks))
+    (rooms/get-uploader-id id
+      (fn [uploader-id]
+        (if (= uploader-id user-id)
+          (.emit (.to io room-id)
+                 "hash-progress"
+                 id
+                 filename
+                 current-chunk
+                 chunks)))))
 
   (s/defevent "check-hash" [id file-hash] [user-id room-id]
     (println (.-id socket) "sent hash:" file-hash)
