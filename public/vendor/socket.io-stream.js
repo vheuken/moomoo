@@ -30,7 +30,7 @@ function BlobReadStream(blob, options) {
   options = options || {};
   this.blob = blob;
   this.slice = blob.slice || blob.webkitSlice || blob.mozSlice;
-  this.start = 0;
+  this.start = options.start || 0;
   this.sync = options.synchronous || false;
 
   var fileReader;

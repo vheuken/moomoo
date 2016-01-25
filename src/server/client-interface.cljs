@@ -383,7 +383,7 @@
               (.emit (.to io room-id) "upload-cancelled" id)))))))
 
   (.on (new socketio-stream socket) "file-upload"
-    (fn [stream original-filename file-size file-id]
+    (fn [stream original-filename file-size file-id start]
       (println (.-id socket) "is uploading" original-filename)
       (rooms/get-user-id-from-socket (.-id socket)
         (fn [user-id]
@@ -394,9 +394,9 @@
                   (let [file-extension (str "." (last (string/split original-filename ".")))
                         temp-filename (subs file-id 0 7)
                         temp-absolute-file-path (str file-upload-directory "/" temp-filename file-extension)]
-
                     (println (str "Saving" original-filename "as" temp-absolute-file-path))
-                    (.pipe stream (.createWriteStream fs temp-absolute-file-path))
+                    (.pipe stream (.createWriteStream fs temp-absolute-file-path #js {:start start
+                                                                                      :flags "a"}))
 
                     (go-loop []
                       (let [data (<! server-chan)]

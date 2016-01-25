@@ -195,50 +195,57 @@
   (let [new-upload (merge blank-upload {:filename (.-name file)
                                         :id upload-id})
         stream (atom (.createStream js/ss))
-        blob-stream (.createBlobReadStream js/ss file)
+        blob-stream (atom (.createBlobReadStream js/ss file))
         emit #(.emit (js/ss app-state/socket)
                      "file-upload"
                      %1
                      (.-name file)
                      (.-size file)
-                     upload-id)
+                     upload-id
+                     %2)
         upload-watch-fn! (fn [_ _ old-state new-state]
                            (let [action (get-action old-state new-state upload-id)
                                  uploads (:uploads new-state)
                                  uploads-order (:uploads-order new-state)
                                  upload (get uploads upload-id)
-                                 upload-slots (:upload-slots new-state)]
+                                 upload-slots (:upload-slots new-state)
+                                 upload-info (first (filter #(= upload-id (.-id %1))
+                                                            (vals (:current-uploads-info @app-state/app-state))))]
                              (if-not (nil? action)
                                (cond
                                  (= action :reconnected)
-                                   (do
+                                   (let [start (.-bytesreceived upload-info)]
                                      (swap! stream #(.createStream js/ss))
-                                     (emit @stream)
+                                     (swap! blob-stream #(.createBlobReadStream
+                                                          js/ss
+                                                          file
+                                                          #js {:start  start}))
+                                     (emit @stream start)
                                      (when (active? upload)
-                                       (.pipe blob-stream @stream))
+                                       (.pipe @blob-stream @stream))
                                      (swap! app-state/app-state
                                             assoc
                                             :reconnected?
                                             false))
                                  (= action :paused)
                                    (do
-                                     (.unpipe blob-stream)
+                                     (.unpipe @blob-stream)
                                      (handle-pause! uploads uploads-order upload-slots))
                                  (= action :unpaused)
                                    (do
                                      (when (:started? upload)
-                                       (.pipe blob-stream @stream))
+                                       (.pipe @blob-stream @stream))
                                      (handle-unpause! uploads
                                                       uploads-order
                                                       upload-slots
                                                       active-uploads
                                                       upload-id))
                                  (= action :stopped)
-                                   (.unpipe blob-stream)
+                                   (.unpipe @blob-stream)
                                  (and (= action :started)
                                       (not (:paused? upload)))
-                                   (.pipe blob-stream @stream)))))]
-    (.on blob-stream "end"
+                                   (.pipe @blob-stream @stream)))))]
+    (.on @blob-stream "end"
       (fn []
         (remove-watch app-state/app-state upload-id)
         (swap! app-state/app-state
@@ -250,7 +257,7 @@
                upload-id
                upload-watch-fn!)
 
-    (emit @stream)
+    (emit @stream 0)
 
     (swap! app-state/app-state
            merge
