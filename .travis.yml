@@ -24,3 +24,4 @@ script:
   - lein cljsbuild once moomoo-frontend-dev
   - lein clean
   - lein cljsbuild once moomoo-frontend-release
+  - lein doo node test

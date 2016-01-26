@@ -37,9 +37,10 @@
             [lein-npm "0.6.1"]
             [lein-cljfmt "0.3.0"]
             [lein-figwheel "0.5.0-3"]
-            [cider/cider-nrepl "0.9.1"]]
+            [cider/cider-nrepl "0.9.1"]
+            [lein-doo "0.1.6"]]
 
-  :source-paths ["src"]
+  :source-paths ["src/server" "test/server"]
 
   :figwheel {:nrepl-port 7888
              :build-ids []}
@@ -74,6 +75,13 @@
                 :output-to  "public/js/moomoo-frontend.js"
                 :output-dir "public/js/out-release"
                 :parallel-build true
-                :optimizations :simple}}]}
+                :optimizations :simple}}
+
+              {:id "test"
+               :source-paths ["src/server" "test/server"]
+               :compiler {:output-to "target/testable.js"
+                          :main moomoo.runner
+                          :target :nodejs
+                          :optimizations :none}}]}
 
   :clean-targets ["target/" "public/js/"])
