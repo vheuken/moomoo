@@ -330,7 +330,7 @@
     (did-mount [this]
      (track-bar-did-mount owner "#progress-track-ball"
                                 "#progress-track-bar"
-                                #(swap! player/app-state assoc
+                                #(swap! app-state/app-state assoc
                                         :ball-being-dragged?
                                         true)
                                 (fn [event ui]
@@ -419,13 +419,13 @@
                         :title "Loop Track"
                         :onClick core/toggle-loop}))))))
 
-(om/root play-pause-button player/app-state {:target (. js/document (getElementById "play-pause-button"))})
+(om/root play-pause-button app-state/app-state {:target (. js/document (getElementById "play-pause-button"))})
 (om/root previous-track-button app-state/app-state {:target (. js/document (getElementById "previous-track-button"))})
 (om/root next-track-button app-state/app-state {:target (. js/document (getElementById "next-track-button"))})
 (om/root restart-button app-state/app-state {:target (. js/document (getElementById "restart-button"))})
 (om/root loop-button app-state/app-state {:target (. js/document (getElementById "loop-button"))})
 (om/root track-queue app-state/app-state {:target (. js/document (getElementById "playlist"))})
-(om/root progress-track player/app-state {:target (. js/document (getElementById "progress-track"))})
+(om/root progress-track app-state/app-state {:target (. js/document (getElementById "progress-track"))})
 
 (defn volume [data owner]
   (reify
@@ -445,7 +445,7 @@
                                  nil
                                  core/on-volume-drag-stop))))
 
-(om/root volume player/app-state {:target (. js/document (getElementById "volume"))})
+(om/root volume app-state/app-state {:target (. js/document (getElementById "volume"))})
 
 (defn upload-slots [data owner]
   (reify

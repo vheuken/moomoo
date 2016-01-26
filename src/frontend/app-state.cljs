@@ -12,8 +12,6 @@
                           :track-id-hashes {}
                           :music-info []
                           :current-track-id nil
-                          :current-sound-id nil
-                          :ball-being-dragged? false
                           :looping? false
                           :lastfm-token nil
                           :lastfm-username nil
@@ -28,4 +26,15 @@
                           :current-uploads-info {}
                           :upload-slots default-upload-slots
                           :uploads {}
-                          :uploads-order []}))
+                          :uploads-order []
+
+                          ; Player
+                          :current-sound nil
+                          :current-sound-id nil
+                          :tracks-to-delete []
+                          :current-sound-position 0
+                          :ball-being-dragged? false
+                          :on-finish nil
+                          :volume 100
+                          :paused? false
+                          :scrobbled? false}))

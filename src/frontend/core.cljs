@@ -104,7 +104,7 @@
     (.emit app-state/socket "start-looping")))
 
 (defn on-drag-stop [event ui]
-  (swap! player/app-state assoc :ball-being-dragged? false)
+  (swap! app-state/app-state assoc :ball-being-dragged? false)
   (if (player/is-sound-loaded?)
     (let [bar-width (.width (js/$ "#progress-track-bar"))
           new-position (* (player/get-duration)
