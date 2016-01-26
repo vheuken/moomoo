@@ -68,11 +68,14 @@
   (fn [file-url position]
     (let [file-url (str (first (string/split (.-href (.-location js/window))
                                              #"/rooms"))
-                        file-url)]
-      (player/play-track! file-url
-                          (:current-sound-id @app-state/app-state)
-                          position
-                          core/on-finish))))
+                        file-url)
+
+          current-sound-id (:current-sound-id @app-state/app-state)]
+      (player/load-track! file-url
+                          current-sound-id
+                          #(player/play-track! current-sound-id
+                                               position
+                                               core/on-finish)))))
 
 (.on app-state/socket "track-change"
   (fn [track-id sound-id]

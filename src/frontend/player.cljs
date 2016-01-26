@@ -58,21 +58,22 @@
   (.resume (:current-sound @app-state))
   (swap! app-state assoc :paused? false))
 
-(defn play-track! [sound-url sound-id position on-finish]
-  (println "Sound URL to play:" sound-url)
+(defn load-track! [sound-url sound-id on-load-fn]
+  (.createSound js/soundManager #js {:id sound-id
+                                     :url sound-url
+                                     :whileloading while-loading
+                                     :autoLoad true
+                                     :onload on-load-fn}))
+
+(defn play-track! [sound-id position on-finish]
   (swap! app-state
          merge
          {:on-finish on-finish
           :current-sound-id sound-id
-          :scrobbled? false})
+          :scrobbled? false
+          :current-sound (.getSoundById js/soundManager sound-id)})
 
-  (swap! app-state assoc :current-sound
-    (.createSound js/soundManager #js {:id sound-id
-                                       :url sound-url
-                                       :whileloading while-loading
-                                       :onfinish on-finish
-                                       :volume (:volume @app-state)
-                                       :from position}))
+
   (defn on-play []
     (if (nil? position)
       (.setPosition (:current-sound @app-state) (.-MAX_SAFE_INTEGER js/Number))))
