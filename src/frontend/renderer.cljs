@@ -117,7 +117,6 @@
   (reify
     om/IRender
     (render [this]
-      (println upload-data)
       (let [upload (first upload-data)
             upload-info (second upload-data)
             file-hash-info (last upload-data)]
