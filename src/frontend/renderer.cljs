@@ -74,7 +74,6 @@
 (defn user-upload-progress [data]
   (let [upload (first data)
         upload-info (second data)]
-    (println "DATAQ" data)
     (dom/div #js {:className "track-view"}
              "UPLOADING: "
              (when-not (nil? upload)
