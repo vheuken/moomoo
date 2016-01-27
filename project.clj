@@ -62,7 +62,7 @@
                 :main "moomoo-frontend.renderer"
                 :asset-path "/js/out"
                 :output-to  "public/js/moomoo-frontend.js"
-                :output-dir "public/js/out-dev"
+                :output-dir "public/js/out"
                 :optimizations :none
                 :parallel-build true
                 :source-map true}}

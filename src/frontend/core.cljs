@@ -216,6 +216,10 @@
   (println "Sending track-complete signal")
   (.emit app-state/socket "track-complete"))
 
+(.setup js/soundManager #js {
+  :html5PollingInterval 50})
+
+
 (.onready js/soundManager
   (fn []
     (.createSound js/soundManager #js {
