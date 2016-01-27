@@ -71,6 +71,7 @@
                         file-url)
 
           current-sound-id (:current-sound-id @app-state/app-state)]
+
       (player/load-track! file-url
                           current-sound-id
                           #(player/play-track! current-sound-id
@@ -85,13 +86,13 @@
     (let [last-current-track-id (:current-track-id @app-state/app-state)
           last-current-sound-id (:current-sound-id @app-state/app-state)]
 
+      (if-not (nil? last-current-sound-id)
+        (player/destroy-track last-current-sound-id)))
+
       (swap! app-state/app-state
              merge
              {:current-track-id track-id
               :current-sound-id sound-id})
-
-      (if-not (nil? last-current-sound-id)
-        (player/destroy-track last-current-sound-id)))
 
       (.emit app-state/socket "ready-to-start" sound-id)))
 

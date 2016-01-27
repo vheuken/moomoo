@@ -55,6 +55,7 @@
 
 
 (defn load-track! [sound-url sound-id on-load-fn]
+  (println "load-track! start")
   (.createSound js/soundManager #js {:id sound-id
                                      :url sound-url
                                      :whileloading while-loading
@@ -62,6 +63,7 @@
                                      :onload on-load-fn}))
 
 (defn play-track! [sound-id position on-finish]
+  (println "play-track! start")
   (swap! app-state/app-state
          merge
          {:on-finish on-finish
