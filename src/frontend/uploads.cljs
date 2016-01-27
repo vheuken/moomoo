@@ -112,7 +112,6 @@
 (defn upload-added-watch-fn! [_ _ old-state new-state]
   (let [new-upload-ids (clojure.set/difference (set (keys (:uploads new-state)))
                                                (set (keys (:uploads old-state))))]
-    (println "NEW UPLOAD IDS" new-upload-ids)
     (if-not (empty? new-upload-ids)
       (swap! app-state/app-state
              assoc
