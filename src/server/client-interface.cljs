@@ -135,10 +135,11 @@
                       (rooms/get-music-file room-id track-id
                         (fn [file-path]
                           (let [file-url (string/replace file-path "public" "")]
-                            (println "TRACK POS INFO" track-position-info)
-                            (if-not (nil? (convert-position track-position-info))
+                            (if (nil? track-position-info)
                               (rooms/get-current-track-position room-id
                                 (fn [track-position-info]
+                                  (println track-position-info)
+                                  (println (convert-position track-position-info))
                                   (.emit socket "start-track" file-url
                                                               (convert-position track-position-info))))
                               (.emit (.to io room-id) "start-track" file-url
@@ -151,6 +152,7 @@
                 (if ready?
                   (rooms/has-track-started? room-id
                     (fn [started?]
+                      (println "STARTED?" started?)
                       (if started?
                         (start-track nil)
                         (rooms/start-current-track room-id

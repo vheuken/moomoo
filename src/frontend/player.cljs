@@ -70,7 +70,8 @@
 
   (.play (:current-sound @app-state/app-state)
                #js {:whileplaying while-playing
-                    :onplay on-play})
+                    :onplay on-play
+                    :from position})
 
   (println "POSITION:" position)
   (if (:paused? @app-state/app-state)
