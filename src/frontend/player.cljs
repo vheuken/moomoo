@@ -48,6 +48,12 @@
   (.resume (:current-sound @app-state/app-state))
   (swap! app-state/app-state assoc :paused? false))
 
+(defn get-duration []
+  (if (nil? (:current-sound @app-state/app-state))
+    0
+    (.-duration (:current-sound @app-state/app-state))))
+
+
 (defn load-track! [sound-url sound-id on-load-fn]
   (.createSound js/soundManager #js {:id sound-id
                                      :url sound-url
@@ -67,11 +73,13 @@
   (defn on-play []
     (if (nil? position)
       (.setPosition (:current-sound @app-state/app-state) (.-MAX_SAFE_INTEGER js/Number))))
-
+  (println "DURATION" (get-duration))
   (.play (:current-sound @app-state/app-state)
                #js {:whileplaying while-playing
                     :onplay on-play
-                    :from position})
+                    :from (if (> (get-duration) position)
+                            position
+                            (get-duration))})
 
   (println "POSITION:" position)
   (if (:paused? @app-state/app-state)
@@ -108,11 +116,6 @@
   (if (nil? (:current-sound @app-state/app-state))
     0
     (.-position (:current-sound @app-state/app-state))))
-
-(defn get-duration []
-  (if (nil? (:current-sound @app-state/app-state))
-    0
-    (.-duration (:current-sound @app-state/app-state))))
 
 (defn is-sound-loaded? []
   (not (nil? (:current-sound @app-state/app-state))))
