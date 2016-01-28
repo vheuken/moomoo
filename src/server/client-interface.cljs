@@ -349,7 +349,6 @@
             (rooms/upload-complete room-id id #(.emit (.to io room-id)
                                                       "new-uploads-order"
                                                       (clj->js %1)))
-
             (rooms/set-music-info-from-hash room-id
                                             id
                                             file-hash
@@ -365,14 +364,14 @@
                                                 track-order
                                                 track-id-hashes)))))
                     (rooms/is-waiting-to-start? room-id
-                    (fn [waiting?]
-                      (if-not waiting?
-                        (rooms/has-track-started? room-id
-                          (fn [started?]
-                            (if-not started?
-                              (rooms/get-num-of-tracks room-id
-                                (fn [num-of-tracks]
-                                  (change-track room-id (- num-of-tracks 1) (.v4 js-uuid)))))))))))))
+                      (fn [waiting?]
+                        (if-not waiting?
+                          (rooms/has-track-started? room-id
+                            (fn [started?]
+                              (if-not started?
+                                (rooms/get-num-of-tracks room-id
+                                  (fn [num-of-tracks]
+                                    (change-track room-id (- num-of-tracks 1) (.v4 js-uuid)))))))))))))
           (.emit socket "hash-not-found" id file-hash)))))
 
   (s/defevent "cancel-upload" [id] [user-id room-id]
