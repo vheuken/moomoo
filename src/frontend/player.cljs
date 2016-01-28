@@ -62,23 +62,30 @@
                                      :autoLoad true
                                      :onload on-load-fn}))
 
-(defn play-track! [sound-id position on-finish]
-  (println "play-track! start")
-  (swap! app-state/app-state
-         merge
-         {:on-finish on-finish
-          :current-sound-id sound-id
-          :scrobbled? false
-          :current-sound (.getSoundById js/soundManager sound-id)})
+(defn play-track! [sound-id position]
+  (letfn [(on-finish []
+            (println "Song has finished!")
+            (println "Sending track-complete signal")
+            (.emit app-state/socket "track-complete"))]
+
+    (println "play-track! start")
+    (swap! app-state/app-state
+           merge
+           {:on-finish on-finish
+            :current-sound-id sound-id
+            :scrobbled? false
+            :current-sound (.getSoundById js/soundManager sound-id)}))
 
 
   (defn on-play []
     (if (nil? position)
       (.setPosition (:current-sound @app-state/app-state) (.-MAX_SAFE_INTEGER js/Number))))
+
   (println "DURATION" (get-duration))
   (.play (:current-sound @app-state/app-state)
                #js {:whileplaying while-playing
                     :onplay on-play
+                    :onfinish (:on-finish @app-state/app-state)
                     :volume (:volume @app-state/app-state)
                     :from (if (> (get-duration) position)
                             position

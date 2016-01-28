@@ -75,8 +75,7 @@
       (player/load-track! file-url
                           current-sound-id
                           #(player/play-track! current-sound-id
-                                               position
-                                               core/on-finish)))))
+                                               position)))))
 
 (.on app-state/socket "track-change"
   (fn [track-id sound-id]
