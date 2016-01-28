@@ -21,7 +21,7 @@
 (defonce redis-lock ((nodejs/require "redis-lock") rooms/redis-client))
 (defonce mmm (nodejs/require "mmmagic"))
 (defonce Magic (.-Magic mmm))
-(defonce server-chan (chan))
+(defonce redis-pub-client (.createClient redis))
 
 (defn initialize! [server options]
   (defonce io (.listen socketio server options))
@@ -381,7 +381,7 @@
         (when (= uploader-id user-id)
           (rooms/cancel-upload id
             (fn []
-              (go (>! server-chan ["cancel-upload" id]))
+              (.publish redis-pub-client "cancel-upload" id)
               (.emit (.to io room-id) "upload-cancelled" id)))))))
 
   (.on (new socketio-stream socket) "file-upload"
@@ -395,22 +395,20 @@
                 (fn [_ upload-num]
                   (let [file-extension (str "." (last (string/split original-filename ".")))
                         temp-filename (subs file-id 0 7)
-                        temp-absolute-file-path (str file-upload-directory "/" temp-filename file-extension)]
-                    (println (str "Saving" original-filename "as" temp-absolute-file-path))
-                    (.pipe stream (.createWriteStream fs temp-absolute-file-path #js {:start start
-                                                                                      :flags "a"}))
-
-                    (go-loop []
-                      (let [data (<! server-chan)]
-                        (if (and (= "cancel-upload" (first data))
-                                 (= file-id (second data)))
-                          (do
+                        temp-absolute-file-path (str file-upload-directory "/" temp-filename file-extension)
+                        redis-sub-client (.createClient redis)]
+                    (.subscribe redis-sub-client "cancel-upload")
+                    (.on redis-sub-client "message"
+                      (fn [channel message]
+                        (when (= message file-id)
                             (rooms/upload-complete room file-id #(.emit (.to io room)
                                                                         "new-uploads-order"
                                                                         (clj->js %1)))
                             (.unpipe stream)
-                            (.unlink fs temp-absolute-file-path))
-                          (recur))))
+                            (.unlink fs temp-absolute-file-path))))
+                    (println (str "Saving" original-filename "as" temp-absolute-file-path))
+                    (.pipe stream (.createWriteStream fs temp-absolute-file-path #js {:start start
+                                                                                      :flags "a"}))
 
                   (.on stream "data"
                     (fn [data-chunk]
