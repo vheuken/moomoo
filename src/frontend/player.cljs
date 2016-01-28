@@ -79,6 +79,7 @@
   (.play (:current-sound @app-state/app-state)
                #js {:whileplaying while-playing
                     :onplay on-play
+                    :volume (:volume @app-state/app-state)
                     :from (if (> (get-duration) position)
                             position
                             (get-duration))})
