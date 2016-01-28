@@ -1,7 +1,5 @@
 (ns moomoo.client-interface
   (:require [cljs.nodejs :as nodejs]
-            [cljs.core.async :as async
-                             :refer [chan >!]]
             [clojure.string :as string]
             [cognitect.transit :as transit]
             [moomoo.rooms :as rooms]

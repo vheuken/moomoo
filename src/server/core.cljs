@@ -3,8 +3,7 @@
             [moomoo.client-interface :as client-interface]
             [moomoo.rooms :as rooms]
             [moomoo.config :as config]
-            [moomoo.watcher :as watcher]
-            #_[figwheel.client :as fw]))
+            [moomoo.watcher :as watcher]))
 
 (nodejs/enable-util-print!)
 
