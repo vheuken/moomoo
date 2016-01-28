@@ -8,8 +8,7 @@
             [moomoo.config :as config]
             [moomoo.file-hash :as file-hash]
             [moomoo.lastfm :as lastfm])
-  (:require-macros [moomoo.socket :as s :refer [defevent]]
-                   [cljs.core.async.macros :refer [go go-loop]]))
+  (:require-macros [moomoo.socket :as s :refer [defevent]]))
 
 (defonce socketio (nodejs/require "socket.io"))
 (defonce socketio-redis (nodejs/require "socket.io-redis"))
