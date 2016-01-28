@@ -211,11 +211,6 @@
   (println "Sending position change signal: " 0)
   (.emit app-state/socket "position-change" 0))
 
-(defn on-finish []
-  (println "Song has finished!")
-  (println "Sending track-complete signal")
-  (.emit app-state/socket "track-complete"))
-
 (.setup js/soundManager #js {
   :html5PollingInterval 50})
 
