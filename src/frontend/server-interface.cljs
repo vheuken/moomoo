@@ -132,7 +132,10 @@
 (.on app-state/socket "hash-found"
   (fn [id file-hash]
     (println "File exists on server. Hash: " file-hash)
-    (swap! app-state/app-state assoc :file-hashes (dissoc (:file-hashes @app-state/app-state) file-hash))))
+    (swap! app-state/app-state
+           assoc
+           :file-hashes
+           (dissoc (:file-hashes @app-state/app-state) file-hash))))
 
 (.on app-state/socket "hash-not-found"
   (fn [id file-hash]
@@ -181,7 +184,7 @@
     (swap! app-state/app-state assoc :track-order (js->clj track-order))))
 
 (.on app-state/socket "upload-complete"
-  (fn [music-info track-order track-id-hashes]
+  (fn [id music-info track-order track-id-hashes]
     (println "Received upload-complete signal:"
              "music-info:" music-info
              "track-order:" track-order)
@@ -189,6 +192,7 @@
            merge
            {:music-info (conj (:music-info @app-state/app-state) music-info)
             :track-id-hashes (js->clj track-id-hashes)
+            :room-file-hashes (dissoc (:room-file-hashes @app-state/app-state) id)
             :track-order (js->clj track-order)})))
 
 (.on app-state/socket "upload-slots-change"

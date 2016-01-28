@@ -250,30 +250,27 @@
                         (fn []
                           (callback))))))))))))))
 
-(defn set-music-info-from-hash [track-id file-hash socket-id callback]
-  (get-room-from-user-id socket-id
-    (fn [room-id]
-      (get-username room-id socket-id
-        (fn [username]
-          (get-num-of-tracks room-id
-            (fn [track-num]
-              (.hset redis-client (redis-room-prefix room-id "music-info")
-                                  track-id
-                                  file-hash
+(defn set-music-info-from-hash [room-id track-id file-hash user-id callback]
+  (get-username room-id user-id
+    (fn [username]
+      (get-num-of-tracks room-id
+        (fn [track-num]
+          (.hset redis-client (redis-room-prefix room-id "music-info")
+                              track-id
+                              file-hash
+            (fn []
+              (.set redis-client (str "track:" track-id ":uploader") username
                 (fn []
-                  (.set redis-client (str "track:" track-id ":uploader") username
+                  (.incr redis-client (str "file-hash:" file-hash ":num-of-tracks")
                     (fn []
-
-                      (.incr redis-client (str "file-hash:" file-hash ":num-of-tracks")
+                      (set-track-position room-id track-id track-num
                         (fn []
-                          (set-track-position room-id track-id track-num
-                            (fn []
-                              (.get redis-client (str "file-hash:" file-hash)
-                                (fn [err music-info-reply]
-                                  (let [reader (transit/reader :json-verbose)
-                                        music-info-json (transit/read reader music-info-reply)
-                                        music-info (js->clj music-info-json)]
-                                    (callback music-info)))))))))))))))))))
+                          (.get redis-client (str "file-hash:" file-hash)
+                            (fn [err music-info-reply]
+                              (let [reader (transit/reader :json-verbose)
+                                    music-info-json (transit/read reader music-info-reply)
+                                    music-info (js->clj music-info-json)]
+                                (callback music-info)))))))))))))))))
 
 (defn get-music-file [room track-id callback]
   (.hget redis-client (redis-room-prefix room "music-info") track-id

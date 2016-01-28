@@ -346,15 +346,21 @@
         (if file-exists?
           (do
             (.emit socket "hash-found" id file-hash)
-            (rooms/set-music-info-from-hash (.v4 js-uuid)
+            (rooms/upload-complete room-id id #(.emit (.to io room-id)
+                                                      "new-uploads-order"
+                                                      (clj->js %1)))
+
+            (rooms/set-music-info-from-hash room-id
+                                            id
                                             file-hash
-                                            (.-id socket)
+                                            user-id
               (fn [music-info]
                 (rooms/get-track-order room-id
                   (fn [track-order]
                     (rooms/get-track-id-hashes room-id
                       (fn [track-id-hashes]
                         (.emit (.to io room-id) "upload-complete"
+                                                id
                                                 (clj->js music-info)
                                                 track-order
                                                 track-id-hashes)))))
@@ -453,6 +459,7 @@
                                                     (rooms/get-track-id-hashes room
                                                       (fn [track-id-hashes]
                                                         (.emit (.to io room) "upload-complete"
+                                                                             file-id
                                                                              (clj->js music-info)
                                                                              track-order
                                                                              track-id-hashes
