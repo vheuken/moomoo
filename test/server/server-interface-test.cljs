@@ -23,3 +23,20 @@
                 (fn [user]
                   (is (= user username))
                   (done))))))))))
+
+(deftest sign-out
+  (let [socket-id "test-socket-id-sign-out"
+        room-id   "test-room-id-sign-out"
+        username  "test-username-sign-out"]
+    (async done
+      (server/sign-in socket-id room-id username
+        (fn [user-id]
+          (server/sign-out socket-id
+            (fn []
+              (user/get-user-id socket-id
+                (fn [id]
+                  (is (nil? id))
+                  (user/get-socket-id user-id
+                    (fn [id]
+                      (is (nil? id))
+                      (done))))))))))))

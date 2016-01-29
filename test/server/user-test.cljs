@@ -29,3 +29,22 @@
             (fn [user]
               (is (= user username))
               (done))))))))
+
+(deftest delete
+  (let [user-id "test-user-id-delete"
+        socket-id "test-socket-id-delete"
+        username "test-username-username"]
+    (async done
+      (user/set-user-id! user-id socket-id
+        (fn []
+          (user/set-username! user-id username
+            (fn []
+              (user/delete! user-id
+                (fn []
+                  (user/get-user-id socket-id
+                    (fn [id]
+                      (is (nil? id))
+                      (user/get-socket-id user-id
+                        (fn [id]
+                          (is (nil? id))
+                          (done))))))))))))))

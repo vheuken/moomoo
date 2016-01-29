@@ -11,3 +11,10 @@
         (user/set-username! user-id username
           (fn []
             (callback user-id)))))))
+
+(defn sign-out [socket-id callback]
+  (user/get-user-id socket-id
+    (fn [user-id]
+      (user/delete! user-id
+        (fn []
+          (callback))))))
