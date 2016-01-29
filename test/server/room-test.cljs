@@ -1,6 +1,11 @@
 (ns moomoo.room-test
-  (:require [cljs.test :refer-macros [async deftest is testing]]
-            [moomoo.room :as room]))
+  (:require [cljs.test :refer-macros [async deftest is testing use-fixtures]]
+            [moomoo.room :as room]
+            [moomoo.fixtures :as fixtures]))
+
+(use-fixtures :each
+  {:before fixtures/flush-all
+   :after  fixtures/flush-all})
 
 (deftest add-user
   (async done

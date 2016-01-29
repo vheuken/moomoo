@@ -1,6 +1,11 @@
 (ns moomoo.user-test
-  (:require [cljs.test :refer-macros [async deftest is testing]]
-            [moomoo.user :as user]))
+  (:require [cljs.test :refer-macros [async deftest is testing use-fixtures]]
+            [moomoo.user :as user]
+            [moomoo.fixtures :as fixtures]))
+
+(use-fixtures :each
+  {:before fixtures/flush-all
+   :after  fixtures/flush-all})
 
 (deftest user-id
   (let [user-id "test-user-id-user-id"
