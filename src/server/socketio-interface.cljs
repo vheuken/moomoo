@@ -17,7 +17,15 @@
     (fn [room-id username]
       (server-interface/sign-in (.-id socket) room-id username
         (fn [user-id]
-          (.emit socket "sign-in-success" user-id))))))
+          (.emit socket "sign-in-success" user-id)))))
+
+  (.on socket "disconnect"
+    (fn []
+      (println "Socket id" (.-id socket) "has disconnected")
+      (server-interface/sign-out (.-id socket)
+                                 #(println "Socket id:"
+                                           (.-id socket)
+                                           "has successfully signed out!")))))
 
 (defn start-listening! []
   (.on io "connection" connection))
