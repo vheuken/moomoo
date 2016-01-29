@@ -2,5 +2,13 @@
   (:require [cljs.test :refer-macros [async deftest is testing]]
             [moomoo.user :as user]))
 
-(deftest foo
-  (is (= 1 1)))
+(deftest user-id
+  (let [user-id "test-user-id"
+        socket-id "test-socket-id"]
+    (async done
+      (user/set-user-id! user-id socket-id
+        (fn []
+          (user/get-user-id socket-id
+            (fn [id]
+              (is (= id user-id))
+              (done))))))))
