@@ -214,8 +214,7 @@
 (.setup js/soundManager #js {
   :html5PollingInterval 50})
 
-
-(.onready js/soundManager
+#_(.onready js/soundManager
   (fn []
     (.createSound js/soundManager #js {
       :id "join-sound"
