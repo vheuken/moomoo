@@ -1,6 +1,6 @@
 (ns moomoo.core
   (:require [cljs.nodejs :as nodejs]
-            #_[moomoo.client-interface :as client-interface]
+            [moomoo.socketio-interface :as socketio-interface]
             #_[moomoo.rooms :as rooms]
             #_[moomoo.config :as config]
             #_[moomoo.watcher :as watcher]))
@@ -15,8 +15,8 @@
 (defonce redis-client (.createClient (nodejs/require "redis")))
 (defonce util (nodejs/require "util"))
 
-#_(client-interface/initialize! server #js {"heartbeat interval" 5
-                                          "heartbeat timeout"  15})
+(socketio-interface/initialize! server #js {"heartbeat interval" 5
+                                            "heartbeat timeout"  15})
 
 (.set app "views" "src/frontend/views")
 (.set app "view engine" "jade")
