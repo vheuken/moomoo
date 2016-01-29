@@ -1,5 +1,6 @@
 (ns moomoo.socketio-interface
-  (:require [cljs.nodejs :as node]))
+  (:require [cljs.nodejs :as node]
+            [moomoo.server-interface :as server-interface]))
 
 (defonce socketio (node/require "socket.io"))
 (defonce socketio-redis (node/require "socket.io-redis"))
@@ -10,7 +11,13 @@
                                     :port 6379})))
 
 (defn connection [socket]
-  (println "CONNECTED TO S"))
+  (println "Socket id" (.-id socket) "successfully connected to server")
+
+  (.on socket "sign-in"
+    (fn [room-id username]
+      (server-interface/sign-in (.-id socket) room-id username
+        (fn [user-id]
+          (.emit socket "sign-in-success" user-id))))))
 
 (defn start-listening! []
   (.on io "connection" connection))

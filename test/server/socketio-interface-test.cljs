@@ -24,10 +24,17 @@
                            "http://localhost:3001"
                            #js {:multiplex false}))
              (async done
-             (.on socket "connect" (fn []
-                                     (println "CONNECTED!!")
-                                     (done)))))
+               (.on socket "connect" (fn []
+                                       (println "Connected to server!")
+                                       (done)))))
    :after  fixtures/flush-all})
 
 (deftest sign-in
-  (is (= 1 1)))
+  (let [username "test-username-sign-in"
+        room-id  "test-room-id-sign-in"]
+    (async done
+      (.on socket "sign-in-success"
+        (fn [user-id]
+          (is (not (nil? user-id)))
+          (done)))
+      (.emit socket "sign-in" room-id username))))
