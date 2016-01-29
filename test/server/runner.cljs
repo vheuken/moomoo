@@ -1,5 +1,13 @@
 (ns moomoo.runner
     (:require [doo.runner :refer-macros [doo-tests]]
-              [moomoo.user-test]))
+              [cljs.nodejs :as node]
+              [moomoo.user-test]
+              [moomoo.server-interface-test]))
 
-(doo-tests 'moomoo.user-test)
+(defonce redis-client (.createClient (node/require "redis")))
+
+(println "Flushing Redis...")
+(.flushall redis-client)
+
+(doo-tests 'moomoo.user-test
+           'moomoo.server-interface-test)

@@ -4,6 +4,8 @@
 (defonce redis-client (.createClient (node/require "redis")))
 
 (defn set-user-id! [user-id socket-id callback]
+  "Does not enforce unique user-id.
+   Must use something guaranteed to be unique (like a UUID)"
   (.set redis-client (str "socket:" socket-id) user-id #(callback)))
 
 (defn get-user-id [socket-id callback]
