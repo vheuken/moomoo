@@ -2,6 +2,7 @@
   (:require [cljs.test :refer-macros [async deftest is testing use-fixtures]]
             [moomoo.server-interface :as server]
             [moomoo.user :as user]
+            [moomoo.room :as room]
             [moomoo.fixtures :as fixtures]))
 
 (use-fixtures :each
@@ -22,7 +23,10 @@
               (user/get-username user-id
                 (fn [user]
                   (is (= user username))
-                  (done))))))))))
+                  (room/get-users room-id
+                    (fn [users]
+                      (is (some #{user-id} users))
+                      (done))))))))))))
 
 (deftest sign-out
   (let [socket-id "test-socket-id-sign-out"
@@ -39,4 +43,7 @@
                   (user/get-socket-id user-id
                     (fn [id]
                       (is (nil? id))
-                      (done))))))))))))
+                      (room/get-users room-id
+                        (fn [users]
+                          (is (not (some #{user-id} users)))
+                          (done))))))))))))))

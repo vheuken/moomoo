@@ -33,18 +33,35 @@
 (deftest delete
   (let [user-id "test-user-id-delete"
         socket-id "test-socket-id-delete"
-        username "test-username-username"]
+        username "test-username-delete"
+        room-id "test-room-id-delete"]
     (async done
       (user/set-user-id! user-id socket-id
         (fn []
           (user/set-username! user-id username
             (fn []
-              (user/delete! user-id
+              (user/set-room-id! user-id room-id
                 (fn []
-                  (user/get-user-id socket-id
-                    (fn [id]
-                      (is (nil? id))
-                      (user/get-socket-id user-id
+                  (user/delete! user-id
+                    (fn []
+                      (user/get-user-id socket-id
                         (fn [id]
                           (is (nil? id))
-                          (done))))))))))))))
+                          (user/get-socket-id user-id
+                            (fn [id]
+                              (is (nil? id))
+                              (user/get-room-id user-id
+                                (fn [id]
+                                  (is (nil? id))
+                                  (done))))))))))))))))))
+
+(deftest room-id
+  (let [user-id "test-user-id-room-id"
+        room-id "test-room-id-room-id"]
+    (async done
+      (user/set-room-id! user-id room-id
+        (fn []
+          (user/get-room-id user-id
+            (fn [id]
+              (= room-id id)
+              (done))))))))

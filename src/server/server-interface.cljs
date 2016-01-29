@@ -1,6 +1,7 @@
 (ns moomoo.server-interface
   (:require [cljs.nodejs :as node]
-            [moomoo.user :as user]))
+            [moomoo.user :as user]
+            [moomoo.room :as room]))
 
 (defonce js-uuid (node/require "uuid"))
 
@@ -10,11 +11,19 @@
       (fn []
         (user/set-username! user-id username
           (fn []
-            (callback user-id)))))))
+            (user/set-room-id! user-id room-id
+              (fn []
+                (room/add-user! room-id user-id
+                  (fn []
+                    (callback user-id)))))))))))
 
 (defn sign-out [socket-id callback]
   (user/get-user-id socket-id
     (fn [user-id]
-      (user/delete! user-id
-        (fn []
-          (callback))))))
+      (user/get-room-id user-id
+        (fn [room-id]
+          (user/delete! user-id
+            (fn []
+              (room/delete-user! room-id user-id
+                (fn []
+                  (callback))))))))))

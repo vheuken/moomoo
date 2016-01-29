@@ -25,11 +25,19 @@
 (defn get-socket-id [user-id callback]
   (.get redis-client (str "user:" user-id ":socket-id") #(callback %2)))
 
+(defn set-room-id! [user-id room-id callback]
+  (.set redis-client (str "user:" user-id ":room-id") room-id #(callback)))
+
+(defn get-room-id [user-id callback]
+  (.get redis-client (str "user:" user-id ":room-id") #(callback %2)))
+
 (defn delete! [user-id callback]
   (get-socket-id user-id
     (fn [socket-id]
       (.del redis-client (str "socket:" socket-id)
         (fn []
-          (.del redis-client
-                (str "user:" user-id ":socket-id")
-                #(callback)))))))
+          (.del redis-client (str "user:" user-id ":socket-id")
+            (fn []
+              (.del redis-client
+                    (str "user:" user-id ":room-id")
+                    #(callback)))))))))

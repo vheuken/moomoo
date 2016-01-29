@@ -6,6 +6,9 @@
 (defn add-user! [room-id user-id callback]
   (.lpush redis-client (str "room:" room-id ":users") user-id #(callback)))
 
+(defn delete-user! [room-id user-id callback]
+  (.lrem redis-client (str "room:" room-id ":users") 0 user-id #(callback)))
+
 (defn get-users [room-id callback]
   (.lrange redis-client
            (str "room:" room-id ":users")
