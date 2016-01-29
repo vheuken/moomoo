@@ -27,7 +27,9 @@
                (.on socket "connect" (fn []
                                        (println "Connected to server!")
                                        (done)))))
-   :after  fixtures/flush-all})
+   :after  (fn []
+             (.disconnect socket)
+             (fixtures/flush-all))})
 
 (deftest sign-in
   (let [username "test-username-sign-in"
