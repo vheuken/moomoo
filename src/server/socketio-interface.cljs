@@ -15,6 +15,7 @@
 
   (.on socket "sign-in"
     (fn [room-id username]
+      (println (.-id socket) "signing in as" username "in room" room-id)
       (server-interface/sign-in (.-id socket) room-id username
         (fn [user-id]
           (.emit socket "sign-in-success" user-id)))))

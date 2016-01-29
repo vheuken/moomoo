@@ -8,10 +8,8 @@ html
     #max-upload-slots(data!= maxuploadslots)
     #default-upload-slots(data!= defaultuploadslots)
     link(rel="stylesheet" type="text/css" href="/css/style.css")
-    script(src="https://cdn.socket.io/socket.io-1.4.4.js")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js")
-    script(src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js")
-    script(src="/vendor/jquery.ui.touch-punch.min.js")
+    script(src="https://cdn.socket.io/socket.io-1.4.5.js")
     script(src="/vendor/socket.io-stream.js")
     script(src="/vendor/soundmanager2-jsmin.js")
     script(src="/vendor/uuid.js")
@@ -20,36 +18,5 @@ html
     script(src="/vendor/md5-file.js")
   body
     #moomoo
-      #username-form
-      #top-bar.top-bottom-bars
-        #current-track-tags
-        #progress-track
-        #player-buttons
-          #restart-button.player-button
-          #previous-track-button.player-button
-          #play-pause-button.player-button
-          #next-track-button.player-button
-          #loop-button.player-button
-
-        button#lastfm-button.top-bar-button Last.fm
-        input#file-upload(type="file" accept=allowedfileextensions)
-        button#file-upload-input.top-bar-button(onclick="document.getElementById('file-upload').click();") Add Music
-
-      #center-area
-        #center-left
-          #messages-window
-          #message-box
-          #userslist
-        #track-queue
-          #playlist
-          #download-progress
-          #users-upload-progress
-          #queued-uploads
-
-      #bottom-bar.top-bottom-bars
-        #upload-slots
-        #volume
-
-        button#clear-songs-button.bottom-bar-button Clear Songs
 
     script(src="/js/moomoo-frontend.js")

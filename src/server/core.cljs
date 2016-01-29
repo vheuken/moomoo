@@ -36,9 +36,7 @@
 
   (println (str "Listening on port " port))
   #_(watcher/watch-directories! (config/data "music-watch-dirs"))
-  #_(client-interface/start-listening!)
+  (socketio-interface/start-listening!)
   (.listen server port))
 
 (set! *main-cli-fn* -main)
-
-#_(fw/start { })
