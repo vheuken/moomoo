@@ -4,8 +4,10 @@
 
 (defonce js-uuid (node/require "uuid"))
 
-(defn sign-in [socket-id room-id callback]
+(defn sign-in [socket-id room-id username callback]
   (let [user-id (.v4 js-uuid)]
     (user/set-user-id! user-id socket-id
       (fn []
-        (callback {:user-id user-id})))))
+        (user/set-username! user-id username
+          (fn []
+            (callback user-id)))))))
