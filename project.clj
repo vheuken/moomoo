@@ -78,10 +78,17 @@
                 :parallel-build true
                 :optimizations :simple}}
 
-              {:id "test"
+              {:id "test-server"
                :source-paths ["src/server" "test/server"]
                :compiler {:output-to "target/testable.js"
                           :main moomoo.runner
+                          :target :nodejs
+                          :optimizations :none}}
+
+              {:id "test-frontend"
+               :source-paths ["src/frontend" "test/frontend"]
+               :compiler {:output-to "public/js/testable.js"
+                          :main moomoo-frontend.runner
                           :target :nodejs
                           :optimizations :none}}]}
 
