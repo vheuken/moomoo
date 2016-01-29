@@ -1,9 +1,9 @@
 (ns moomoo.core
   (:require [cljs.nodejs :as nodejs]
-            [moomoo.client-interface :as client-interface]
-            [moomoo.rooms :as rooms]
-            [moomoo.config :as config]
-            [moomoo.watcher :as watcher]))
+            #_[moomoo.client-interface :as client-interface]
+            #_[moomoo.rooms :as rooms]
+            #_[moomoo.config :as config]
+            #_[moomoo.watcher :as watcher]))
 
 (nodejs/enable-util-print!)
 
@@ -32,15 +32,11 @@
                                                                                  (rooms/allowed-file-extensions (.-id (.-params %1))))})))
 
 (defn -main []
-  (config/load-file! "config.toml")
-
-  (.monitor redis-client
-    (fn [err res]
-      (println "Entering redis-monitoring mode")))
+  #_(config/load-file! "config.toml")
 
   (println (str "Listening on port " port))
-  (watcher/watch-directories! (config/data "music-watch-dirs"))
-  (client-interface/start-listening!)
+  #_(watcher/watch-directories! (config/data "music-watch-dirs"))
+  #_(client-interface/start-listening!)
   (.listen server port))
 
 (set! *main-cli-fn* -main)
