@@ -15,7 +15,7 @@
 (defonce redis-client (.createClient (nodejs/require "redis")))
 (defonce util (nodejs/require "util"))
 
-(client-interface/initialize! server #js {"heartbeat interval" 5
+#_(client-interface/initialize! server #js {"heartbeat interval" 5
                                           "heartbeat timeout"  15})
 
 (.set app "views" "src/frontend/views")
@@ -25,10 +25,10 @@
 (.get app "/" #(. %2 (sendFile "public/index.html")))
 
 (.get app "/rooms/:id" #(. %2 (render "room" #js {:roomid (.-id (.-params %1))
-                                                  :maxuploadslots (config/data "max-upload-slots")
-                                                  :defaultuploadslots (config/data "default-upload-slots")
-                                                  :lastfmkey (config/data "lastfm-api-key")
-                                                  :allowedfileextensions (reduce (fn [a b] (str a "," b))
+                                                  ;:maxuploadslots (config/data "max-upload-slots")
+                                                  ;:defaultuploadslots (config/data "default-upload-slots")
+                                                  ;:lastfmkey (config/data "lastfm-api-key")
+                                                  :allowedfileextensions nil #_(reduce (fn [a b] (str a "," b))
                                                                                  (rooms/allowed-file-extensions (.-id (.-params %1))))})))
 
 (defn -main []
