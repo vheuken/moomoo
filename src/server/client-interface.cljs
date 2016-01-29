@@ -408,9 +408,6 @@
                                                                         (clj->js %1)))
                             (.unpipe stream)
                             (.unlink fs temp-absolute-file-path))))
-                    (println (str "Saving" original-filename "as" temp-absolute-file-path))
-                    (.pipe stream (.createWriteStream fs temp-absolute-file-path #js {:start start
-                                                                                      :flags "a"}))
 
                   (.on stream "data"
                     (fn [data-chunk]
@@ -427,12 +424,8 @@
                                         :filename      original-filename}))))))
 
                   (.on stream "end"
-                    (fn []
-                      (println "Upload of" original-filename
-                               "from" (.-id socket) "is complete!")
-                      (rooms/upload-complete room file-id #(.emit (.to io room)
-                                                                  "new-uploads-order"
-                                                                  (clj->js %1)))
+                    (fn [] (println "Upload of" original-filename "from" (.-id socket) "is complete!")
+                      (rooms/upload-complete room file-id #(.emit (.to io room) "new-uploads-order" (clj->js %1)))
                       (redis-lock. room
                         (fn [done]
                           (let [magic (Magic. (.-MAGIC_MIME_TYPE mmm))]
@@ -472,7 +465,11 @@
                                                             (rooms/get-num-of-tracks room
                                                               (fn [num-of-tracks]
                                                                 (change-track room (- num-of-tracks 1) (.v4 js-uuid))))))))))
-                                                (done))))))))))))))))))))))))))))
+                                                (done))))))))))))))))))
+
+                  (println (str "Saving" original-filename "as" temp-absolute-file-path))
+                  (.pipe stream (.createWriteStream fs temp-absolute-file-path #js {:start start
+                                                                                   :flags "a"}))))))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))
