@@ -18,6 +18,4 @@
         (fn [room-id]
           (user/delete! user-id
             (fn []
-              (room/delete-user! room-id user-id
-                (fn []
-                  (callback))))))))))
+              (callback))))))))

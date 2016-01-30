@@ -28,7 +28,7 @@
                       (is (some #{user-id} (keys users)))
                       (done))))))))))))
 
-#_(deftest sign-out
+(deftest sign-out
   (let [socket-id "test-socket-id-sign-out"
         room-id   "test-room-id-sign-out"
         username  "test-username-sign-out"]
