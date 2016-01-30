@@ -7,7 +7,10 @@
   (.hgetall redis-client
             (str "room:" room-id ":users")
             (fn [_ users-data]
-              (let [users-data (js->clj users-data)
-                    users (update-in users-data (keys users-data) (fn [a]
-                                                                    (js->clj (.parse js/JSON a))))]
-                (callback (dissoc users nil))))))
+              (if (nil? users-data)
+                (callback {})
+                (let [users-data (js->clj users-data)
+                      users (zipmap (keys users-data)
+                                    (map #(js->clj (.parse js/JSON %))
+                                         (vals users-data)))]
+                  (callback users))))))

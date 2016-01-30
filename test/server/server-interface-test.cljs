@@ -10,21 +10,25 @@
    :after  fixtures/flush-all})
 
 (deftest sign-in
-  (let [socket-id "test-socket-id-sign-in"
-        room-id   "test-room-id-sign-in"
-        username  "test-username-sign-in"]
+  (let [socket-id   "test-socket-id-sign-in"
+        room-id     "test-room-id-sign-in"
+        username    "test-username-sign-in"
+        socket-id-2 "test-socket-id2"
+        username-2  "test-username-2"]
     (async done
       (server/sign-in socket-id room-id username
         (fn [user-id users]
-          (is (not (nil? user-id)))
-          (user/get-user-id socket-id
-            (fn [id]
-              (is (= id user-id))
-              (user/get-username user-id
-                (fn [user]
-                  (is (= user username))
-                  (is (some #{user-id} (keys users)))
-                  (done))))))))))
+          (server/sign-in socket-id-2 room-id username-2
+            (fn [user-id-2 users-2]
+              (is (not (nil? user-id)))
+              (user/get-user-id socket-id
+                (fn [id]
+                  (is (= id user-id))
+                  (user/get-username user-id
+                    (fn [user]
+                      (is (= user username))
+                      (is (some #{user-id} (keys users)))
+                      (done))))))))))))
 
 (deftest sign-out
   (let [socket-id "test-socket-id-sign-out"
@@ -32,7 +36,7 @@
         username  "test-username-sign-out"]
     (async done
       (server/sign-in socket-id room-id username
-        (fn [user-id]
+        (fn [user-id users]
           (server/sign-out socket-id
             (fn []
               (user/get-user-id socket-id
