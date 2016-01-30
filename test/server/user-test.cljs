@@ -7,28 +7,27 @@
   {:before fixtures/flush-all
    :after  fixtures/flush-all})
 
-(deftest user-id
+(deftest add-user
   (let [user-id "test-user-id-user-id"
-        socket-id "test-socket-id-user-id"]
+        socket-id "test-socket-id-user-id"
+        username "test-username"
+        room-id "test-room"]
     (async done
-      (user/set-user-id! user-id socket-id
+      (user/add-user! user-id socket-id username room-id
         (fn []
           (user/get-user-id socket-id
             (fn [id]
               (is (= id user-id))
-              (done))))))))
-
-(deftest username
-  (let [user-id "test-user-id-username"
-        socket-id "test-socket-id-username"
-        username "test-username-username"]
-    (async done
-      (user/set-username! user-id username
-        (fn []
-          (user/get-username user-id
-            (fn [user]
-              (is (= user username))
-              (done))))))))
+              (user/get-room-id user-id
+                (fn [id]
+                  (is (= id room-id))
+                  (user/get-socket-id user-id
+                    (fn [id]
+                      (is (= id socket-id))
+                      (user/get-username user-id
+                        (fn [uname]
+                          (is (= uname username))
+                          (done))))))))))))))
 
 (deftest delete
   (let [user-id "test-user-id-delete"
@@ -36,32 +35,17 @@
         username "test-username-delete"
         room-id "test-room-id-delete"]
     (async done
-      (user/set-user-id! user-id socket-id
+      (user/add-user! user-id socket-id username room-id
         (fn []
-          (user/set-username! user-id username
+          (user/delete! user-id
             (fn []
-              (user/set-room-id! user-id room-id
-                (fn []
-                  (user/delete! user-id
-                    (fn []
-                      (user/get-user-id socket-id
+              (user/get-user-id socket-id
+                (fn [id]
+                  (is (nil? id))
+                  (user/get-socket-id user-id
+                    (fn [id]
+                      (is (nil? id))
+                      (user/get-room-id user-id
                         (fn [id]
                           (is (nil? id))
-                          (user/get-socket-id user-id
-                            (fn [id]
-                              (is (nil? id))
-                              (user/get-room-id user-id
-                                (fn [id]
-                                  (is (nil? id))
-                                  (done))))))))))))))))))
-
-(deftest room-id
-  (let [user-id "test-user-id-room-id"
-        room-id "test-room-id-room-id"]
-    (async done
-      (user/set-room-id! user-id room-id
-        (fn []
-          (user/get-room-id user-id
-            (fn [id]
-              (= room-id id)
-              (done))))))))
+                          (done))))))))))))))

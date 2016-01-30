@@ -10,7 +10,7 @@
 (defonce app (express))
 (defonce server (.Server (node/require "http") app))
 
-(use-fixtures :each
+#_(use-fixtures :each
   {:before (fn []
              (fixtures/flush-all)
              (io-interface/initialize! server
@@ -31,7 +31,7 @@
              (.disconnect socket)
              (fixtures/flush-all))})
 
-(deftest sign-in
+#_(deftest sign-in
   (let [username "test-username-sign-in"
         room-id  "test-room-id-sign-in"]
     (async done
