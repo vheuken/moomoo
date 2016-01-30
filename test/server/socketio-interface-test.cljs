@@ -10,7 +10,7 @@
 (defonce app (express))
 (defonce server (.Server (node/require "http") app))
 
-#_(use-fixtures :each
+(use-fixtures :each
   {:before (fn []
              (fixtures/flush-all)
              (io-interface/initialize! server
@@ -31,12 +31,14 @@
              (.disconnect socket)
              (fixtures/flush-all))})
 
-#_(deftest sign-in
+(deftest sign-in
   (let [username "test-username-sign-in"
         room-id  "test-room-id-sign-in"]
     (async done
       (.on socket "sign-in-success"
-        (fn [user-id]
+        (fn [user-id users]
           (is (not (nil? user-id)))
+          (is (map? (js->clj users)))
+          (is (map? (js->clj ((js->clj users) user-id))))
           (done)))
       (.emit socket "sign-in" room-id username))))

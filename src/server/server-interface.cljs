@@ -9,7 +9,9 @@
   (let [user-id (.v4 js-uuid)]
     (user/add-user! user-id socket-id username room-id
       (fn []
-        (callback user-id)))))
+        (room/get-users room-id
+          (fn [users]
+            (callback user-id users)))))))
 
 (defn sign-out [socket-id callback]
   (user/get-user-id socket-id

@@ -15,7 +15,7 @@
         username  "test-username-sign-in"]
     (async done
       (server/sign-in socket-id room-id username
-        (fn [user-id]
+        (fn [user-id users]
           (is (not (nil? user-id)))
           (user/get-user-id socket-id
             (fn [id]
@@ -23,10 +23,8 @@
               (user/get-username user-id
                 (fn [user]
                   (is (= user username))
-                  (room/get-users room-id
-                    (fn [users]
-                      (is (some #{user-id} (keys users)))
-                      (done))))))))))))
+                  (is (some #{user-id} (keys users)))
+                  (done))))))))))
 
 (deftest sign-out
   (let [socket-id "test-socket-id-sign-out"
