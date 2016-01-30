@@ -40,5 +40,6 @@
           (is (not (nil? user-id)))
           (is (map? (js->clj users)))
           (is (map? (js->clj ((js->clj users) user-id))))
+          (is (= username  ((js->clj ((js->clj users) user-id)) "username")))
           (done)))
       (.emit socket "sign-in" room-id username))))

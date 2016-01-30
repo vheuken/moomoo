@@ -1,10 +1,9 @@
 (ns moomoo-frontend.renderer
   (:require [om.core :as om  :include-macros true]
             [om.dom  :as dom :include-macros true]
-            [moomoo-frontend.globals :as g])
+            [moomoo-frontend.globals :as g]
+            [jayq.core :as jq])
    (:use [jayq.core :only [$]]))
-
-(defonce $interface ($ :#interface))
 
 (defn sign-in-form [data owner]
   (reify
@@ -19,7 +18,7 @@
                                       (.emit g/socket
                                              "sign-in"
                                              g/room-id
-                                             (.val $interface "username-input"))
+                                             (jq/val ($ :#username)))
                                       false)}
                       "Join"))))))
 

@@ -3,6 +3,8 @@
             [moomoo-frontend.socketio-interface]
             [moomoo-frontend.renderer]))
 
+(enable-console-print!)
+
 (.setup js/soundManager
         #js {:html5PollingInterval 50
              :onready #(.createSound js/soundManager
