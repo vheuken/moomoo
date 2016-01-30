@@ -9,7 +9,7 @@
   {:before fixtures/flush-all
    :after  fixtures/flush-all})
 
-#_(deftest sign-in
+(deftest sign-in
   (let [socket-id "test-socket-id-sign-in"
         room-id   "test-room-id-sign-in"
         username  "test-username-sign-in"]
@@ -25,7 +25,7 @@
                   (is (= user username))
                   (room/get-users room-id
                     (fn [users]
-                      (is (some #{user-id} users))
+                      (is (some #{user-id} (keys users)))
                       (done))))))))))))
 
 #_(deftest sign-out

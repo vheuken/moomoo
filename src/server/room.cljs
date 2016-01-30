@@ -3,15 +3,11 @@
 
 (defonce redis-client (.createClient (node/require "redis")))
 
-(defn add-user! [room-id user-id callback]
-  (.lpush redis-client (str "room:" room-id ":users") user-id #(callback)))
-
-(defn delete-user! [room-id user-id callback]
-  (.lrem redis-client (str "room:" room-id ":users") 0 user-id #(callback)))
-
 (defn get-users [room-id callback]
-  (.lrange redis-client
-           (str "room:" room-id ":users")
-           0
-           -1
-           #(callback (js->clj %2))))
+  (.hgetall redis-client
+            (str "room:" room-id ":users")
+            (fn [_ users-data]
+              (let [users-data (js->clj users-data)
+                    users (update-in users-data (keys users-data) (fn [a]
+                                                                    (js->clj (.parse js/JSON a))))]
+                (callback (dissoc users nil))))))

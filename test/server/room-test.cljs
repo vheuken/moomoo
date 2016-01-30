@@ -1,27 +1,27 @@
 (ns moomoo.room-test
   (:require [cljs.test :refer-macros [async deftest is testing use-fixtures]]
             [moomoo.room :as room]
+            [moomoo.user :as user]
             [moomoo.fixtures :as fixtures]))
 
 (use-fixtures :each
   {:before fixtures/flush-all
    :after  fixtures/flush-all})
 
-(deftest add-user
+(deftest get-users
   (async done
-    (let [room-id "test-room-id-add-user"
-          user-id "test-user-id-add-user"]
-      (room/add-user! room-id user-id
-        (fn []
-          (room/get-users room-id
-            (fn [users]
-              (is (some #{user-id} users))
-              (done))))))))
-
-(deftest get-users-empty
-  (async done
-    (let [room-id "test-room-id-get-users-empty"]
+    (let [room-id "test-room-id-get-users-empty"
+          user-id "test-user-id"
+          socket-id "test-socket-id"
+          username "test-username"]
       (room/get-users room-id
         (fn [users]
           (is (empty? users))
-          (done))))))
+          (user/add-user! user-id socket-id username room-id
+            (fn []
+              (room/get-users room-id
+                (fn [users]
+                  (is (some #{user-id} (keys users)))
+                  (is (= socket-id ((users user-id) "socket")))
+                  (is (= username ((users user-id) "username")))
+                  (done))))))))))
