@@ -20,8 +20,9 @@
         (fn [user-id users]
           (server/sign-in socket-id-2 room-id username-2
             (fn [user-id-2 users-2]
-              (is (some #{user-id} users))
-              (is (and (some #{user-id}   (keys users-2)
+              (println (keys users-2))
+              (is (some #{user-id} (keys users)))
+              (is (and (some #{user-id}   (keys users-2))
                        (some #{user-id-2} (keys users-2))))
               (is (not (nil? user-id)))
               (is (not (nil? user-id-2)))
@@ -30,12 +31,12 @@
                   (is (= id user-id))
                   (user/get-user-id socket-id-2
                     (fn [id-2]
-                      (is (= id-2 user-id-2)
+                      (is (= id-2 user-id-2))
                       (user/get-username user-id
                         (fn [user]
                           (is (= user username))
                           (is (some #{user-id} (keys users)))
-                          (done))))))))))))))))
+                          (done))))))))))))))
 
 (deftest sign-out
   (let [socket-id "test-socket-id-sign-out"
@@ -56,3 +57,20 @@
                         (fn [users]
                           (is (not (some #{user-id} users)))
                           (done))))))))))))))
+
+(deftest chat-message
+  (let [message "Woo!"
+        room-id "test-room-id"
+        username "test-username"
+        socket-id "test-socket-id"]
+    (async done
+      (server/sign-in socket-id room-id username
+        (fn [user-id]
+          (server/chat-message socket-id user-id message
+            (fn [message-fmt]
+              (is (:message message-fmt) message)
+              (is (:user-id message-fmt) user-id)
+              (server/chat-message "BADID" user-id message
+                (fn [message-fmt]
+                (is (nil? message-fmt))
+                (done))))))))))

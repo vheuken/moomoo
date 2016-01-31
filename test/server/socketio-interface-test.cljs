@@ -45,13 +45,11 @@
       (.emit socket "sign-in" room-id username))))
 
 (deftest user-joined
-  (println "HAAHAHA\nHAHAHA")
   (let [username   "test-username-sign-in"
         room-id    "test-room-id-sign-in"]
     (async done
       (.on socket "user-joined"
         (fn [users]
-          (println "YOLO")
           (is (= 1 (count (keys (js->clj users)))))
           (done)))
       (.emit socket "sign-in" room-id username))))

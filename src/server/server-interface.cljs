@@ -21,3 +21,11 @@
           (user/delete! user-id
             (fn []
               (callback))))))))
+
+(defn chat-message [socket-id user-id message callback]
+  (user/get-socket-id user-id
+    (fn [id]
+      (if (= id socket-id)
+        (callback {:message message
+                   :user-id user-id})
+        (callback nil)))))
