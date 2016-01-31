@@ -35,7 +35,7 @@
                         (fn [user]
                           (is (= user username))
                           (is (some #{user-id} (keys users)))
-                          (done)))))))))))))))
+                          (done))))))))))))))))
 
 (deftest sign-out
   (let [socket-id "test-socket-id-sign-out"
