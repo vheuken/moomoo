@@ -48,7 +48,7 @@
     om/IRender
     (render [this]
       (dom/div #js {:id "messages-window"}
-        (dom/div #js {:id "messages"})))))
+        ))))
 
 (defn center-area [data owner]
   (reify
@@ -73,7 +73,7 @@
     (render [this]
       (if (nil? (:user-id data))
         (om/build sign-in-form nil)
-        (dom/div nil
+        (dom/div #js {:id "app"}
           (om/build top-bar data)
           (om/build center-area data)
           (om/build bottom-bar data))))))
