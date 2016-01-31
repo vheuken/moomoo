@@ -4,3 +4,5 @@
   (swap! state merge {:user-id user-id
                       :users   users}))
 
+(defn user-joined! [state users]
+  (swap! state assoc :users users))

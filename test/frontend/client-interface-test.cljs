@@ -15,3 +15,11 @@
     (is (= user-id (:user-id @state)))
     (is (= (keys @state) state-keys))
     (is (= users (:users @state)))))
+
+(deftest user-joined
+  (let [state (atom {:users {}})
+        state-keys (keys @state)
+        users {:userid {:foo :bar}}]
+    (client/user-joined! state users)
+    (is (= (:users @state) users))
+    (is (= state-keys (keys @state)))))
