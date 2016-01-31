@@ -23,6 +23,10 @@
                  (.connect io
                            "http://localhost:3001"
                            #js {:multiplex false}))
+             (def socket-2
+               (.connect io
+                         "http://localhost:3001"
+                         #js {:multiplex false}))
              (async done
                (.on socket "connect" (fn []
                                        (println "Connected to server!")
@@ -43,3 +47,15 @@
           (is (= username  ((js->clj ((js->clj users) user-id)) "username")))
           (done)))
       (.emit socket "sign-in" room-id username))))
+
+(deftest user-joined
+  (let [username   "test-username-sign-in"
+        username-2 "test-username-sign-in-2"
+        room-id    "test-room-id-sign-in"]
+    (async done
+      (.on socket "user-joined"
+        (fn [users]
+          (is (= 2 (count (keys (js->clj users)))))
+          (done))))
+      (.emit socket "sign-in" room-id username)
+      (.emit socket-2 "sign-in" room-id username-2)))

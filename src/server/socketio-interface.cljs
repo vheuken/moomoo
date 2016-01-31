@@ -18,7 +18,8 @@
       (println (.-id socket) "signing in as" username "in room" room-id)
       (server-interface/sign-in (.-id socket) room-id username
         (fn [user-id users]
-          (.emit socket "sign-in-success" user-id (clj->js users))))))
+          (.emit socket "sign-in-success" user-id (clj->js users))
+          (.emit (.to io room-id) "user-joined" (clj->js users))))))
 
   (.on socket "disconnect"
     (fn []
