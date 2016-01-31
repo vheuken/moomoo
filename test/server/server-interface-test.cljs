@@ -20,15 +20,22 @@
         (fn [user-id users]
           (server/sign-in socket-id-2 room-id username-2
             (fn [user-id-2 users-2]
+              (is (some #{user-id} users))
+              (is (and (some #{user-id}   (keys users-2)
+                       (some #{user-id-2} (keys users-2))))
               (is (not (nil? user-id)))
+              (is (not (nil? user-id-2)))
               (user/get-user-id socket-id
                 (fn [id]
                   (is (= id user-id))
-                  (user/get-username user-id
-                    (fn [user]
-                      (is (= user username))
-                      (is (some #{user-id} (keys users)))
-                      (done))))))))))))
+                  (user/get-user-id socket-id-2
+                    (fn [id-2]
+                      (is (= id-2 user-id-2)
+                      (user/get-username user-id
+                        (fn [user]
+                          (is (= user username))
+                          (is (some #{user-id} (keys users)))
+                          (done)))))))))))))))
 
 (deftest sign-out
   (let [socket-id "test-socket-id-sign-out"
