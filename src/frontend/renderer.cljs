@@ -5,6 +5,8 @@
             [jayq.core :as jq])
    (:use [jayq.core :only [$]]))
 
+(defonce grey-out-image "https://media.licdn.com/mpr/mpr/shrink_200_200/p/8/005/082/26a/1ecd9a2.jpg")
+
 (defn sign-in-form [data owner]
   (reify
     om/IRender
@@ -22,12 +24,58 @@
                                       false)}
                       "Join"))))))
 
+(defn current-track-tags [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div #js {:id "current-track-tags"}
+        ))))
+
+(defn top-bar [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div #js {:id "top-bar" :className "top-bottom-bars"}
+        (om/build current-track-tags nil)
+        (dom/button #js {:id "lastfm-button" :className "top-bar-button"}
+                    "Last.fm")
+        (dom/input #js {:id "file-upload" :type "file"})
+        (dom/button #js {:id "file-upload-input" :className "top-bar-button"}
+                    "Add music")))))
+
+(defn messages-window [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div #js {:id "messages-window"}
+        (dom/div #js {:id "messages"})))))
+
+(defn center-area [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div #js {:id "center-area"}
+        (dom/div #js {:id "center-left"}
+          (om/build messages-window nil))
+        (dom/div #js {:id "track-queue"})))))
+
+(defn bottom-bar [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div #js {:id "bottom-bar" :className "top-bottom-bars"}
+        ))))
+
+
 (defn moomoo [data owner]
   (reify
     om/IRender
     (render [this]
       (if (nil? (:user-id data))
         (om/build sign-in-form nil)
-        (dom/div nil "Logged in mother fucker")))))
+        (dom/div nil
+          (om/build top-bar data)
+          (om/build center-area data)
+          (om/build bottom-bar data))))))
 
 (om/root moomoo g/app-state {:target (. js/document (getElementById "moomoo"))})

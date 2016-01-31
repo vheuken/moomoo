@@ -2,11 +2,6 @@ doctype html
 html
   head
     title MooMoo
-    #roomid(data!= roomid)
-    #lastfm-key(data!= lastfmkey)
-    #allowed-file-extensions(data!= allowedfileextensions)
-    #max-upload-slots(data!= maxuploadslots)
-    #default-upload-slots(data!= defaultuploadslots)
     link(rel="stylesheet" type="text/css" href="/css/style.css")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js")
     script(src="https://cdn.socket.io/socket.io-1.4.5.js")
@@ -16,7 +11,14 @@ html
     script(src="/vendor/base64-arraybuffer.js")
     script(src="/vendor/spark-md5.min.js")
     script(src="/vendor/md5-file.js")
+
   body
+    #roomid.data-element(data!= roomid)
+    #lastfm-key.data-element(data!= lastfmkey)
+    #allowed-file-extensions.data-element(data!= allowedfileextensions)
+    #max-upload-slots.data-element(data!= maxuploadslots)
+    #default-upload-slots.data-element(data!= defaultuploadslots)
+
     #moomoo
 
     script(src="/js/moomoo-frontend.js")
