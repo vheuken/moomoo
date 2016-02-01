@@ -6,3 +6,6 @@
 
 (defn user-joined! [state users]
   (swap! state assoc :users users))
+
+(defn chat-message-received! [state message]
+  (swap! state assoc :messages (conj (:messages @state) message)))
