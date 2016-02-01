@@ -14,3 +14,7 @@
       (println users)
       (println "YOLO")
       (client/user-joined! g/app-state users))))
+
+(.on g/socket "new-chat-message"
+  (fn [user-id message]
+    (client/chat-message-received! g/app-state {user-id message})))

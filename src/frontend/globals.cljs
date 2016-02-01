@@ -5,4 +5,6 @@
 
 #_(defonce default-upload-slots (js/Number (.getAttribute (. js/document (getElementById "default-upload-slots")) "data")))
 
-(defonce app-state (atom {:user-id nil}))
+(defonce app-state (atom {:user-id nil
+                          :users  {}
+                          :messages []}))
