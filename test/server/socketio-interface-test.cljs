@@ -53,3 +53,19 @@
           (is (= 1 (count (keys (js->clj users)))))
           (done)))
       (.emit socket "sign-in" room-id username))))
+
+(deftest chat-message
+  (let [room-id "b"
+        message "foo"
+        username "bar"]
+    (async done
+      (.on socket "sign-in-success"
+        (fn [user-id _]
+          (.on socket "new-chat-message"
+            (fn [chat-user-id m]
+              (is (= message m))
+              (is (= chat-user-id user-id))
+              (println m)
+              (done)))
+          (.emit socket "chat-message" message)))
+      (.emit socket "sign-in" room-id username))))

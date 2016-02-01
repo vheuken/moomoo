@@ -1,6 +1,7 @@
 (ns moomoo.socketio-interface
   (:require [cljs.nodejs :as node]
-            [moomoo.server-interface :as server-interface]))
+            [moomoo.server-interface :as server-interface]
+            [moomoo.user :as user]))
 
 (defonce socketio (node/require "socket.io"))
 (defonce socketio-redis (node/require "socket.io-redis"))
@@ -28,7 +29,21 @@
       (server-interface/sign-out (.-id socket)
                                  #(println "Socket id:"
                                            (.-id socket)
-                                           "has successfully signed out!")))))
+                                           "has successfully signed out!"))))
+  (.on socket "chat-message"
+    (fn [message]
+      (user/get-user-id (.-id socket)
+        (fn [user-id]
+          (server-interface/chat-message (.-id socket) user-id message
+            (fn [chat-message-fmt]
+              (println "CHAT" chat-message-fmt)
+              (if-not (nil? chat-message-fmt)
+                (user/get-room-id user-id
+                  (fn [room-id]
+                    (.emit (.to io room-id)
+                           "new-chat-message"
+                           (:user-id chat-message-fmt)
+                           (:message chat-message-fmt))))))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))
