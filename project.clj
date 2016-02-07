@@ -76,7 +76,7 @@
                 :output-to  "public/js/moomoo-frontend.js"
                 :output-dir "public/js/out-release"
                 :parallel-build true
-                :optimizations :simple}}
+                :optimizations :advanced}}
 
               {:id "test-server"
                :source-paths ["src/server" "test/server"]
