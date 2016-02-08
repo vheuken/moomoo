@@ -68,3 +68,11 @@
     (let [old-state {:uploads {upload-id (uploads/resume (uploads/stop upload))}}
           new-state {:uploads {upload-id (uploads/resume (uploads/stop upload))}}]
       (is (nil? (uploads/get-action old-state new-state upload-id))))))
+
+(deftest get-action-no-change
+  (let [upload-id "test-id"
+        upload (merge uploads/blank-upload {:filename filename
+                                            :id upload-id})
+        old-state {:uploads {upload-id upload}}
+        new-state old-state]
+    (is (nil? (uploads/get-action old-state new-state upload-id)))))

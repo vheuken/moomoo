@@ -19,7 +19,7 @@
 
 (defn get-action [old-state new-state upload-id]
   "returns the action applied to the given upload-id.
-   Can return: :stopped, :started, :paused, :resumed. :reconnected"
+   Can return: :stopped, :started, :paused, :resumed, or nil"
   (let [old-uploads (:uploads old-state)
         new-uploads (:uploads new-state)
         old-upload (old-uploads upload-id)
