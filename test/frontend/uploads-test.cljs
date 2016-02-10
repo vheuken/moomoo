@@ -110,5 +110,5 @@
                   :room-uploads-order new-uploads-order
                   :upload-slots upload-slots}
        changed-state (uploads/handle-state-change old-state new-state)]
-    (println changed-state)
     (is (:stopped? ((:uploads changed-state) upload-id-2)))))
+
