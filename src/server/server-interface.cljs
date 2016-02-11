@@ -1,7 +1,8 @@
 (ns moomoo.server-interface
   (:require [cljs.nodejs :as node]
             [moomoo.user :as user]
-            [moomoo.room :as room]))
+            [moomoo.room :as room]
+            [moomoo.upload :as upload]))
 
 (defonce js-uuid (node/require "uuid"))
 
@@ -29,3 +30,11 @@
         (callback {:message message
                    :user-id user-id})
         (callback nil)))))
+
+(defn new-hash [user-id room-id callback]
+  (let [upload-id (.v4 js-uuid)]
+    (upload/add-new-upload room-id user-id upload-id
+      (fn []
+        (upload/get-uploads-order room-id
+          (fn [uploads-order]
+            (callback upload-id uploads-order)))))))

@@ -112,3 +112,38 @@
        changed-state (uploads/handle-state-change old-state new-state)]
     (is (:stopped? ((:uploads changed-state) upload-id-2)))))
 
+(deftest uploads-watcher-upload-removed
+ (let [upload-id "UPLOAD-ID"
+       filename "foo.mp3"
+       upload-slots 4
+       upload (merge uploads/blank-upload {:filename filename
+                                           :id upload-id})
+       new-room-uploads-order []
+       old-room-uploads-order [upload-id]
+       old-state {:uploads {upload-id upload}
+                  :upload-slots upload-slots
+                  :room-uploads-order old-room-uploads-order}
+       new-state {:uploads {}
+                  :upload-slots upload-slots
+                  :room-uploads-order new-room-uploads-order}
+       changed-state (uploads/handle-state-change old-state new-state)]
+    (is (= changed-state new-state)))
+ (let [upload-id-1 "foo"
+       filename-1 "foo.mp3"
+       upload-1 (uploads/start (merge uploads/blank-upload {:filename filename-1
+                                                            :upload-id upload-id-1}))
+       upload-id-2 "foo1"
+       filename-2 "foo1.mp3"
+       upload-2 (merge uploads/blank-upload {:filename filename-2
+                                             :upload-id upload-id-2})
+       upload-slots 1
+       old-uploads-order [upload-id-1 upload-id-2]
+       new-uploads-order [upload-id-2]
+       old-state {:uploads {upload-id-1 upload-1 upload-id-2 upload-2}
+                  :room-uploads-order old-uploads-order
+                  :upload-slots upload-slots}
+       new-state {:uploads {upload-id-2 upload-2}
+                  :room-uploads-order new-uploads-order
+                  :upload-slots upload-slots}
+       changed-state (uploads/handle-state-change old-state new-state)]
+    (is (not (:stopped? ((:uploads changed-state) upload-id-2))))))

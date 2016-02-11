@@ -3,6 +3,7 @@
             [moomoo.server-interface :as server]
             [moomoo.user :as user]
             [moomoo.room :as room]
+            [moomoo.upload :as upload]
             [moomoo.fixtures :as fixtures]))
 
 (use-fixtures :each
@@ -74,3 +75,16 @@
                 (fn [message-fmt]
                 (is (nil? message-fmt))
                 (done))))))))))
+
+(deftest hashing
+  (let [room-id "wooroom"
+        user-id "test-user-id"]
+    (async done
+      (server/new-hash user-id room-id
+        (fn [upload-id uploads-order]
+          (is (string? upload-id))
+          (is (= upload-id (first uploads-order)))
+          (upload/get-uploader upload-id
+            (fn [uploader-id]
+              (is (= uploader-id user-id))
+              (done))))))))

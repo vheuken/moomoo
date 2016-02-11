@@ -51,3 +51,6 @@
                     (first new-upload-ids)
                     (start ((:uploads new-state) (first new-upload-ids)))))
       new-state)))
+
+(defn upload-file! []
+  )
