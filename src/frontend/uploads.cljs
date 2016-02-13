@@ -18,6 +18,16 @@
 (defn resume [upload]
   (assoc upload :paused? false))
 
+(defn active? [upload]
+  (and (not (:stopped? upload))
+       (not (:paused? upload))))
+
+(defn active-uploads [uploads-order uploads]
+  (vec (remove #(not (active? (uploads %1))) uploads-order)))
+
+(defn inactive-uploads [uploads-order uploads]
+  (vec (remove #(active? (uploads %1)) uploads-order)))
+
 (defn get-action [old-state new-state upload-id]
   "returns the action applied to the given upload-id.
    Can return: :stopped, :started, :paused, :resumed, or nil"
@@ -42,15 +52,32 @@
   "Returns new state map according to changes between old-state and new-state"
   ; uploads added
   (let [new-upload-ids (clojure.set/difference (set (:room-uploads-order new-state))
-                                               (set (:room-uploads-order old-state)))]
-    (if (and (not (empty? new-upload-ids))
-             (< (count (:room-uploads-order new-state)) (:upload-slots new-state)))
-      (assoc new-state
-             :uploads
-             (assoc (:uploads new-state)
-                    (first new-upload-ids)
-                    (start ((:uploads new-state) (first new-upload-ids)))))
-      new-state)))
+                                               (set (:room-uploads-order old-state)))
+        removed-upload-ids (clojure.set/difference (set (:room-uploads-order old-state))
+                                                   (set (:room-uploads-order new-state)))
+        uploads (:uploads new-state)
+        room-uploads-order (:room-uploads-order new-state)
+        active-uploads (active-uploads room-uploads-order uploads)
+        inactive-uploads (inactive-uploads room-uploads-order uploads)
+        unpaused-inactive-uploads (vec (remove #(:paused (uploads %)) inactive-uploads))]
+    (cond
+      (and (not (empty? new-upload-ids))
+           (< (count room-uploads-order) (:upload-slots new-state)))
+        (assoc new-state
+               :uploads
+               (assoc (:uploads new-state)
+                      (first new-upload-ids)
+                      (start ((:uploads new-state) (first new-upload-ids)))))
+      (and (and (not (empty? removed-upload-ids))
+                (not (empty? unpaused-inactive-uploads)))
+           (< (count active-uploads)
+              (:upload-slots new-state)))
+        (assoc new-state
+               :uploads
+               (assoc (:uploads new-state)
+                      (first unpaused-inactive-uploads)
+                      (start ((:uploads new-state) (first unpaused-inactive-uploads)))))
+      :else new-state)))
 
 (defn upload-file! []
   )
