@@ -57,26 +57,27 @@
                                                    (set (:room-uploads-order new-state)))
         uploads (:uploads new-state)
         room-uploads-order (:room-uploads-order new-state)
+        upload-slots (:upload-slots new-state)
         active-uploads (active-uploads room-uploads-order uploads)
         inactive-uploads (inactive-uploads room-uploads-order uploads)
         unpaused-inactive-uploads (vec (remove #(:paused (uploads %)) inactive-uploads))]
     (cond
       (and (not (empty? new-upload-ids))
-           (< (count room-uploads-order) (:upload-slots new-state)))
+           (< (count room-uploads-order) upload-slots))
         (assoc new-state
                :uploads
                (assoc (:uploads new-state)
                       (first new-upload-ids)
-                      (start ((:uploads new-state) (first new-upload-ids)))))
+                      (start (uploads (first new-upload-ids)))))
       (and (and (not (empty? removed-upload-ids))
                 (not (empty? unpaused-inactive-uploads)))
            (< (count active-uploads)
-              (:upload-slots new-state)))
+              upload-slots))
         (assoc new-state
                :uploads
-               (assoc (:uploads new-state)
+               (assoc uploads
                       (first unpaused-inactive-uploads)
-                      (start ((:uploads new-state) (first unpaused-inactive-uploads)))))
+                      (start (uploads (first unpaused-inactive-uploads)))))
       :else new-state)))
 
 (defn upload-file! []
