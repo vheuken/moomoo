@@ -51,22 +51,22 @@
 (defn handle-state-change [old-state new-state]
   "Returns new state map according to changes between old-state and new-state"
   ; uploads added
-  (let [new-upload-ids (clojure.set/difference (set (:room-uploads-order new-state))
-                                               (set (:room-uploads-order old-state)))
-        removed-upload-ids (clojure.set/difference (set (:room-uploads-order old-state))
-                                                   (set (:room-uploads-order new-state)))
-        uploads (:uploads new-state)
+  (let [uploads (:uploads new-state)
         room-uploads-order (:room-uploads-order new-state)
         upload-slots (:upload-slots new-state)
         active-uploads (active-uploads room-uploads-order uploads)
         inactive-uploads (inactive-uploads room-uploads-order uploads)
-        unpaused-inactive-uploads (vec (remove #(:paused (uploads %)) inactive-uploads))]
+        unpaused-inactive-uploads (vec (remove #(:paused? (uploads %)) inactive-uploads))
+        new-upload-ids (clojure.set/difference (set (:room-uploads-order new-state))
+                                               (set (:room-uploads-order old-state)))
+        removed-upload-ids (clojure.set/difference (set (:room-uploads-order old-state))
+                                                   (set (:room-uploads-order new-state)))]
     (cond
       (and (not (empty? new-upload-ids))
            (< (count room-uploads-order) upload-slots))
         (assoc new-state
                :uploads
-               (assoc (:uploads new-state)
+               (assoc uploads
                       (first new-upload-ids)
                       (start (uploads (first new-upload-ids)))))
       (and (and (not (empty? removed-upload-ids))
@@ -80,5 +80,3 @@
                       (start (uploads (first unpaused-inactive-uploads)))))
       :else new-state)))
 
-(defn upload-file! []
-  )
