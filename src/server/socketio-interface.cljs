@@ -50,7 +50,7 @@
         (fn [user-id]
           (user/get-room-id user-id
             (fn [room-id]
-              (server/new-hash user-id room-id
+              (server-interface/new-hash user-id room-id
                 (fn [upload-id uploads-order]
                   (.emit (.to io room-id) "uploads-order" uploads-order)
                   (.emit socket "start-hashing" client-id upload-id))))))))))
