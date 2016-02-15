@@ -57,6 +57,30 @@
       (dom/div #js {:id "messages-window"}
         ))))
 
+(defn upload-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [id (first data)
+            info (second data)
+            hashing-completion (/ (:current-chunk info) (:chunks info))
+            hashing-percent-completion (if (<= 1 hashing-completion)
+                                         100
+                                         (* 100 hashing-completion))]
+        (dom/div #js {:className "track-view"}
+          "HASHING: "
+          (:filename info)
+          " "
+          hashing-percent-completion
+          "%")))))
+
+(defn track-queue-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div #js {:id "uploads-queue"}
+        (om/build-all upload-view (:uploads data))))))
+
 (defn center-area [data owner]
   (reify
     om/IRender
@@ -64,7 +88,8 @@
       (dom/div #js {:id "center-area"}
         (dom/div #js {:id "center-left"}
           (om/build messages-window nil))
-        (dom/div #js {:id "track-queue"})))))
+        (dom/div #js {:id "track-queue"}
+          (om/build track-queue-view data))))))
 
 (defn bottom-bar [data owner]
   (reify

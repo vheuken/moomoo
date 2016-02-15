@@ -50,8 +50,9 @@
     (swap! g/app-state
            assoc
            :uploads
-           (merge {upload-id {:type :hash
-                              :filename filename
-                              :current-chunk current-chunk
-                              :chunks chunks}}
-                  (:uploads @g/app-state)))))
+           (assoc (:uploads @g/app-state)
+                  upload-id
+                  {:type :hash
+                   :filename filename
+                   :current-chunk current-chunk
+                   :chunks chunks}))))
