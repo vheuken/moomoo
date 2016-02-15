@@ -74,14 +74,24 @@
           hashing-percent-completion
           "%")))))
 
+(defn upload-progress-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [id (first data)
+            info (second data)]
+        (dom/div #js {:className "track-view"}
+                 )))))
+
 (defn upload-view [data owner]
   (reify
     om/IRender
     (render [this]
       (let [info (second data)]
         (cond
-          (= :hash (:type info))
-            (om/build hashing-progress-view data))))))
+          (= :hash (:type info)) (om/build hashing-progress-view data)
+          (= :upload (:type info)) (om/build upload-progress-view data)
+          )))))
 
 (defn track-queue-view [data owner]
   (reify

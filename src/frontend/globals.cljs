@@ -13,4 +13,5 @@
                           :files-to-hash {}
                           :uploads {}
                           :upload-slots default-upload-slots
+                          :client-uploads-order []
                           :room-uploads-order []}))

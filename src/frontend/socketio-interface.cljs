@@ -1,6 +1,7 @@
 (ns moomoo-frontend.socketio-interface
   (:require [moomoo-frontend.globals :as g]
-            [moomoo-frontend.client-interface :as client]))
+            [moomoo-frontend.client-interface :as client]
+            [moomoo-frontend.uploads :as uploads]))
 
 (.on g/socket "sign-in-success"
   (fn [user-id users]
@@ -53,6 +54,59 @@
            (assoc (:uploads @g/app-state)
                   upload-id
                   {:type :hash
+                   :id upload-id
                    :filename filename
                    :current-chunk current-chunk
                    :chunks chunks}))))
+
+(.on g/socket "hash-not-found"
+  (fn [upload-id]
+    (println "Hash not found for id:" upload-id)))
+
+(defn upload-file! [file upload-id]
+  (let [new-upload (merge uploads/blank-upload {:filename (.-name file)
+                                                :id upload-id})
+        stream (atom (.createStream js/ss))
+        blob-stream (atom (.createBlobReadStream js/ss file))
+        emit #(.emit (js/ss g/socket)
+                     "file-upload"
+                     %1
+                     (.-name file)
+                     (.-size file)
+                     upload-id
+                     %2)
+        upload-watch-fn! (fn [_ _ old-state new-state]
+                           (let [action (uploads/get-action old-state new-state upload-id)
+                                 uploads (:uploads new-state)
+                                 uploads-order (:uploads-order new-state)
+                                 upload (get uploads upload-id)
+                                 upload-slots (:upload-slots new-state)
+                                 upload-info (first (filter #(= upload-id (.-id %1))
+                                                            (vals (:current-uploads-info @g/app-state))))]
+                             (if-not (nil? action)
+                               (cond
+                                 (= action :paused)
+                                   (.unpipe @blob-stream)
+                                 (= action :resumed)
+                                   (when-not (:stopped? upload)
+                                     (.pipe @blob-stream @stream))
+                                 (= action :stopped)
+                                   (.unpipe @blob-stream)
+                                 (= action :started)
+                                   (when-not (:paused? upload)
+                                     (.pipe @blob-stream @stream))))))]
+    (.on @blob-stream "end" #(remove-watch g/app-state upload-id))
+
+    (add-watch g/app-state
+               upload-id
+               upload-watch-fn!)
+
+    (emit @stream 0)
+
+    (swap! g/app-state
+           merge
+           {:uploads (merge (:uploads @g/app-state)
+                            {upload-id new-upload})
+            :client-uploads-order (conj (:client-uploads-order @g/app-state)
+                                        upload-id)})))
+

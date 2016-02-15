@@ -70,6 +70,11 @@
                      filename
                      current-chunk
                      chunks)))))))
+
+  (.on socket "check-hash"
+    (fn [upload-id file-hash]
+      (.emit socket "hash-not-found" upload-id)))
+
   ; END HASHING SECTION
   )
 
