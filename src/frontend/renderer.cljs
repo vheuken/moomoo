@@ -2,6 +2,7 @@
   (:require [om.core :as om  :include-macros true]
             [om.dom  :as dom :include-macros true]
             [moomoo-frontend.globals :as g]
+            [moomoo-frontend.hashing :as hashing]
             [jayq.core :as jq])
    (:use [jayq.core :only [$]]))
 
@@ -39,8 +40,14 @@
         (om/build current-track-tags nil)
         (dom/button #js {:id "lastfm-button" :className "top-bar-button"}
                     "Last.fm")
-        (dom/input #js {:id "file-upload" :type "file"})
-        (dom/button #js {:id "file-upload-input" :className "top-bar-button"}
+        (dom/input #js {:id "file-upload"
+                        :type "file"
+                        :onChange (fn [e]
+                                    (if-let [file (aget (.-files (.-target e)) 0)]
+                                      (hashing/check-hash file)))})
+        (dom/button #js {:id "file-upload-input"
+                         :className "top-bar-button"
+                         :onClick #(.click (.getElementById js/document "file-upload"))}
                     "Add music")))))
 
 (defn messages-window [data owner]

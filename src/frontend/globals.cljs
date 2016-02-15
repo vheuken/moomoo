@@ -10,6 +10,7 @@
                           :messages []
 
                           ; Uploads
+                          :files-to-hash {}
                           :uploads {}
                           :upload-slots default-upload-slots
                           :room-uploads-order []}))

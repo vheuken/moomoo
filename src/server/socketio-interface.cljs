@@ -44,6 +44,9 @@
                            "new-chat-message"
                            (:user-id chat-message-fmt)
                            (:message chat-message-fmt)))))))))))
+
+  ; START HASHING SECTION
+
   (.on socket "new-hash"
     (fn [client-id]
       (user/get-user-id (.-id socket)
@@ -53,7 +56,22 @@
               (server-interface/new-hash user-id room-id
                 (fn [upload-id uploads-order]
                   (.emit (.to io room-id) "uploads-order" uploads-order)
-                  (.emit socket "start-hashing" client-id upload-id))))))))))
+                  (.emit socket "start-hashing" client-id upload-id)))))))))
+
+  (.on socket "hash-progress"
+    (fn [upload-id filename current-chunk chunks]
+      (user/get-user-id (.-id socket)
+        (fn [user-id]
+          (user/get-room-id user-id
+            (fn [room-id]
+              (.emit (.to io room-id)
+                     "hash-progress"
+                     upload-id
+                     filename
+                     current-chunk
+                     chunks)))))))
+  ; END HASHING SECTION
+  )
 
 (defn start-listening! []
   (.on io "connection" connection))
