@@ -57,7 +57,7 @@
       (dom/div #js {:id "messages-window"}
         ))))
 
-(defn upload-view [data owner]
+(defn hashing-progress-view [data owner]
   (reify
     om/IRender
     (render [this]
@@ -73,6 +73,15 @@
           " "
           hashing-percent-completion
           "%")))))
+
+(defn upload-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [info (second data)]
+        (cond
+          (= :hash (:type info))
+            (om/build hashing-progress-view data))))))
 
 (defn track-queue-view [data owner]
   (reify
