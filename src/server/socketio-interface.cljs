@@ -1,10 +1,14 @@
 (ns moomoo.socketio-interface
   (:require [cljs.nodejs :as node]
+            [clojure.string :as string]
             [moomoo.server-interface :as server-interface]
             [moomoo.user :as user]))
 
 (defonce socketio (node/require "socket.io"))
 (defonce socketio-redis (node/require "socket.io-redis"))
+(defonce socketio-stream (node/require "socket.io-stream"))
+(defonce file-upload-directory "public/music")
+(defonce fs (node/require "fs"))
 
 (defn initialize! [server options]
   (def io (.listen socketio server options))
@@ -76,7 +80,31 @@
       (.emit socket "hash-not-found" upload-id)))
 
   ; END HASHING SECTION
-  )
+
+  (.on (new socketio-stream socket) "file-upload"
+    (fn [stream filename file-size upload-id start]
+      (user/get-user-id (.-id socket)
+        (fn [user-id]
+          (user/get-room-id user-id
+            (fn [room-id]
+              (let [file-extension (str "."
+                                        (last (string/split filename ".")))
+                    temp-filename (str upload-id file-extension)
+                    temp-absolute-file-path (str file-upload-directory
+                                                 "/"
+                                                 temp-filename)]
+                (.on stream "data"
+                  (fn [data-chunk]
+                    (let [bytes-received (aget (.statSync fs
+                                                          temp-absolute-file-path)
+                                               "size")]
+                      (.emit (.to io room-id)
+                             "upload-progress"
+                             upload-id
+                             user-id
+                             bytes-received
+                             file-size
+                             filename))))))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))

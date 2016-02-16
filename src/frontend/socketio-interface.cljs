@@ -95,6 +95,7 @@
                                  (= action :started)
                                    (when-not (:paused? upload)
                                      (.pipe @blob-stream @stream))))))]
+
     (.on @blob-stream "end" #(remove-watch g/app-state upload-id))
 
     (add-watch g/app-state
