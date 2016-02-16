@@ -42,7 +42,7 @@
                  assoc
                  :file-hashes
                  (merge {file-hash file}
-                        (:file-hashes g/app-state)))
+                        (:file-hashes @g/app-state)))
           (.emit g/socket "check-hash" upload-id file-hash))))))
 
 (.on g/socket "hash-progress"
@@ -59,9 +59,11 @@
                    :current-chunk current-chunk
                    :chunks chunks}))))
 
-(.on g/socket "hash-not-found"
-  (fn [upload-id]
-    (println "Hash not found for id:" upload-id)))
+(add-watch g/app-state :uploads-watcher (fn [_ _ o n]
+                                          (let [s (uploads/handle-state-change o n)]
+                                            (when-not (= s n)
+                                              (println "AY")
+                                              (swap! g/app-state merge s)))))
 
 (defn upload-file! [file upload-id]
   (let [new-upload (merge uploads/blank-upload {:filename (.-name file)
@@ -78,11 +80,9 @@
         upload-watch-fn! (fn [_ _ old-state new-state]
                            (let [action (uploads/get-action old-state new-state upload-id)
                                  uploads (:uploads new-state)
-                                 uploads-order (:uploads-order new-state)
-                                 upload (get uploads upload-id)
-                                 upload-slots (:upload-slots new-state)
-                                 upload-info (first (filter #(= upload-id (.-id %1))
-                                                            (vals (:current-uploads-info @g/app-state))))]
+                                 upload (get uploads upload-id)]
+                             (println action)
+                             (println upload)
                              (if-not (nil? action)
                                (cond
                                  (= action :paused)
@@ -110,4 +110,10 @@
                             {upload-id new-upload})
             :client-uploads-order (conj (:client-uploads-order @g/app-state)
                                         upload-id)})))
+
+(.on g/socket "hash-not-found"
+  (fn [upload-id file-hash]
+    (println "Hash not found for id:" upload-id)
+    (let [file ((:file-hashes @g/app-state) file-hash)]
+      (upload-file! file upload-id))))
 

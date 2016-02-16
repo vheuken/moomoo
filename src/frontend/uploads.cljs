@@ -52,15 +52,15 @@
   "Returns new state map according to changes between old-state and new-state"
   ; uploads added
   (let [uploads (:uploads new-state)
-        room-uploads-order (:room-uploads-order new-state)
+        room-uploads-order (:client-uploads-order new-state)
         upload-slots (:upload-slots new-state)
         active-uploads (active-uploads room-uploads-order uploads)
         inactive-uploads (inactive-uploads room-uploads-order uploads)
         unpaused-inactive-uploads (vec (remove #(:paused? (uploads %)) inactive-uploads))
-        new-upload-ids (clojure.set/difference (set (:room-uploads-order new-state))
-                                               (set (:room-uploads-order old-state)))
-        removed-upload-ids (clojure.set/difference (set (:room-uploads-order old-state))
-                                                   (set (:room-uploads-order new-state)))]
+        new-upload-ids (clojure.set/difference (set (:client-uploads-order new-state))
+                                               (set (:client-uploads-order old-state)))
+        removed-upload-ids (clojure.set/difference (set (:client-uploads-order old-state))
+                                                   (set (:client-uploads-order new-state)))]
     (cond
       (and (not (empty? new-upload-ids))
            (< (count room-uploads-order) upload-slots))

@@ -12,6 +12,16 @@
                           ; Uploads
                           :files-to-hash {}
                           :uploads {}
-                          :upload-slots default-upload-slots
+                          :upload-slots 4
                           :client-uploads-order []
-                          :room-uploads-order []}))
+                          :room-uploads-order []
+
+                          ; Tracks
+                          :current-track-id nil
+                          :track-order []
+                          :tracks {}
+
+                          ; Player
+                          :volume 100
+                          :current-sound-position 0
+                          :current-sound-id nil}))

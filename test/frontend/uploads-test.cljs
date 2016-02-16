@@ -87,10 +87,10 @@
        new-room-uploads-order [upload-id]
        old-state {:uploads {}
                   :upload-slots upload-slots
-                  :room-uploads-order old-room-uploads-order}
+                  :client-uploads-order old-room-uploads-order}
        new-state {:uploads {upload-id upload}
                   :upload-slots upload-slots
-                  :room-uploads-order new-room-uploads-order}]
+                  :client-uploads-order new-room-uploads-order}]
    (is (not (:stopped? ((:uploads (uploads/handle-state-change old-state new-state)) upload-id)))))
  (let [upload-id-1 "foo"
        filename-1 "foo.mp3"
@@ -104,10 +104,10 @@
        old-uploads-order [upload-id-1]
        new-uploads-order [upload-id-1 upload-id-2]
        old-state {:uploads {upload-id-1 upload-1}
-                  :room-uploads-order old-uploads-order
+                  :client-uploads-order old-uploads-order
                   :upload-slots upload-slots}
        new-state {:uploads {upload-id-1 upload-1 upload-id-2 upload-2}
-                  :room-uploads-order new-uploads-order
+                  :client-uploads-order new-uploads-order
                   :upload-slots upload-slots}
        changed-state (uploads/handle-state-change old-state new-state)]
     (is (:stopped? ((:uploads changed-state) upload-id-2)))))
@@ -122,10 +122,10 @@
        old-room-uploads-order [upload-id]
        old-state {:uploads {upload-id upload}
                   :upload-slots upload-slots
-                  :room-uploads-order old-room-uploads-order}
+                  :client-uploads-order old-room-uploads-order}
        new-state {:uploads {}
                   :upload-slots upload-slots
-                  :room-uploads-order new-room-uploads-order}
+                  :client-uploads-order new-room-uploads-order}
        changed-state (uploads/handle-state-change old-state new-state)]
     (is (= changed-state new-state)))
  (let [upload-id-1 "foo"
@@ -140,10 +140,10 @@
        old-uploads-order [upload-id-1 upload-id-2]
        new-uploads-order [upload-id-2]
        old-state {:uploads {upload-id-1 upload-1 upload-id-2 upload-2}
-                  :room-uploads-order old-uploads-order
+                  :client-uploads-order old-uploads-order
                   :upload-slots upload-slots}
        new-state {:uploads {upload-id-2 upload-2}
-                  :room-uploads-order new-uploads-order
+                  :client-uploads-order new-uploads-order
                   :upload-slots upload-slots}
        changed-state (uploads/handle-state-change old-state new-state)]
     (is (not (:stopped? ((:uploads changed-state) upload-id-2))))))

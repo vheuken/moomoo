@@ -77,12 +77,13 @@
 
   (.on socket "check-hash"
     (fn [upload-id file-hash]
-      (.emit socket "hash-not-found" upload-id)))
+      (.emit socket "hash-not-found" upload-id file-hash)))
 
   ; END HASHING SECTION
 
   (.on (new socketio-stream socket) "file-upload"
     (fn [stream filename file-size upload-id start]
+      (println (.-id socket) "is uploading" filename)
       (user/get-user-id (.-id socket)
         (fn [user-id]
           (user/get-room-id user-id
@@ -104,7 +105,13 @@
                              user-id
                              bytes-received
                              file-size
-                             filename))))))))))))
+                             filename))))
+                (.on stream "end"
+                  (fn []
+                    (println "DONE uploading " filename)))
+                (println (str "Saving" filename "as" temp-absolute-file-path))
+                (.pipe stream (.createWriteStream fs temp-absolute-file-path #js {:start start
+                                                                                  :flags "a"}))))))))))
 
 (defn start-listening! []
   (.on io "connection" connection))
