@@ -4,7 +4,8 @@
 (defonce  blank-upload {:stopped? true
                         :paused?  false
                         :id       nil
-                        :filename nil})
+                        :filename nil
+                        :type :upload})
 
 (defn start [upload]
   (assoc upload :stopped? false))

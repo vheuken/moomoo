@@ -71,6 +71,7 @@
               (.emit (.to io room-id)
                      "hash-progress"
                      upload-id
+                     user-id
                      filename
                      current-chunk
                      chunks)))))))

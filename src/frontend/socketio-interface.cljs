@@ -13,7 +13,6 @@
   (fn [users]
     (let [users (js->clj users)]
       (println users)
-      (println "YOLO")
       (client/user-joined! g/app-state users))))
 
 (.on g/socket "new-chat-message"
@@ -46,7 +45,7 @@
           (.emit g/socket "check-hash" upload-id file-hash))))))
 
 (.on g/socket "hash-progress"
-  (fn [upload-id filename current-chunk chunks]
+  (fn [upload-id user-id filename current-chunk chunks]
     (println "hash-progress" upload-id filename current-chunk chunks)
     (swap! g/app-state
            assoc
@@ -56,13 +55,27 @@
                   {:type :hash
                    :id upload-id
                    :filename filename
+                   :user user-id
                    :current-chunk current-chunk
                    :chunks chunks}))))
+
+(.on g/socket "upload-progress"
+  (fn [upload-id user-id bytes-received file-size filename]
+    (swap! g/app-state
+           assoc
+           :uploads
+           (assoc (:uploads @g/app-state)
+                  upload-id
+                  {:type :upload
+                   :id upload-id
+                   :filename filename
+                   :user user-id
+                   :bytes-received bytes-received
+                   :file-size file-size}))))
 
 (add-watch g/app-state :uploads-watcher (fn [_ _ o n]
                                           (let [s (uploads/handle-state-change o n)]
                                             (when-not (= s n)
-                                              (println "AY")
                                               (swap! g/app-state merge s)))))
 
 (defn upload-file! [file upload-id]

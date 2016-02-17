@@ -3,6 +3,7 @@
             [om.dom  :as dom :include-macros true]
             [moomoo-frontend.globals :as g]
             [moomoo-frontend.hashing :as hashing]
+            [moomoo-frontend.uploads :as uploads]
             [jayq.core :as jq])
    (:use [jayq.core :only [$]]))
 
@@ -79,9 +80,23 @@
     om/IRender
     (render [this]
       (let [id (first data)
-            info (second data)]
+            info (second data)
+            upload-completion (/ (:bytes-received info) (:file-size info))
+            upload-percent-completion (* 100 upload-completion)
+            buttons (if (= (:user-id @g/app-state) (:user info))
+                      (list
+                        (dom/button nil "CANCEL")
+                        (if (:paused? info)
+                          (dom/button nil "RESUME")
+                          (dom/button nil "PAUSE")))
+                      "")]
         (dom/div #js {:className "track-view"}
-                 )))))
+          buttons
+          "UPLOAD: "
+          (:filename info)
+          " "
+          upload-percent-completion
+          "%")))))
 
 (defn upload-view [data owner]
   (reify
@@ -110,13 +125,18 @@
         (dom/div #js {:id "track-queue"}
           (om/build track-queue-view data))))))
 
+(defn volume-control [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      )))
+
 (defn bottom-bar [data owner]
   (reify
     om/IRender
     (render [this]
       (dom/div #js {:id "bottom-bar" :className "top-bottom-bars"}
-        ))))
-
+        (om/build volume-control (:volume data))))))
 
 (defn moomoo [data owner]
   (reify

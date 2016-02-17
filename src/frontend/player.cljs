@@ -19,7 +19,7 @@
 (defn play-track! [sound-id position on-finish-callback]
   (swap! g/app-state assoc :current-sound-id sound-id)
   (.play js/soundManager sound-id #js {:whileplaying while-playing
-                                       :onfinish on-finish-callback
+
                                        :volume (:volume @g/app-state)
                                        :from (if (> (duration) position)
                                                position
