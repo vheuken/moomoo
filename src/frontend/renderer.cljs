@@ -116,6 +116,20 @@
         (dom/div #js {:id "uploads-queue"}
           (om/build-all upload-view (:uploads data)))))))
 
+(defn user-view [data owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div nil
+        (data "username")))))
+
+(defn users-list-view [data owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div nil
+        (om/build-all user-view (vals data))))))
+
 (defn chat-view [data owner]
   (reify
     om/IRenderState
@@ -123,7 +137,9 @@
       (let [width (:width state)]
         (dom/div #js {:id "center-left"
                       :style #js {:width width}}
-          (om/build messages-window nil))))))
+          (list
+            (om/build messages-window nil)
+            (om/build users-list-view (:users data))))))))
 
 (defn center-area [data owner]
   (reify
@@ -141,7 +157,7 @@
                         (om/set-state! owner
                                        :dimensions
                                        {:chat-width (str left-width "px")
-                                        :track-queue-width (str right-width "px")}))))
+                                        :track-queue-width (str right-width "px")})))
       ((om/get-state owner :handle-resize))
       (dommy/listen! js/window :resize (om/get-state owner :handle-resize)))
     om/IWillUnmount
@@ -150,10 +166,10 @@
     om/IRenderState
     (render-state [_ state]
       (dom/div #js {:id "center-area"}
-        (list
-          (let [dimensions {:dimensions state}]
+        (let [dimensions (:dimensions state)]
+          (list
             (om/build chat-view data {:state {:width (:chat-width dimensions)}})
-            (om/build track-queue-view data {:state {:width (:track-queue-width dimensions)}}))))))
+            (om/build track-queue-view data {:state {:width (:track-queue-width dimensions)}})))))))
 
 (defn volume-control [data owner]
   (reify
