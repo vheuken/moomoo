@@ -37,7 +37,7 @@
   :plugins [[lein-cljsbuild "1.1.2"]
             [lein-npm "0.6.1"]
             [lein-cljfmt "0.3.0"]
-            [lein-figwheel "0.5.0-3"]
+            [lein-figwheel "0.5.0-6"]
             [cider/cider-nrepl "0.9.1"]
             [lein-doo "0.1.6"]]
 
@@ -45,20 +45,11 @@
 
   :figwheel {:nrepl-port 7888
              :build-ids []}
-  :cljsbuild {
-    :builds [{:id "moomoo-server"
-              :source-paths ["src/server"]
-              :compiler {
-                :main "moomoo.core"
-                :output-to  "target/moomoo.js"
-                :output-dir "target"
-                :target :nodejs
-                :parallel-build true
-                :optimizations :none}}
 
-             {:id "moomoo-frontend-dev"
-              :source-paths ["src/frontend"]
-              :figwheel {:websocket-host "localhost:3449"}
+  :cljsbuild {
+    :builds [{:id "moomoo-frontend-dev"
+              :source-paths ["src/frontend" "src-dev/frontend"]
+              :figwheel true
               :compiler {
                 :main "moomoo-frontend.core"
                 :asset-path "/js/out"
@@ -69,13 +60,23 @@
                 :source-map true}}
 
               {:id "moomoo-frontend-release"
-              :source-paths ["src/frontend"]
+               :source-paths ["src/frontend"]
+               :compiler {
+                 :asset-path "/js/out"
+                 :output-to  "public/js/moomoo-frontend.js"
+                 :output-dir "public/js/out-release"
+                 :parallel-build true
+                 :optimizations :simple}}
+
+             {:id "moomoo-server"
+              :source-paths ["src/server"]
               :compiler {
-                :asset-path "/js/out"
-                :output-to  "public/js/moomoo-frontend.js"
-                :output-dir "public/js/out-release"
+                :main "moomoo.core"
+                :output-to  "target/moomoo.js"
+                :output-dir "target"
+                :target :nodejs
                 :parallel-build true
-                :optimizations :simple}}
+                :optimizations :none}}
 
               {:id "test-server"
                :source-paths ["src/server" "test/server"]
