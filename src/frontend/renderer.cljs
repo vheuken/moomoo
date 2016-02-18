@@ -114,13 +114,37 @@
       (dom/div #js {:id "uploads-queue"}
         (om/build-all upload-view (:uploads data))))))
 
+(defn center-left-area [data owner]
+  (reify
+    om/IDidMount
+    (did-mount [_]
+      (om/set-state! owner :handle-resize #(let [window-width (.-innerWidth js/window)
+                                                 width (if (< window-width 850)
+                                                         (* 0.50 window-width)
+                                                         (* 0.35 window-width))]
+                                             (println width)
+                                             (om/set-state! owner
+                                                            :width
+                                                            (str width "px"))))
+      ((om/get-state owner :handle-resize))
+      (dommy/listen! js/window :resize (om/get-state owner :handle-resize)))
+    om/IWillUnmount
+    (will-unmount [_]
+      (dommy/unlisten! js/window :resize (om/get-state owner :handle-resize)))
+    om/IRenderState
+    (render-state [_ state]
+      (let [width (:width state)]
+        (println width)
+        (dom/div #js {:id "center-left"
+                      :style #js {:width width}}
+          (om/build messages-window nil))))))
+
 (defn center-area [data owner]
   (reify
     om/IRender
     (render [this]
       (dom/div #js {:id "center-area"}
-        (dom/div #js {:id "center-left"}
-          (om/build messages-window nil))
+        (om/build center-left-area data)
         (dom/div #js {:id "track-queue"}
           (om/build track-queue-view data))))))
 

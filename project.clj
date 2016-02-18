@@ -44,7 +44,8 @@
   :source-paths ["src/server" "test/server"]
 
   :figwheel {:nrepl-port 7888
-             :build-ids []}
+             :build-ids []
+             :css-dirs ["public/css"]}
 
   :cljsbuild {
     :builds [{:id "moomoo-frontend-dev"
