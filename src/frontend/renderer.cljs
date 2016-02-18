@@ -116,7 +116,7 @@
         (dom/div #js {:id "uploads-queue"}
           (om/build-all upload-view (:uploads data)))))))
 
-(defn center-left-area [data owner]
+(defn chat-view [data owner]
   (reify
     om/IRenderState
     (render-state [_ state]
@@ -129,19 +129,19 @@
   (reify
     om/IDidMount
     (did-mount [_]
-      (om/set-state! owner :handle-resize #(let [window-width (.-innerWidth js/window)
-                                                 left-width (if (< window-width 850)
-                                                              (* 0.50 window-width)
-                                                              (* 0.35 window-width))
-                                                 right-width (if (< window-width 850)
-                                                               (* 0.50 window-width)
-                                                               (* 0.65 window-width))]
-                                             (om/set-state! owner
-                                                            :left-width
-                                                            (str left-width "px"))
-                                             (om/set-state! owner
-                                                            :right-width
-                                                            (str right-width "px"))))
+      (om/set-state! owner
+                     :handle-resize
+                     #(let [window-width (.-innerWidth js/window)
+                            left-width (if (< window-width 850)
+                                         (* 0.50 window-width)
+                                         (* 0.35 window-width))
+                            right-width (if (< window-width 850)
+                                          (* 0.50 window-width)
+                                          (* 0.65 window-width))]
+                        (om/set-state! owner
+                                       :dimensions
+                                       {:chat-width (str left-width "px")
+                                        :track-queue-width (str right-width "px")}))))
       ((om/get-state owner :handle-resize))
       (dommy/listen! js/window :resize (om/get-state owner :handle-resize)))
     om/IWillUnmount
@@ -151,8 +151,9 @@
     (render-state [_ state]
       (dom/div #js {:id "center-area"}
         (list
-          (om/build center-left-area data {:state {:width (:left-width state)}})
-          (om/build track-queue-view data {:state {:width (:right-width state)}}))))))
+          (let [dimensions {:dimensions state}]
+            (om/build chat-view data {:state {:width (:chat-width dimensions)}})
+            (om/build track-queue-view data {:state {:width (:track-queue-width dimensions)}}))))))
 
 (defn volume-control [data owner]
   (reify
