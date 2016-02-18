@@ -47,7 +47,7 @@
                                       (hashing/check-hash file)))})
         (dom/button #js {:id "file-upload-input"
                          :className "top-bar-button"
-                         :onClick #(.click (.getElementById js/document "file-upload"))}
+                         :onClick #(.click (sel1 :#file-upload))}
                     "Add music")))))
 
 (defn messages-window [data owner]
