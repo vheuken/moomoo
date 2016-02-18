@@ -4,8 +4,7 @@
             [moomoo-frontend.globals :as g]
             [moomoo-frontend.hashing :as hashing]
             [moomoo-frontend.uploads :as uploads]
-            [jayq.core :as jq])
-   (:use [jayq.core :only [$]]))
+            [dommy.core :as dommy :refer-macros [sel sel1]]))
 
 (defonce grey-out-image "https://media.licdn.com/mpr/mpr/shrink_200_200/p/8/005/082/26a/1ecd9a2.jpg")
 
@@ -22,7 +21,7 @@
                                       (.emit g/socket
                                              "sign-in"
                                              g/room-id
-                                             (jq/val ($ :#username)))
+                                             (dommy/value (sel1 :#username)))
                                       false)}
                       "Join"))))))
 
@@ -129,7 +128,7 @@
   (reify
     om/IRender
     (render [this]
-      )))
+      (dom/div nil ))))
 
 (defn bottom-bar [data owner]
   (reify

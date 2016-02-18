@@ -8,7 +8,7 @@
                  [com.cognitect/transit-cljs "0.8.225"]
                  [com.cemerick/piggieback "0.2.1"]
                  [org.clojure/tools.nrepl "0.2.12"]
-                 [jayq "2.5.4"]]
+                 [prismatic/dommy "1.1.0"]]
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
@@ -70,7 +70,6 @@
 
               {:id "moomoo-frontend-release"
               :source-paths ["src/frontend"]
-              :figwheel {:websocket-host "localhost:3449"}
               :compiler {
                 :asset-path "/js/out"
                 :output-to  "public/js/moomoo-frontend.js"
