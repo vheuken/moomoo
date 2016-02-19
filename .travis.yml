@@ -20,4 +20,4 @@ install:
   - lein deps
 
 script:
-  - lein do cljsbuild once moomoo-server moomoo-frontend-dev, clean, cljsbuild once moomoo-frontend-release, clean, doo node test-server once, doo node test-frontend once
+  - lein do cljsbuild once moomoo-server moomoo-frontend-release, clean, doo node test-server once, doo node test-frontend once
