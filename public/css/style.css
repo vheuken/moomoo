@@ -128,3 +128,17 @@
 #file-upload {
   display: none;
 }
+
+.chat-message-username {
+  color: #898781;
+}
+
+#chat-input {
+  resize: none;
+  height: 10%;
+  width: 90%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: 'Noto Sans', sans-serif;
+}

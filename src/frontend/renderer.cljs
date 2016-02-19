@@ -147,15 +147,18 @@
   (reify
     om/IDidMount
     (did-mount [_]
-      (dommy/listen! (sel1 :#chat-input) :keydown (fn [event]
-                                                    (when (= 13 (.-keyCode event))
-                                                      (.emit g/socket
-                                                             "chat-message"
-                                                              (dommy/value (sel1 :#chat-input)))
-                                                      (dommy/set-value! (sel1 :#chat-input) "")))))
+      (om/set-state! owner :enter-key-handler (fn [event]
+                                                (when (and (= 13 (.-keyCode event))
+                                                           (not (.-shiftKey event)))
+                                                  (.preventDefault event)
+                                                  (.emit g/socket
+                                                         "chat-message"
+                                                         (dommy/value (sel1 :#chat-input)))
+                                                  (dommy/set-value! (sel1 :#chat-input) ""))))
+      (dommy/listen! (sel1 :#chat-input) :keydown (om/get-state owner :enter-key-handler)))
     om/IWillUnmount
     (will-unmount [_]
-      )
+      (dommy/unlisten! (sel1 :#chat-input) :keydown (om/get-state owner :enter-key-handler)))
     om/IRender
     (render [_]
       (dom/textarea #js {:id "chat-input"} nil))))
