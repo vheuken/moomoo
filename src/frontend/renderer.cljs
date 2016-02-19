@@ -50,12 +50,25 @@
                          :onClick #(.click (sel1 :#file-upload))}
                     "Add music")))))
 
+(defn message-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (println data)
+      (dom/div #js {:className "chat-message"}
+        (dom/div #js {:className "chat-message-username"}
+          (get ((:users @g/app-state) (:user-id data)) "username")
+          ":")
+        (dom/div #js {:className "chat-message-text"}
+          (:message data))))))
+
 (defn messages-window [data owner]
   (reify
     om/IRender
     (render [this]
+      (println data)
       (dom/div #js {:id "messages-window"}
-        ))))
+        (om/build-all message-view data)))))
 
 (defn hashing-progress-view [data owner]
   (reify
@@ -130,6 +143,23 @@
       (dom/div nil
         (om/build-all user-view (vals data))))))
 
+(defn chat-input [data owner]
+  (reify
+    om/IDidMount
+    (did-mount [_]
+      (dommy/listen! (sel1 :#chat-input) :keydown (fn [event]
+                                                    (when (= 13 (.-keyCode event))
+                                                      (.emit g/socket
+                                                             "chat-message"
+                                                              (dommy/value (sel1 :#chat-input)))
+                                                      false))))
+    om/IWillUnmount
+    (will-unmount [_]
+      )
+    om/IRender
+    (render [_]
+      (dom/textarea #js {:id "chat-input"} nil))))
+
 (defn chat-view [data owner]
   (reify
     om/IRenderState
@@ -138,7 +168,8 @@
         (dom/div #js {:id "center-left"
                       :style #js {:width width}}
           (list
-            (om/build messages-window nil)
+            (om/build messages-window (:messages data))
+            (om/build chat-input nil)
             (om/build users-list-view (:users data))))))))
 
 (defn center-area [data owner]

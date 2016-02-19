@@ -17,7 +17,8 @@
 
 (.on g/socket "new-chat-message"
   (fn [user-id message]
-    (client/chat-message-received! g/app-state {user-id message})))
+    (client/chat-message-received! g/app-state {:user-id user-id
+                                                :message message})))
 
 (.on g/socket "start-hashing"
   (fn [client-id upload-id]

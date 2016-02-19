@@ -38,6 +38,7 @@
     (fn [message]
       (user/get-user-id (.-id socket)
         (fn [user-id]
+          (println message)
           (server-interface/chat-message (.-id socket) user-id message
             (fn [chat-message-fmt]
               (println "CHAT" chat-message-fmt)
