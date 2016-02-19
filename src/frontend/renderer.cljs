@@ -160,7 +160,7 @@
       (dommy/listen! (sel1 :#chat-input) :keydown (om/get-state owner :enter-key-handler)))
     om/IWillUnmount
     (will-unmount [_]
-      (dommy/unlisten! (sel1 :#chat-input) :k:ydown (om/get-state owner :enter-key-handler)))
+      (dommy/unlisten! (sel1 :#chat-input) :keydown (om/get-state owner :enter-key-handler)))
     om/IRender
     (render [_]
       (dom/textarea #js {:id "chat-input"} nil))))
