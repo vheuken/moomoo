@@ -151,10 +151,12 @@
                                                 (when (and (= 13 (.-keyCode event))
                                                            (not (.-shiftKey event)))
                                                   (.preventDefault event)
-                                                  (.emit g/socket
-                                                         "chat-message"
-                                                         (dommy/value (sel1 :#chat-input)))
-                                                  (dommy/set-value! (sel1 :#chat-input) ""))))
+                                                  (let [message (dommy/value (sel1 :#chat-input))]
+                                                    (when-not (empty? message)
+                                                      (.emit g/socket
+                                                             "chat-message"
+                                                             message)
+                                                      (dommy/set-value! (sel1 :#chat-input) "")))))
       (dommy/listen! (sel1 :#chat-input) :keydown (om/get-state owner :enter-key-handler)))
     om/IWillUnmount
     (will-unmount [_]
