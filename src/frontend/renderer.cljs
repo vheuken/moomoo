@@ -152,7 +152,7 @@
                                                       (.emit g/socket
                                                              "chat-message"
                                                               (dommy/value (sel1 :#chat-input)))
-                                                      false))))
+                                                      (dommy/set-value! (sel1 :#chat-input) "")))))
     om/IWillUnmount
     (will-unmount [_]
       )
