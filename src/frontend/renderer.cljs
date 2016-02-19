@@ -64,9 +64,12 @@
 
 (defn messages-window [data owner]
   (reify
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (println "DID UPDATE")
+      (set! (.-scrollTop (sel1 "#messages-window")) (.-scrollHeight (sel1 "#messages-window"))))
     om/IRender
     (render [this]
-      (println data)
       (dom/div #js {:id "messages-window"}
         (om/build-all message-view data)))))
 
