@@ -15,6 +15,13 @@
       (println users)
       (client/user-joined! g/app-state users))))
 
+(.on g/socket "sign-out"
+  (fn [user-id]
+    (swap! g/app-state
+           assoc
+           :users
+           (dissoc (:users @g/app-state) user-id))))
+
 (.on g/socket "new-chat-message"
   (fn [user-id message]
     (client/chat-message-received! g/app-state {:user-id user-id

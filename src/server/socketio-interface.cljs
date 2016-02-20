@@ -31,9 +31,12 @@
     (fn []
       (println "Socket id" (.-id socket) "has disconnected")
       (server-interface/sign-out (.-id socket)
-                                 #(println "Socket id:"
-                                           (.-id socket)
-                                           "has successfully signed out!"))))
+        (fn [user-id room-id]
+          (println "Socket id:"
+                    (.-id socket)
+                    "has successfully signed out!")
+          (.emit (.to io room-id) "sign-out" user-id)))))
+
   (.on socket "chat-message"
     (fn [message]
       (user/get-user-id (.-id socket)

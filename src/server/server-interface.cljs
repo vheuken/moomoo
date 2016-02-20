@@ -21,7 +21,7 @@
         (fn [room-id]
           (user/delete! user-id
             (fn []
-              (callback))))))))
+              (callback user-id room-id))))))))
 
 (defn chat-message [socket-id user-id message callback]
   (user/get-socket-id user-id
