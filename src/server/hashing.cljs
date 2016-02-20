@@ -10,7 +10,7 @@
         (callback false nil)
         (callback true reply)))))
 
-(defn add-hash [hash-str file-path callback]
+(defn add-hash! [hash-str file-path callback]
   (.set redis-client (str "hash:" hash-str) file-path
     (fn [_ _]
       (callback))))

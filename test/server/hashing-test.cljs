@@ -15,7 +15,7 @@
         (fn [hash-exists? file-path]
           (is (not hash-exists?))
           (is (nil? file-path))
-          (hashing/add-hash hash-str test-file-path
+          (hashing/add-hash! hash-str test-file-path
             (fn []
               (hashing/check-hash hash-str
                 (fn [hash-exists? file-path]
