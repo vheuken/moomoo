@@ -66,8 +66,8 @@
   (reify
     om/IDidUpdate
     (did-update [_ _ _]
-      (println "DID UPDATE")
-      (set! (.-scrollTop (sel1 "#messages-window")) (.-scrollHeight (sel1 "#messages-window"))))
+      (set! (.-scrollTop (sel1 "#messages-window"))
+            (.-scrollHeight (sel1 "#messages-window"))))
     om/IRender
     (render [this]
       (dom/div #js {:id "messages-window"}
