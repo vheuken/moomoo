@@ -34,8 +34,8 @@
                        [xml2js "0.4.15"]
                        [ws "0.8.0"]]}
 
-  :plugins [[lein-cljsbuild "1.1.2"]
-            [lein-npm "0.6.1"]
+  :plugins [[lein-cljsbuild "1.1.3"]
+            [lein-npm "0.6.2"]
             [lein-figwheel "0.5.0-6"]
             [cider/cider-nrepl "0.9.1"]
             [lein-doo "0.1.6"]]
