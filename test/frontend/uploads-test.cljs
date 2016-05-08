@@ -70,7 +70,8 @@
       (is (nil? (uploads/get-action old-state new-state upload-id))))))
 
 (deftest get-action-no-change
-  (let [upload-id "test-id"
+  (let [filename "foo.mp3"
+        upload-id "test-id"
         upload (merge uploads/blank-upload {:filename filename
                                             :id upload-id})
         old-state {:uploads {upload-id upload}}
