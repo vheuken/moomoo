@@ -3,7 +3,7 @@
   :url "https://github.com/vheuken/moomoo"
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.8.51"]
+                 [org.clojure/clojurescript "1.9.36"]
                  [org.omcljs/om "0.9.0"]
                  [com.cognitect/transit-cljs "0.8.225"]
                  [com.cemerick/piggieback "0.2.1"]
@@ -16,8 +16,7 @@
                        [socket.io "1.4.5"]
                        [socket.io-redis "1.0.0"]
                        [socket.io-client "1.4.5"]
-                       [redis "2.6.0-2"]
-                       [hiredis "0.4.1"]
+                       [redis "2.6.1"]
                        [socket.io-stream "0.9.0"]
                        [uuid "2.0.1"]
                        [express "4.13.4"]
