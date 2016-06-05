@@ -4,8 +4,7 @@
             [moomoo.fixtures :as fixtures]))
 
 (use-fixtures :each
-  {:before fixtures/flush-all
-   :after  fixtures/flush-all})
+  {:after  fixtures/flush-all})
 
 (deftest check-hash
   (let [hash-str "HASH"
