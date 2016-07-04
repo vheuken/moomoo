@@ -98,9 +98,6 @@
                                  uploads (:uploads new-state)
                                  upload (get uploads upload-id)]
                              (when-not (nil? action)
-                               (println action)
-                               (println old-state)
-                               (println new-state)
                                (cond
                                  (= action :paused)
                                  (.unpipe @blob-stream)
