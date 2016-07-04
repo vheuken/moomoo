@@ -69,7 +69,7 @@
                                                    (set (:client-uploads-order new-state)))]
     (cond
       (and (not (empty? new-upload-ids))
-           (< (count room-uploads-order) upload-slots))
+           (<= (count room-uploads-order) upload-slots))
       (assoc new-state
              :uploads
              (assoc uploads
