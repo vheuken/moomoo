@@ -33,7 +33,7 @@
 
   :plugins [[lein-cljsbuild "1.1.3"]
             [lein-npm "0.6.2"]
-            [lein-figwheel "0.5.3-1"]
+            [lein-figwheel "0.5.4-5"]
             [cider/cider-nrepl "0.12.0"]
             [lein-doo "0.1.6"]]
 
