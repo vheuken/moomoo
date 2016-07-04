@@ -6,13 +6,11 @@
 (.on g/socket "sign-in-success"
   (fn [user-id users]
     (let [users (js->clj users)]
-      (println users)
       (client/sign-in-success! g/app-state user-id users))))
 
 (.on g/socket "user-joined"
   (fn [users]
     (let [users (js->clj users)]
-      (println users)
       (client/user-joined! g/app-state users))))
 
 (.on g/socket "sign-out"
@@ -29,7 +27,6 @@
 
 (.on g/socket "start-hashing"
   (fn [client-id upload-id]
-    (println "Received start-hashing signal" client-id upload-id)
     (when-let [file ((:files-to-hash @g/app-state) client-id)]
       (swap! g/app-state
              assoc
@@ -37,7 +34,6 @@
              (dissoc (:files-to-hash @g/app-state) client-id))
       (js/md5File file
         (fn [current-chunk chunks]
-          (println "Current chunk:" current-chunk "Chunks:" chunks)
           (.emit g/socket
                  "hash-progress"
                  upload-id
@@ -54,7 +50,6 @@
 
 (.on g/socket "hash-progress"
   (fn [upload-id user-id filename current-chunk chunks]
-    (println "hash-progress" upload-id filename current-chunk chunks)
     (swap! g/app-state
            assoc
            :uploads
@@ -102,8 +97,6 @@
                            (let [action (uploads/get-action old-state new-state upload-id)
                                  uploads (:uploads new-state)
                                  upload (get uploads upload-id)]
-                             (println action)
-                             (println upload)
                              (if-not (nil? action)
                                (cond
                                  (= action :paused)
@@ -134,7 +127,6 @@
 
 (.on g/socket "hash-not-found"
   (fn [upload-id file-hash]
-    (println "Hash not found for id:" upload-id)
     (let [file ((:file-hashes @g/app-state) file-hash)]
       (upload-file! file upload-id))))
 
