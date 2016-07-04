@@ -78,6 +78,14 @@
         new-state old-state]
     (is (nil? (uploads/get-action old-state new-state upload-id)))))
 
+(deftest get-action-switched-from-hash
+  (let [upload-id "GGG"
+        old-state {:uploads {upload-id {:type :hash}}}
+        new-state {:uploads {upload-id {:type :upload :stopped? true}}}]
+    (is (nil? (uploads/get-action old-state new-state upload-id)))
+    )
+  )
+
 (deftest uploads-watcher-upload-added
  (let [upload-id "UPLOAD-ID"
        filename "foo.mp3"

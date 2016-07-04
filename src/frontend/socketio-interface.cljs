@@ -97,18 +97,24 @@
                            (let [action (uploads/get-action old-state new-state upload-id)
                                  uploads (:uploads new-state)
                                  upload (get uploads upload-id)]
-                             (if-not (nil? action)
+                             (when-not (nil? action)
+                               (println action)
+                               (println old-state)
+                               (println new-state)
                                (cond
                                  (= action :paused)
-                                   (.unpipe @blob-stream)
+                                 (.unpipe @blob-stream)
+
                                  (= action :resumed)
-                                   (when-not (:stopped? upload)
-                                     (.pipe @blob-stream @stream))
+                                 (when-not (:stopped? upload)
+                                   (.pipe @blob-stream @stream))
+
                                  (= action :stopped)
-                                   (.unpipe @blob-stream)
+                                 (.unpipe @blob-stream)
+
                                  (= action :started)
-                                   (when-not (:paused? upload)
-                                     (.pipe @blob-stream @stream))))))]
+                                 (when-not (:paused? upload)
+                                   (.pipe @blob-stream @stream))))))]
 
     (.on @blob-stream "end" #(remove-watch g/app-state upload-id))
 
