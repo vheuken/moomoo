@@ -36,18 +36,19 @@
         new-uploads (:uploads new-state)
         old-upload (old-uploads upload-id)
         new-upload (new-uploads upload-id)]
-    (if (and (not (:stopped? new-upload))
+    (cond
+      (and (not (:stopped? new-upload))
              (:stopped? old-upload))
-      :started
-      (if (and (:stopped? new-upload)
+        :started
+      (and (:stopped? new-upload)
                (not (:stopped? old-upload)))
         :stopped
-        (if (and (:paused? new-upload)
-                 (not (:paused? old-upload)))
-          :paused
-          (if (and (not (:paused? new-upload))
-                   (:paused? old-upload))
-            :resumed))))))
+      (and (:paused? new-upload)
+           (not (:paused? old-upload)))
+        :paused
+      (and (not (:paused? new-upload))
+                (:paused? old-upload))
+        :resumed)))
 
 (defn handle-state-change [old-state new-state]
   "Returns new state map according to changes between old-state and new-state"
