@@ -38,17 +38,20 @@
         new-upload (new-uploads upload-id)]
     (cond
       (and (not (:stopped? new-upload))
-             (:stopped? old-upload))
-        :started
+           (:stopped? old-upload))
+      :started
+
       (and (:stopped? new-upload)
-               (not (:stopped? old-upload)))
-        :stopped
+           (not (:stopped? old-upload)))
+      :stopped
+
       (and (:paused? new-upload)
            (not (:paused? old-upload)))
-        :paused
+      :paused
+
       (and (not (:paused? new-upload))
-                (:paused? old-upload))
-        :resumed)))
+          (:paused? old-upload))
+      :resumed)))
 
 (defn handle-state-change [old-state new-state]
   "Returns new state map according to changes between old-state and new-state"
@@ -66,19 +69,21 @@
     (cond
       (and (not (empty? new-upload-ids))
            (< (count room-uploads-order) upload-slots))
-        (assoc new-state
-               :uploads
-               (assoc uploads
-                      (first new-upload-ids)
-                      (start (uploads (first new-upload-ids)))))
+      (assoc new-state
+             :uploads
+             (assoc uploads
+                    (first new-upload-ids)
+                    (start (uploads (first new-upload-ids)))))
+
       (and (and (not (empty? removed-upload-ids))
                 (not (empty? unpaused-inactive-uploads)))
            (< (count active-uploads)
               upload-slots))
-        (assoc new-state
-               :uploads
-               (assoc uploads
-                      (first unpaused-inactive-uploads)
-                      (start (uploads (first unpaused-inactive-uploads)))))
+      (assoc new-state
+             :uploads
+             (assoc uploads
+                    (first unpaused-inactive-uploads)
+                    (start (uploads (first unpaused-inactive-uploads)))))
+
       :else new-state)))
 
