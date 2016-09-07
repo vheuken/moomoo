@@ -9,27 +9,10 @@
                  [com.cognitect/transit-cljs "0.8.225"]
                  [com.cemerick/piggieback "0.2.1"]
                  [org.clojure/tools.nrepl "0.2.12"]
-                 [prismatic/dommy "1.1.0"]]
+                 [prismatic/dommy "1.1.0"]
+                 [ring/ring "1.5.0"]]
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
-
-  :npm {:dependencies [[source-map-support "0.4.0"]
-                       [socket.io "1.4.5"]
-                       [socket.io-redis "1.0.0"]
-                       [socket.io-client "1.4.5"]
-                       [redis "2.6.1"]
-                       [socket.io-stream "0.9.0"]
-                       [uuid "2.0.1"]
-                       [express "4.13.4"]
-                       [jade "1.11"]
-                       [musicmetadata "2.0.2"]
-                       [redislock "1.2.0"]
-                       [mmmagic "0.4.4"]
-                       [toml "2.3.0"]
-                       [request "2.67.0"]
-                       [watchr "2.4.13"]
-                       [xml2js "0.4.16"]
-                       [ws "0.8.0"]]}
 
   :plugins [[lein-cljsbuild "1.1.3"]
             [lein-npm "0.6.2"]
@@ -63,24 +46,6 @@
                  :output-dir "public/js/out-release"
                  :parallel-build true
                  :optimizations :simple}}
-
-             {:id "moomoo-server"
-              :source-paths ["src/server"]
-              :figwheel true
-              :compiler {
-                :main "moomoo.core"
-                :output-to  "target/moomoo.js"
-                :output-dir "target"
-                :target :nodejs
-                :parallel-build true
-                :optimizations :none}}
-
-              {:id "test-server"
-               :source-paths ["src/server" "test/server"]
-               :compiler {:output-to "target/testable.js"
-                          :main moomoo.runner
-                          :target :nodejs
-                          :optimizations :none}}
 
               {:id "test-frontend"
                :source-paths ["src/frontend" "test/frontend"]
