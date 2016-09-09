@@ -3,8 +3,8 @@
   :url "https://github.com/vheuken/moomoo"
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.9.89"]
-                 [org.clojure/core.async "0.2.374"]
+                 [org.clojure/clojurescript "1.9.229"]
+                 [org.clojure/core.async "0.2.385"]
                  [org.omcljs/om "0.9.0"]
                  [com.cognitect/transit-cljs "0.8.225"]
                  [com.cemerick/piggieback "0.2.1"]
@@ -14,11 +14,10 @@
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
-  :plugins [[lein-cljsbuild "1.1.3"]
-            [lein-npm "0.6.2"]
-            [lein-figwheel "0.5.4-5"]
-            [cider/cider-nrepl "0.12.0"]
-            [lein-doo "0.1.6"]]
+  :plugins [[lein-cljsbuild "1.1.4"]
+            [lein-figwheel "0.5.7"]
+            [cider/cider-nrepl "0.13.0"]
+            [lein-doo "0.1.7"]]
 
   :source-paths ["src/server" "test/server"]
 
