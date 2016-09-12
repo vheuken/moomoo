@@ -3,7 +3,8 @@
             [compojure.route :as route]
             [selmer.parser :as selmer]
             [ring.middleware.defaults :refer [wrap-defaults 
-                                              site-defaults]]))
+                                              site-defaults]]
+            [taoensso.sente :as sente]))
 
 (defroutes app-routes
   (GET "/" [] "<h1>Hello world!</h1>")

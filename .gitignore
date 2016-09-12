@@ -5,7 +5,7 @@ pom.xml
 /out/
 /out-test/
 /target/
-/public/js/
+/resources/public/js/
 /node_modules/
 .lein-deps-sum
 .lein-repl-history
