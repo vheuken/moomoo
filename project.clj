@@ -13,7 +13,9 @@
                  [ring/ring "1.5.0"]
                  [ring/ring-defaults "0.2.1"]
                  [compojure "1.5.1"]
-                 [selmer "1.0.7"]]
+                 [selmer "1.0.7"]
+                 [com.taoensso/sente "1.10.0"]
+                 [com.taoensso/carmine "2.14.0"]]
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
