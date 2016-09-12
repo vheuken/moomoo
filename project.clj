@@ -12,7 +12,8 @@
                  [prismatic/dommy "1.1.0"]
                  [ring/ring "1.5.0"]
                  [ring/ring-defaults "0.2.1"]
-                 [compojure "1.5.1"]]
+                 [compojure "1.5.1"]
+                 [selmer "1.0.7"]]
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
@@ -27,7 +28,7 @@
   :ring {:handler moomoo.handler/app}
 
   :figwheel {:nrepl-port 7888
-             :css-dirs ["public/css"]}
+             :css-dirs ["resources/public/css"]}
 
   :cljsbuild {
     :builds [{:id "moomoo-frontend-dev"
@@ -36,8 +37,8 @@
               :compiler {
                 :main "moomoo-frontend.core"
                 :asset-path "/js/out"
-                :output-to  "public/js/moomoo-frontend.js"
-                :output-dir "public/js/out"
+                :output-to  "resources/public/js/moomoo-frontend.js"
+                :output-dir "resources/public/js/out"
                 :optimizations :none
                 :parallel-build true
                 :source-map true}}
@@ -46,16 +47,16 @@
                :source-paths ["src/frontend"]
                :compiler {
                  :asset-path "/js/out"
-                 :output-to  "public/js/moomoo-frontend.js"
-                 :output-dir "public/js/out-release"
+                 :output-to  "resources/public/js/moomoo-frontend.js"
+                 :output-dir "resources/public/js/out-release"
                  :parallel-build true
                  :optimizations :simple}}
 
               {:id "test-frontend"
                :source-paths ["src/frontend" "test/frontend"]
-               :compiler {:output-to "public/js/testable.js"
+               :compiler {:output-to "resources/public/js/testable.js"
                           :main moomoo-frontend.runner
                           :target :nodejs
                           :optimizations :none}}]}
 
-  :clean-targets ["target/" "public/js/"])
+  :clean-targets ["target/" "resources/public/js/"])
