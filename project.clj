@@ -10,16 +10,21 @@
                  [com.cemerick/piggieback "0.2.1"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [prismatic/dommy "1.1.0"]
-                 [ring/ring "1.5.0"]]
+                 [ring/ring "1.5.0"]
+                 [ring/ring-defaults "0.2.1"]
+                 [compojure "1.5.1"]]
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-figwheel "0.5.7"]
             [cider/cider-nrepl "0.13.0"]
-            [lein-doo "0.1.7"]]
+            [lein-doo "0.1.7"]
+            [lein-ring "0.9.7"]]
 
-  :source-paths ["src/server" "test/server"]
+  :source-paths ["src"  "src/moomoo" "test/server"]
+
+  :ring {:handler moomoo.handler/app}
 
   :figwheel {:nrepl-port 7888
              :css-dirs ["public/css"]}
