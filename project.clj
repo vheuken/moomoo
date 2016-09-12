@@ -59,4 +59,4 @@
                           :target :nodejs
                           :optimizations :none}}]}
 
-  :clean-targets ["target/" "resources/public/js/"])
+  :clean-targets ["target/"])
