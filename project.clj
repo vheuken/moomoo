@@ -15,19 +15,19 @@
                  [compojure "1.5.1"]
                  [selmer "1.0.7"]
                  [com.taoensso/sente "1.10.0"]
-                 [com.taoensso/carmine "2.14.0"]]
+                 [com.taoensso/carmine "2.14.0"]
+                 [http-kit "2.2.0"]]
 
-  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+  :main ^:skip-aot moomoo.handler
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-figwheel "0.5.7"]
             [cider/cider-nrepl "0.13.0"]
-            [lein-doo "0.1.7"]
-            [lein-ring "0.9.7"]]
+            [lein-doo "0.1.7"]]
 
   :source-paths ["src"  "src/moomoo" "test/server"]
 
-  :ring {:handler moomoo.handler/app}
+  ;:ring {:handler moomoo.handler/app}
 
   :figwheel {:nrepl-port 7888
              :css-dirs ["resources/public/css"]}
