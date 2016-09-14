@@ -12,7 +12,7 @@ The main issues with using Node were the following:
 2. Because of the event loop, things like server-side hashing were clunky and would have had to been moved to a separate service (preferably written in something that wasn't Node.js). 
 3. Third party libraries were often of low quality and had to be manually patched. 
 4. The tooling, compared to a language like Clojure, is quite poor
-5. Testing asyncronous code is a nightmare.
+5. Testing Node's asyncronous code is a nightmare.
 
 To have a look at the original Node code, [visit the "pre-rewrite" branch](https://github.com/vheuken/moomoo/tree/pre-rewrite/)
 
