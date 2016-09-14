@@ -4,6 +4,7 @@
             [moomoo-frontend.globals :as g]
             [moomoo-frontend.hashing :as hashing]
             [moomoo-frontend.uploads :as uploads]
+            [moomoo-frontend.socketio-interface :as socket]
             [dommy.core :as dommy :refer-macros [sel sel1]]))
 
 (defonce grey-out-image "https://media.licdn.com/mpr/mpr/shrink_200_200/p/8/005/082/26a/1ecd9a2.jpg")
@@ -18,11 +19,7 @@
           (dom/input #js {:id "username" :type "text" :autoComplete "off"})
           (dom/button #js {:onClick (fn []
                                       (.play js/soundManager "join-sound")
-                                      (.emit g/socket
-                                             "sign-in"
-                                             g/room-id
-                                             (dommy/value (sel1 :#username)))
-                                      false)}
+                                      (socket/sign-in (dommy/value (sel1 :#username))))}
                       "Join"))))))
 
 (defn current-track-tags [data owner]
@@ -156,7 +153,7 @@
                                                   (.preventDefault event)
                                                   (let [message (dommy/value (sel1 :#chat-input))]
                                                     (when-not (empty? message)
-                                                      (.emit g/socket
+                                                      #_(.emit g/socket
                                                              "chat-message"
                                                              message)
                                                       (dommy/set-value! (sel1 :#chat-input) ""))))))

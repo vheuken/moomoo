@@ -5,6 +5,7 @@
             [ring.middleware.defaults :refer [wrap-defaults 
                                               site-defaults]]
             [taoensso.sente :as sente]
+            [org.httpkit.server :as http-kit]
             [taoensso.sente.server-adapters.http-kit 
              :refer (get-sch-adapter)]))
 
@@ -19,16 +20,17 @@
   (def connected-uids                connected-uids) ; Watchable, read-only atom
   )
 
-
 (defroutes app-routes
   (GET "/" [] "<h1>Hello world!</h1>")
   (GET "/:room-id" [room-id] (selmer/render-file "views/room.html" 
                                                  {:room-id room-id}))
   
-  (GET "/chsk" req (ring-ajax-get-or-ws-handshake req))
-  (GET "/chsk" req (ring-ajax-post) req)
+  (GET "/:room-id/chsk" req (ring-ajax-get-or-ws-handshake req))
+  (POST "/:room-id/chsk" req (ring-ajax-post req))
 
   (route/not-found "<h1>Page not found</h1>"))
 
 (def app
-  (wrap-defaults app-routes site-defaults))
+  (-> (wrap-defaults app-routes site-defaults)
+      ring.middleware.keyword-params/wrap-keyword-params
+      ring.middleware.params/wrap-params))

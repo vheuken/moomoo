@@ -9,4 +9,4 @@
            :files-to-hash
            (merge {client-id file}
                   (:files-to-check @g/app-state)))
-    (.emit g/socket "new-hash" client-id)))
+    #_(.emit g/socket "new-hash" client-id)))
