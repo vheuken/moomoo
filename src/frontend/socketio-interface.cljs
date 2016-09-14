@@ -17,5 +17,5 @@
 
 (defn sign-in [username]
   (println "Signing in with username " username)
-  (chsk-send! [:sign-in {:username username :room-id g/room-id}] 8000))
+  (chsk-send! [:room/sign-in {:username username :room-id g/room-id}] 8000))
 

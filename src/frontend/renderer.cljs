@@ -19,7 +19,8 @@
           (dom/input #js {:id "username" :type "text" :autoComplete "off"})
           (dom/button #js {:onClick (fn []
                                       (.play js/soundManager "join-sound")
-                                      (socket/sign-in (dommy/value (sel1 :#username))))}
+                                      (socket/sign-in (dommy/value (sel1 :#username)))
+                                      false)}
                       "Join"))))))
 
 (defn current-track-tags [data owner]

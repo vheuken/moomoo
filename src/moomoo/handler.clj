@@ -7,7 +7,11 @@
             [taoensso.sente :as sente]
             [org.httpkit.server :as http-kit]
             [taoensso.sente.server-adapters.http-kit 
-             :refer (get-sch-adapter)]))
+             :refer (get-sch-adapter)]
+            [clojure.core.async
+             :as a
+             :refer [>! <! >!! <!! go chan buffer close! thread
+                     alts! alts!! timeout]]))
 
 (let [{:keys [ch-recv send-fn connected-uids
               ajax-post-fn ajax-get-or-ws-handshake-fn]}
@@ -34,3 +38,9 @@
   (-> (wrap-defaults app-routes site-defaults)
       ring.middleware.keyword-params/wrap-keyword-params
       ring.middleware.params/wrap-params))
+
+(defn event-handler [f]
+  (println f))
+
+(defn start-router! []
+  (sente/start-server-chsk-router! ch-chsk event-handler))
