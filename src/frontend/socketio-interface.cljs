@@ -8,7 +8,7 @@
             [taoensso.sente :as sente :refer (cb-success?)]))
 
 (let [{:keys [chsk ch-recv send-fn state]}
-      (sente/make-channel-socket!  (str "/" g/room-id "/chsk")
+      (sente/make-channel-socket! (str "/" g/room-id "/chsk")
                                   {:type :auto})]
   (def chsk chsk)
   (def ch-chsk ch-recv) ; ChannelSocket's receive channel
@@ -19,3 +19,8 @@
   (println "Signing in with username " username)
   (chsk-send! [:room/sign-in {:username username :room-id g/room-id}] 8000))
 
+(defn event-handler [f]
+  (println "YO")
+  (println f))
+
+(sente/start-client-chsk-router! ch-chsk event-handler)
