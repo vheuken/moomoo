@@ -15,12 +15,14 @@
   (def chsk-send! send-fn) ; ChannelSocket's send API fn
   (def chsk-state state)) ; Watchable, read-only atom
 
-(defn sign-in [username]
-  (println "Signing in with username " username)
-  (chsk-send! [:room/sign-in {:username username :room-id g/room-id}] 8000))
-
 (defn event-handler [f]
   (println "YO")
   (println f))
 
 (sente/start-client-chsk-router! ch-chsk event-handler)
+
+(defn sign-in [username]
+  (println "Signing in with username " username)
+  (chsk-send! [:room/sign-in {:username username :room-id g/room-id}] 8000))
+
+

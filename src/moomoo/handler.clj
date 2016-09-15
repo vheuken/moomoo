@@ -44,11 +44,11 @@
   (let [event (:event f)
         event-id (first event)
         event-params (second event)
-        client-id (:uid f)]
+        uid (:uid f)]
     (when (= event-id :room/sign-in)
       (println "User signing in as" (:username event-params) 
                "in room" (:room-id event-params))
-      (chsk-send! client-id [:foo/bar {:hello "world"}]))))
+      (chsk-send! uid [:foo/bar {:hello "world"}]))))
 
 (defn start-router! []
   (sente/start-server-chsk-router! ch-chsk event-handler))
