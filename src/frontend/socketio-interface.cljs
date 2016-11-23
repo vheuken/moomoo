@@ -16,8 +16,11 @@
   (def chsk-state state)) ; Watchable, read-only atom
 
 (defn event-handler [f]
-  (println "YO")
-  (println f))
+  (let [event (second (:event f))]
+    (print event)
+    (when (= :moomoo/sign-in (first event))
+      (println "AA")
+      (swap! g/app-state merge {:user-id "FOO"}))))
 
 (sente/start-client-chsk-router! ch-chsk event-handler)
 

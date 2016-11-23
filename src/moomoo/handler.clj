@@ -47,7 +47,7 @@
     (when (= event-id :room/sign-in)
       (println "User signing in as" (:username event-params)
                "in room" (:room-id event-params))
-      (chsk-send! uid [:foo/bar {:hello "world"}]))))
+      (chsk-send! uid [:moomoo/sign-in {:success? true}]))))
 
 (defn start-router! []
   (sente/start-server-chsk-router! ch-chsk event-handler))
