@@ -2,11 +2,11 @@
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [selmer.parser :as selmer]
-            [ring.middleware.defaults :refer [wrap-defaults 
+            [ring.middleware.defaults :refer [wrap-defaults
                                               site-defaults]]
             [taoensso.sente :as sente]
             [org.httpkit.server :as http-kit]
-            [taoensso.sente.server-adapters.http-kit 
+            [taoensso.sente.server-adapters.http-kit
              :refer (get-sch-adapter)]
             [clojure.core.async
              :as a
@@ -26,9 +26,9 @@
 
 (defroutes app-routes
   (GET "/" [] "<h1>Hello world!</h1>")
-  (GET "/:room-id" [room-id] (selmer/render-file "views/room.html" 
+  (GET "/:room-id" [room-id] (selmer/render-file "views/room.html"
                                                  {:room-id room-id}))
-  
+
   (GET "/:room-id/chsk" req (ring-ajax-get-or-ws-handshake req))
   (POST "/:room-id/chsk" req (ring-ajax-post req))
 
@@ -40,15 +40,29 @@
       ring.middleware.params/wrap-params))
 
 (defn event-handler [f]
-  #_(println f)
   (let [event (:event f)
         event-id (first event)
         event-params (second event)
         uid (:uid f)]
     (when (= event-id :room/sign-in)
-      (println "User signing in as" (:username event-params) 
+      (println "User signing in as" (:username event-params)
                "in room" (:room-id event-params))
       (chsk-send! uid [:foo/bar {:hello "world"}]))))
 
 (defn start-router! []
   (sente/start-server-chsk-router! ch-chsk event-handler))
+
+(defn start-server! [port]
+  (def stop-ring-server! (http-kit/run-server app {:port port}))
+  (def stop-socket-server! (start-router!)))
+
+(defn stop-server! []
+  (when-not (nil? stop-ring-server!)
+    (stop-ring-server!)
+    (stop-socket-server!)
+    (def stop-ring-server! nil)
+    (def stop-socket-server! nil)))
+
+(defn reset-server! []
+  (stop-server!)
+  (start-server! 3000))
