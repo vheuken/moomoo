@@ -15,7 +15,7 @@
                  [compojure "1.5.1"]
                  [selmer "1.0.7"]
                  [com.taoensso/carmine "2.14.0"]
-                 [com.taoensso/sente "1.10.0"]
+                 [com.taoensso/sente "1.11.0"]
                  [http-kit "2.2.0"]]
 
   :main ^:skip-aot moomoo.handler

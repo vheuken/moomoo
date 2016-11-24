@@ -17,7 +17,6 @@
 
 (defn event-handler [f]
   (let [event (second (:event f))]
-    (print event)
     (when (= :moomoo/sign-in (first event))
       (println "AA")
       (swap! g/app-state merge {:user-id "FOO"}))))
