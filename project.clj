@@ -14,6 +14,7 @@
                  [ring/ring-defaults "0.2.1"]
                  [compojure "1.5.1"]
                  [selmer "1.0.7"]
+                 [com.taoensso/encore "2.87.0"]
                  [com.taoensso/carmine "2.14.0"]
                  [com.taoensso/sente "1.11.0"]
                  [http-kit "2.2.0"]]
