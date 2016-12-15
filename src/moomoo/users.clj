@@ -11,5 +11,9 @@
   nil)
 
 (defn get-user [user-id]
-  )
+  (apply hash-map
+         (map-indexed #(if (even? %1)
+                         (keyword %2)
+                         %2)
+         (wcar* (car/hgetall (str "user:" user-id))))))
 
