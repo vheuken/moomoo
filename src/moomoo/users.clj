@@ -7,8 +7,15 @@
   (wcar* 
    (car/hset (str "user:" user-id) :username username)
    (car/hset (str "user:" user-id) :muted? false)
+   (car/hset (str "user:" user-id) :room-id room-id)
    (car/sadd (str "room:" room-id ":users") user-id))
   nil)
+
+(defn delete-user! [user-id]
+  (let [room-id (:room-id (get-user user-id))] 
+    (wcar*
+     (car/del (str "user:" user-id))
+     (car/srem (str "room:" room-id ":users") user-id))))
 
 (defn get-user [user-id]
   (apply hash-map

@@ -47,6 +47,10 @@
     (when (= event-id :room/sign-in)
       (println "User signing in as" (:username event-params)
                "in room" (:room-id event-params))
+      ; if room does not exist
+        ; create room
+      ; add user
+      ; send room state to client
       (chsk-send! uid [:moomoo/sign-in {:success? true}]))))
 
 (defn start-router! []
