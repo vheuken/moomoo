@@ -1,8 +1,7 @@
 (ns moomoo.events
   (:require [moomoo.users :as users]
-            [moomoo.rooms :as rooms]))
-
-(defn uuid [] (str (java.util.UUID/randomUUID)))
+            [moomoo.rooms :as rooms]
+            [moomoo.utils :as utils]))
 
 (defmulti handle-event! #(first (:event %)))
 
@@ -17,7 +16,7 @@
   (let [event (:event f)
         event-id (first event)
         event-params (second event)
-        user-id (uuid)
+        user-id (utils/uuid)
         room-id (:room-id event-params)
         username (:username event-params)]
     (println "User signing in as" username
