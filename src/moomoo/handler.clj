@@ -11,12 +11,13 @@
             [clojure.core.async
              :as a
              :refer [>! <! >!! <!! go chan buffer close! thread
-                     alts! alts!! timeout]]))
+                     alts! alts!! timeout]]
+            [moomoo.events :as events]))
 
 (let [{:keys [ch-recv send-fn connected-uids
               ajax-post-fn ajax-get-or-ws-handshake-fn]}
       (sente/make-channel-socket! (get-sch-adapter) {})]
-
+()
   (def ring-ajax-post                ajax-post-fn)
   (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
   (def ch-chsk                       ch-recv) ; ChannelSocket's receive channel
@@ -40,18 +41,9 @@
       ring.middleware.params/wrap-params))
 
 (defn event-handler [f]
-  (let [event (:event f)
-        event-id (first event)
-        event-params (second event)
-        uid (:uid f)]
-    (when (= event-id :room/sign-in)
-      (println "User signing in as" (:username event-params)
-               "in room" (:room-id event-params))
-      ; if room does not exist
-        ; create room
-      ; add user
-      ; send room state to client
-      (chsk-send! uid [:moomoo/sign-in {:success? true}]))))
+  (let [uid (:uid f)]
+    (if-let [event-to-client (events/handle-event! f)]
+      (chsk-send! uid event-to-client))))
 
 (defn start-router! []
   (sente/start-server-chsk-router! ch-chsk event-handler))
