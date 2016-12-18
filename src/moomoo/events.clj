@@ -14,6 +14,7 @@
 
 (defmethod handle-event! :room/sign-in [f]
   (let [event (:event f)
+        client-id (:client-id f)
         event-id (first event)
         event-params (second event)
         user-id (utils/uuid)
@@ -27,7 +28,8 @@
 
     (users/create-user! {:username username
                          :room-id room-id
-                         :user-id user-id})
+                         :user-id user-id
+                         :client-id client-id})
 
     [:moomoo/sign-in {:success? true
                       :state {:user-id user-id
