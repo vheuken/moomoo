@@ -19,7 +19,9 @@
    (wcar* (car/hgetall (str "user:" user-id)))))
 
 (defn delete-user! [user-id]
-  (let [room-id (:room-id (get-user user-id))] 
+  (let [user (get-user user-id)
+        client-id (:client-id user)
+        room-id (:room-id user)] 
     (wcar*
      (car/del (str "user:" user-id))
      (car/srem (str "room:" room-id ":users-list") user-id)
