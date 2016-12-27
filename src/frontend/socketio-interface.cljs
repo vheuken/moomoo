@@ -18,8 +18,8 @@
 (defn event-handler [f]
   (let [event (second (:event f))]
     (when (= :moomoo/sign-in (first event))
-      (println "AA")
-      (swap! g/app-state merge {:user-id "FOO"}))))
+      (println (:state event))
+      (swap! g/app-state merge (:state event)))))
 
 (sente/start-client-chsk-router! ch-chsk event-handler)
 
