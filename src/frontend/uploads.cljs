@@ -39,7 +39,7 @@
     (when-not (= :hash (:type old-upload))
       (cond
         (and (not (:stopped? new-upload))
-           (:stopped? old-upload))
+             (:stopped? old-upload))
         :started
 
         (and (:stopped? new-upload)
@@ -56,7 +56,6 @@
 
 (defn handle-state-change [old-state new-state]
   "Returns new state map according to changes between old-state and new-state"
-  ; uploads added
   (let [uploads (:uploads new-state)
         room-uploads-order (:client-uploads-order new-state)
         upload-slots (:upload-slots new-state)
@@ -70,21 +69,17 @@
     (cond
       (and (not (empty? new-upload-ids))
            (<= (count room-uploads-order) upload-slots))
-      (assoc new-state
-             :uploads
-             (assoc uploads
-                    (first new-upload-ids)
-                    (start (uploads (first new-upload-ids)))))
+      (assoc-in new-state
+                [:uploads (first new-upload-ids)]
+                (start (uploads (first new-upload-ids))))
 
       (and (and (not (empty? removed-upload-ids))
                 (not (empty? unpaused-inactive-uploads)))
            (< (count active-uploads)
               upload-slots))
-      (assoc new-state
-             :uploads
-             (assoc uploads
-                    (first unpaused-inactive-uploads)
-                    (start (uploads (first unpaused-inactive-uploads)))))
+      (assoc-in new-state
+                [:uploads (first unpaused-inactive-uploads)]
+                (start (uploads (first unpaused-inactive-uploads))))
 
       :else new-state)))
 
