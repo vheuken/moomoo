@@ -1,5 +1,5 @@
 (ns moomoo-frontend.uploads
-  (:require [clojure.set]))
+  (:require [clojure.set :as set :refer [difference]]))
 
 (def blank-upload {:stopped? true
                    :paused?  false
@@ -62,10 +62,10 @@
         active-uploads (active-uploads room-uploads-order uploads)
         inactive-uploads (inactive-uploads room-uploads-order uploads)
         unpaused-inactive-uploads (remove #(:paused? (uploads %)) inactive-uploads)
-        new-upload-ids (clojure.set/difference (set (:client-uploads-order new-state))
-                                               (set (:client-uploads-order old-state)))
-        removed-upload-ids (clojure.set/difference (set (:client-uploads-order old-state))
-                                                   (set (:client-uploads-order new-state)))]
+        new-upload-ids (set/difference (set (:client-uploads-order new-state))
+                                       (set (:client-uploads-order old-state)))
+        removed-upload-ids (set/difference (set (:client-uploads-order old-state))
+                                           (set (:client-uploads-order new-state)))]
     (cond
       (and (not (empty? new-upload-ids))
            (<= (count room-uploads-order) upload-slots))
