@@ -1,11 +1,11 @@
 (ns moomoo-frontend.uploads
   (:require [clojure.set]))
 
-(defonce  blank-upload {:stopped? true
-                        :paused?  false
-                        :id       nil
-                        :filename nil
-                        :type :upload})
+(def blank-upload {:stopped? true
+                   :paused?  false
+                   :id       nil
+                   :filename nil
+                   :type :upload})
 
 (defn start [upload]
   (assoc upload :stopped? false))
@@ -24,10 +24,10 @@
        (not (:paused? upload))))
 
 (defn active-uploads [uploads-order uploads]
-  (vec (remove #(not (active? (uploads %1))) uploads-order)))
+  (remove #(not (active? (uploads %1))) uploads-order))
 
 (defn inactive-uploads [uploads-order uploads]
-  (vec (remove #(active? (uploads %1)) uploads-order)))
+  (remove #(active? (uploads %1)) uploads-order))
 
 (defn get-action [old-state new-state upload-id]
   "returns the action applied to the given upload-id.
@@ -61,7 +61,7 @@
         upload-slots (:upload-slots new-state)
         active-uploads (active-uploads room-uploads-order uploads)
         inactive-uploads (inactive-uploads room-uploads-order uploads)
-        unpaused-inactive-uploads (vec (remove #(:paused? (uploads %)) inactive-uploads))
+        unpaused-inactive-uploads (remove #(:paused? (uploads %)) inactive-uploads)
         new-upload-ids (clojure.set/difference (set (:client-uploads-order new-state))
                                                (set (:client-uploads-order old-state)))
         removed-upload-ids (clojure.set/difference (set (:client-uploads-order old-state))
