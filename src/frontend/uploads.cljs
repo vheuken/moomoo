@@ -1,6 +1,9 @@
 (ns moomoo-frontend.uploads
   (:require [clojure.set :as set :refer [difference]]))
 
+; paused? refers to when user manually pauses an upload
+; stopped? refers to the upload being stopped because
+; of the upload limit
 (def blank-upload {:stopped? true
                    :paused?  false
                    :id       nil
@@ -24,9 +27,11 @@
        (not (:paused? upload))))
 
 (defn active-uploads [uploads-order uploads]
+  "Returns a list of active upload IDs"
   (remove #(not (active? (uploads %1))) uploads-order))
 
 (defn inactive-uploads [uploads-order uploads]
+  "Returns al list of inactive upload IDs"
   (remove #(active? (uploads %1)) uploads-order))
 
 (defn get-action [old-state new-state upload-id]
@@ -36,6 +41,7 @@
         new-uploads (:uploads new-state)
         old-upload (old-uploads upload-id)
         new-upload (new-uploads upload-id)]
+    ; confirm it is an upload, not a file hashing
     (when-not (= :hash (:type old-upload))
       (cond
         (and (not (:stopped? new-upload))
@@ -68,21 +74,26 @@
                                        (set old-uploads-order))
         removed-upload-ids (set/difference (set old-uploads-order)
                                            (set uploads-order))
-        update-vals (fn [f m vals] (reduce #(update % %2 f)
+        update-vals (fn [m keys f] (reduce #(update % %2 f)
                                            m
-                                           vals))]
+                                           keys))]
     (cond
       (< (count active-uploads) upload-slots)
       (assoc new-state 
              :uploads
-              (update-vals start
-                           uploads 
-                           (take (- upload-slots
-                                    (count active-uploads)) 
-                                 uploads-order)))
+             (update-vals uploads
+                          (take (- upload-slots
+                                   (count active-uploads)) 
+                                unpaused-inactive-uploads)
+                          start))
       
-      ;(> (count active-uploads) upload-slots)
-      ;new-state
+      (> (count active-uploads) upload-slots)
+      (assoc new-state
+             :uploads
+             (update-vals uploads
+                          (drop upload-slots
+                                active-uploads)
+                          stop))
 
       :else new-state)))
 
