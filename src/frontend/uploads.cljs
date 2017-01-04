@@ -67,16 +67,19 @@
         new-upload-ids (set/difference (set uploads-order)
                                        (set old-uploads-order))
         removed-upload-ids (set/difference (set old-uploads-order)
-                                           (set uploads-order))]
+                                           (set uploads-order))
+        update-vals (fn [f m vals] (reduce #(update % %2 f)
+                                           m
+                                           vals))]
     (cond
       (< (count active-uploads) upload-slots)
       (assoc new-state 
              :uploads
-              (reduce #(update % %2 start) 
-                      uploads 
-                      (take (- upload-slots
-                            (count active-uploads)) 
-                      uploads-order)))
+              (update-vals start
+                           uploads 
+                           (take (- upload-slots
+                                    (count active-uploads)) 
+                                 uploads-order)))
       
       ;(> (count active-uploads) upload-slots)
       ;new-state
