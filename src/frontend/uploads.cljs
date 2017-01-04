@@ -57,29 +57,29 @@
 (defn handle-state-change [old-state new-state]
   "Returns new state map according to changes between old-state and new-state"
   (let [uploads (:uploads new-state)
-        room-uploads-order (:client-uploads-order new-state)
+        uploads-order (:client-uploads-order new-state)
+        old-uploads-order (:client-uploads-order old-state)
         upload-slots (:upload-slots new-state)
-        active-uploads (active-uploads room-uploads-order uploads)
-        inactive-uploads (inactive-uploads room-uploads-order uploads)
-        unpaused-inactive-uploads (remove #(:paused? (uploads %)) inactive-uploads)
-        new-upload-ids (set/difference (set (:client-uploads-order new-state))
-                                       (set (:client-uploads-order old-state)))
-        removed-upload-ids (set/difference (set (:client-uploads-order old-state))
-                                           (set (:client-uploads-order new-state)))]
+        active-uploads (active-uploads uploads-order uploads)
+        inactive-uploads (inactive-uploads uploads-order uploads)
+        unpaused-inactive-uploads (remove #(:paused? (uploads %)) 
+                                          inactive-uploads)
+        new-upload-ids (set/difference (set uploads-order)
+                                       (set old-uploads-order))
+        removed-upload-ids (set/difference (set old-uploads-order)
+                                           (set uploads-order))]
     (cond
-      (and (not (empty? new-upload-ids))
-           (<= (count room-uploads-order) upload-slots))
-      (assoc-in new-state
-                [:uploads (first new-upload-ids)]
-                (start (uploads (first new-upload-ids))))
-
-      (and (and (not (empty? removed-upload-ids))
-                (not (empty? unpaused-inactive-uploads)))
-           (< (count active-uploads)
-              upload-slots))
-      (assoc-in new-state
-                [:uploads (first unpaused-inactive-uploads)]
-                (start (uploads (first unpaused-inactive-uploads))))
+      (< (count active-uploads) upload-slots)
+      (assoc new-state 
+             :uploads
+              (reduce #(update % %2 start) 
+                      uploads 
+                      (take (- upload-slots
+                            (count active-uploads)) 
+                      uploads-order)))
+      
+      ;(> (count active-uploads) upload-slots)
+      ;new-state
 
       :else new-state)))
 
