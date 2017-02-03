@@ -31,7 +31,7 @@
   (remove #(not (active? (uploads %1))) uploads-order))
 
 (defn inactive-uploads [uploads-order uploads]
-  "Returns al list of inactive upload IDs"
+  "Returns a list of inactive upload IDs"
   (remove #(active? (uploads %1)) uploads-order))
 
 (defn get-action [old-state new-state upload-id]
