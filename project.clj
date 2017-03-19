@@ -3,38 +3,30 @@
   :url "https://github.com/vheuken/moomoo"
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.9.293"]
-                 [org.clojure/core.async "0.2.385"]
-                 [org.omcljs/om "0.9.0"]
-                 [com.cognitect/transit-cljs "0.8.225"]
-                 [com.cemerick/piggieback "0.2.1"]
-                 [org.clojure/tools.nrepl "0.2.12"]
-                 [prismatic/dommy "1.1.0"]
+                 [org.clojure/clojurescript "1.9.494"]
+                 [org.clojure/core.async "0.3.442"]
+                 [reagent "0.6.1"]
                  [ring/ring "1.5.0"]
-                 [ring/ring-defaults "0.2.1"]
-                 [compojure "1.5.1"]
-                 [selmer "1.0.7"]
-                 [com.taoensso/encore "2.87.0"]
-                 [com.taoensso/carmine "2.14.0"]
+                 [ring/ring-defaults "0.2.3"]
+                 [compojure "1.5.2"]
+                 [selmer "1.10.6"]
+                 [com.taoensso/encore "2.90.1"]
+                 [com.taoensso/carmine "2.15.1"]
                  [com.taoensso/sente "1.11.0"]
-                 [http-kit "2.2.0"]]
+                 [http-kit "2.2.0"]
+                 [com.stuartsierra/component "0.3.2"]]
 
-  :main ^:skip-aot moomoo.handler
-
-  :plugins [[lein-cljsbuild "1.1.4"]
-            [lein-figwheel "0.5.7"]
-            [cider/cider-nrepl "0.13.0"]
+  :plugins [[lein-cljsbuild "1.1.5"]
+            [lein-figwheel "0.5.9"]
             [lein-doo "0.1.7"]]
 
-  :source-paths ["src"  "src/moomoo" "test/server"]
-
-  ;:ring {:handler moomoo.handler/app}
+  :source-paths ["src"]
 
   :figwheel {:nrepl-port 7888
              :css-dirs ["resources/public/css"]}
 
   :cljsbuild {
-    :builds [{:id "moomoo-frontend-dev"
+    :builds [{:id "frontend-dev"
               :source-paths ["src/frontend" "src-dev/frontend"]
               :figwheel true
               :compiler {
@@ -46,7 +38,7 @@
                 :parallel-build true
                 :source-map true}}
 
-              {:id "moomoo-frontend-release"
+              {:id "frontend-release"
                :source-paths ["src/frontend"]
                :compiler {
                  :asset-path "/js/out"
